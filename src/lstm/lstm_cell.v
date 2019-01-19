@@ -4,60 +4,50 @@
 // 
 // Module Name      : Perceptron Module
 // File Name        : perceptron.v
-// Version          : 2.0
+// Version          : 3.0
 // Description      : Perceptron with NUM inputs, NUM weight, and 1 bias.
 //                    Giving output of activation and weight value for
 //					  backpropagation purpose.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module lstm_cell (clk, rst, wr, rd_addr, wr_addr, i_x, i_prev_state, i_w_a, i_w_i, i_w_f, i_w_o,  
-i_b_a, i_b_i,  i_b_f, i_b_o,
-o_w_a, o_w_i,  o_w_f, o_w_o, 
-o_b_a, o_b_i, o_b_f, o_b_o, 
+module lstm_cell (clk, rst, acc_x, acc_h, i_x, i_h, i_prev_state,
+i_w_a, i_w_i, i_w_f, i_w_o,
+i_u_a, i_u_i, i_u_f, i_u_o,  
+i_b_a, i_b_i, i_b_f, i_b_o,
 o_a, o_i, o_f, o_o, o_c, o_h);
 
 // parameters
 parameter WIDTH = 32;
-parameter NUM = 68; // number of input layer
-parameter NUM_LSTM = 8; // number of LSTM CELL
-parameter FILENAMEA="mem_wghta.list";
-parameter FILENAMEI="mem_wghti.list";
-parameter FILENAMEF="mem_wghtf.list";
-parameter FILENAMEO="mem_wghto.list";
-
+parameter FRAC = 24;
 
 // common ports
 input clk, rst;
 
 // control ports
-input wr;
-input signed [8:0] rd_addr, wr_addr;
+input acc_x, acc_h;
 
 // input ports
-input signed [(NUM+NUM_LSTM)*WIDTH-1:0] i_x;
+input signed [WIDTH-1:0] i_x;
+input signed [WIDTH-1:0] i_h;
 input signed [WIDTH-1:0] i_prev_state;
 
-// input ports for backpropagation
-input signed [(NUM+NUM_LSTM)*WIDTH-1:0] i_w_a;
-input signed [(NUM+NUM_LSTM)*WIDTH-1:0] i_w_i;
-input signed [(NUM+NUM_LSTM)*WIDTH-1:0] i_w_f;
-input signed [(NUM+NUM_LSTM)*WIDTH-1:0] i_w_o;
+input signed [WIDTH-1:0] i_w_a;
+input signed [WIDTH-1:0] i_w_i;
+input signed [WIDTH-1:0] i_w_f;
+input signed [WIDTH-1:0] i_w_o;
+
+input signed [WIDTH-1:0] i_u_a;
+input signed [WIDTH-1:0] i_u_i;
+input signed [WIDTH-1:0] i_u_f;
+input signed [WIDTH-1:0] i_u_o;
+
 input signed [WIDTH-1:0] i_b_a;
 input signed [WIDTH-1:0] i_b_i;
 input signed [WIDTH-1:0] i_b_f;
 input signed [WIDTH-1:0] i_b_o;
 
-
 // output ports
-output signed [(NUM+NUM_LSTM)*WIDTH-1:0] o_w_a;
-output signed [(NUM+NUM_LSTM)*WIDTH-1:0] o_w_i;
-output signed [(NUM+NUM_LSTM)*WIDTH-1:0] o_w_f;
-output signed [(NUM+NUM_LSTM)*WIDTH-1:0] o_w_o;
-output signed [WIDTH-1:0] o_b_a;
-output signed [WIDTH-1:0] o_b_i;
-output signed [WIDTH-1:0] o_b_f;
-output signed [WIDTH-1:0] o_b_o;
 output signed [WIDTH-1:0] o_c;
 output signed [WIDTH-1:0] o_h;
 output signed [WIDTH-1:0] o_a;
@@ -77,95 +67,87 @@ wire signed [WIDTH-1:0] mul_fc;
 wire signed [WIDTH-1:0] state_t;
 wire signed [WIDTH-1:0] tanh_state_t;
 
+// Input activation
 act_tanh #(
-			.NUM(NUM),
 			.WIDTH(WIDTH),
-			.NUM_LSTM(NUM_LSTM),
-			.FILE_NAME(FILENAMEA)
-		) 	inst_act_tanh (
+			.FRAC(FRAC)
+		) inst_act_tanh (
 			.clk (clk),
 			.rst (rst),
-			.wr  (wr),
-			.rd_addr (rd_addr),
-			.wr_addr (wr_addr),
-			.i_k (i_x),
-			.i_w(i_w_a),
-			.i_b(i_b_a),
-			.o_a (temp_a),
-			.o_w (o_w_a),
-			.o_b (o_b_a)
+			.acc_x (acc_x),
+			.acc_h (acc_h),
+			.i_x (i_x),
+			.i_w (i_w_a),
+			.i_h (i_h),
+			.i_u (i_u_a),
+			.i_b (i_b_a),
+			.o   (temp_a)
 		);
 
-
+// Input gate
 act_sigmoid #(
-			.NUM(NUM),
 			.WIDTH(WIDTH),
-			.NUM_LSTM(NUM_LSTM),
-			.FILE_NAME(FILENAMEI)
+			.FRAC(FRAC)
 		) inst_perceptron_i (
 			.clk (clk),
 			.rst (rst),
-			.wr(wr),
-			.rd_addr (rd_addr),
-			.wr_addr (wr_addr),
-			.i_k (i_x),
-			.i_w(i_w_i),
-			.i_b(i_b_i),
-			.o_a (temp_i),
-			.o_w (o_w_i),
-			.o_b (o_b_i)
+			.acc_x (acc_x),
+			.acc_h (acc_h),
+			.i_x (i_x),
+			.i_w (i_w_i),
+			.i_h (i_h),
+			.i_u (i_u_i),
+			.i_b (i_b_i),
+			.o   (temp_i)
 		);
 
+// Forget gate
 act_sigmoid #(
-			.NUM(NUM),
 			.WIDTH(WIDTH),
-			.NUM_LSTM(NUM_LSTM),
-			.FILE_NAME(FILENAMEF)
+			.FRAC(FRAC)
 		) inst_perceptron_f (
 			.clk (clk),
 			.rst (rst),
-			.wr(wr),
-			.rd_addr (rd_addr),
-			.wr_addr (wr_addr),
-			.i_k (i_x),
-			.i_w(i_w_f),
-			.i_b(i_b_f),
-			.o_a (temp_f),
-			.o_w (o_w_f),
-			.o_b (o_b_f)
+			.acc_x (acc_x),
+			.acc_h (acc_h),
+			.i_x (i_x),
+			.i_w (i_w_f),
+			.i_h (i_h),
+			.i_u (i_u_f),
+			.i_b (i_b_f),
+			.o   (temp_f)
 		);
 
+// Output gate
 act_sigmoid #(
-			.NUM(NUM),
 			.WIDTH(WIDTH),
-			.NUM_LSTM(NUM_LSTM),
-			.FILE_NAME(FILENAMEO)
+			.FRAC(FRAC)
 		) inst_perceptron_o (
 			.clk (clk),
 			.rst (rst),
-			.wr(wr),
-			.rd_addr (rd_addr),
-			.wr_addr (wr_addr),
-			.i_k (i_x),
-			.i_w(i_w_o),
-			.i_b(i_b_o),
-			.o_a (temp_o),
-			.o_w (o_w_o),
-			.o_b (o_b_o)
+			.acc_x (acc_x),
+			.acc_h (acc_h),
+			.i_x (i_x),
+			.i_w (i_w_o),
+			.i_h (i_h),
+			.i_u (i_u_o),
+			.i_b (i_b_o),
+			.o   (temp_o)
 		);
 
+
 // a(t) * i(t)
-mult_2in #(.WIDTH(WIDTH), .FRAC(24)) inst_mult_2in (.i_a(temp_a), .i_b(temp_i), .o(mul_ai));
+mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_mult_2in (.i_a(temp_a), .i_b(temp_i), .o(mul_ai));
 
 // f(t) * c(t-1)
-mult_2in #(.WIDTH(WIDTH), .FRAC(24)) inst2_mult_2in (.i_a(temp_f), .i_b(i_prev_state), .o(mul_fc));
+mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst2_mult_2in (.i_a(temp_f), .i_b(i_prev_state), .o(mul_fc));
 
 //state_t = a(t) * i(t) + f(t) * c(t-1)
 adder_2in #(.WIDTH(WIDTH)) inst_adder_2in (.i_a(mul_ai), .i_b(mul_fc), .o(state_t));
 
-// o_h = tanh(state(t)  * o
+// o_h = tanh(state(t)) * o
 tanh #(.WIDTH(WIDTH)) inst_tanh (.i(state_t), .o(tanh_state_t));
-mult_2in #(.WIDTH(WIDTH), .FRAC(24)) inst3_mult_2in (.i_a(tanh_state_t), .i_b(temp_o), .o(temp_h));
+mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst3_mult_2in (.i_a(tanh_state_t), .i_b(temp_o), .o(temp_h));
 
 assign o_c = state_t;
 assign o_a = temp_a;
