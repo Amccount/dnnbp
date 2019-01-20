@@ -2,15 +2,15 @@
 //
 // By : Joshua, Teresia Savera, Yashael Faith
 // 
-// Module Name      : Tanh Activation Module
-// File Name        : act_tanh.v
+// Module Name      : Sigmoid Activation Module
+// File Name        : act_sigmoid.v
 // Version          : 3.0
 // Description      : Module with NUM inputs, NUM weight, and 1 bias.
-//                    Using Tanh Function.
+//                    Using Sigmoid function.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module act_tanh (clk, rst, acc_x, acc_h, i_x, i_w, i_h, i_u, i_b, o);
+module act_sigmoid (clk, rst, acc_x, acc_h, i_x, i_w, i_h, i_u, i_b, o);
 
 // parameters
 parameter WIDTH = 32;
@@ -37,6 +37,7 @@ wire signed [WIDTH-1:0] o_add;
 wire signed [WIDTH-1:0] o_mac_1;
 wire signed [WIDTH-1:0] o_mac_2;
 
+
 // Two MAC module for x*w and h*u
 mac #(
 		.WIDTH(WIDTH),
@@ -50,7 +51,6 @@ mac #(
 		.o   (o_mac_1)
 	);
 
-
 mac #(
 		.WIDTH(WIDTH),
 		.FRAC(FRAC)
@@ -63,10 +63,11 @@ mac #(
 		.o   (o_mac_2)
 	);
 
+
 // Adding all multiplier output & bias
 adder_3in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_adder_3in (.i_a(o_mac_1), .i_b(o_mac_2), .i_c(i_b), .o(o_add));
 
 // Using sigmoid function for the Activation value
-tanh inst_tanh (.i(o_add), .o(o));
+sigmf sigmoid (.i(o_add), .o(o));
 
 endmodule
