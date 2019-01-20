@@ -12,14 +12,14 @@
 module adder_3in(i_a, i_b, i_c, o);
 
 // parameters
-parameter DWIDTH=32;
+parameter WIDTH=32;
 parameter FRAC=24;
 
 // input ports
-input signed [DWIDTH-1:0] i_a, i_b, i_c;
+input signed [WIDTH-1:0] i_a, i_b, i_c;
 
 // output ports
-output signed [DWIDTH-1:0] o;
+output signed [WIDTH-1:0] o;
 
 // adding i_a, i_b, and i_c
 assign o = i_a + i_b + i_c;

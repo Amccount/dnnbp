@@ -55,6 +55,12 @@ output signed [WIDTH-1:0] o_i;
 output signed [WIDTH-1:0] o_f;
 output signed [WIDTH-1:0] o_o;
 
+// registers
+reg signed [WIDTH-1:0] reg_a;
+reg signed [WIDTH-1:0] reg_i;
+reg signed [WIDTH-1:0] reg_f;
+reg signed [WIDTH-1:0] reg_o;
+
 // wires
 wire signed [WIDTH-1:0] temp_a;
 wire signed [WIDTH-1:0] temp_i;
@@ -135,25 +141,33 @@ act_sigmoid #(
 			.o   (temp_o)
 		);
 
+// Pipeline register after activation
+always @(posedge clk) 
+begin
+	reg_a <= temp_a;
+	reg_i <= temp_i;
+	reg_f <= temp_f;
+	reg_o <= temp_o;
+end
 
 // a(t) * i(t)
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_mult_2in (.i_a(temp_a), .i_b(temp_i), .o(mul_ai));
+mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_mult_2in (.i_a(reg_a), .i_b(reg_i), .o(mul_ai));
 
 // f(t) * c(t-1)
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst2_mult_2in (.i_a(temp_f), .i_b(i_prev_state), .o(mul_fc));
+mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst2_mult_2in (.i_a(reg_f), .i_b(i_prev_state), .o(mul_fc));
 
 //state_t = a(t) * i(t) + f(t) * c(t-1)
 adder_2in #(.WIDTH(WIDTH)) inst_adder_2in (.i_a(mul_ai), .i_b(mul_fc), .o(state_t));
 
 // o_h = tanh(state(t)) * o
 tanh #(.WIDTH(WIDTH)) inst_tanh (.i(state_t), .o(tanh_state_t));
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst3_mult_2in (.i_a(tanh_state_t), .i_b(temp_o), .o(temp_h));
+mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst3_mult_2in (.i_a(tanh_state_t), .i_b(reg_o), .o(temp_h));
 
 assign o_c = state_t;
-assign o_a = temp_a;
-assign o_i = temp_i;
-assign o_f = temp_f;
-assign o_o = temp_o;
+assign o_a = reg_a;
+assign o_i = reg_i;
+assign o_f = reg_f;
+assign o_o = reg_o;
 assign o_h = temp_h;
 
 endmodule
