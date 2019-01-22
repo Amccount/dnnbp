@@ -4,223 +4,334 @@
 // 
 // Module Name      : Backpropagation module
 // File Name        : bp.v
-// Version          : 1.0
+// Version          : 2.0
 // Description      : LSTM Backpropagation calculation include:
 //                    calculation of delta, dweight, dbias, and cost
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module bp (i_x, i_t, i_h, i_c, i_a, i_i, i_f, i_o, i_wa, i_wo, i_wi, i_wf,
-           o_b, o_wa, o_wi, o_wf, o_wo, o_d_loss);
+module bp ( clk, rst, i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state,
+            i_layr2_a, i_layr2_i, i_layr2_f, i_layr2_o, i_layr2_state, i_layr2_h, i_layr2_t,
+            i_layr1_wa, i_layr1_wi, i_layr1_wf, i_layr1_wo,
+            i_layr1_ua, i_layr1_ui, i_layr1_uf, i_layr1_uo,
+            i_layr1_ba, i_layr1_bi, i_layr1_bf, i_layr1_bo,
+            i_layr2_wa, i_layr2_wi, i_layr2_wf, i_layr2_wo,
+            i_layr2_ua, i_layr2_ui, i_layr2_uf, i_layr2_uo,
+            i_layr2_ba, i_layr2_bi, i_layr2_bf, i_layr2_bo);
 
 // parameters
 parameter WIDTH = 32;
 parameter FRAC = 24;
-parameter TIMESTEP = 4;
-parameter NUM = 2; // Number of Inputs
-parameter NUM_LSTM = 1;
+
+parameter LAYR1_INPUT = 53;
+parameter LAYR1_CELL = 53;
+parameter LAYR2_CELL = 8;
+
+// This holds d gates
+parameter LAYR1_dA = "layer1_dA.list";
+parameter LAYR1_dI = "layer1_dI.list";
+parameter LAYR1_dF = "layer1_dF.list";
+parameter LAYR1_dO = "layer1_dO.list";
+
+// This holds d gates
+parameter LAYR2_dA = "layer2_dA.list";
+parameter LAYR2_dI = "layer2_dI.list";
+parameter LAYR2_dF = "layer2_dF.list";
+parameter LAYR2_dO = "layer2_dO.list";
 
 // common ports
-
-// control ports
+input clk, rst;
 
 // input ports
-input signed [TIMESTEP*WIDTH-1:0] i_t, i_h, i_c, i_a, i_i, i_f, i_o;
-input signed [TIMESTEP*(NUM+NUM_LSTM)*WIDTH-1:0] i_x;
-input signed [(NUM+NUM_LSTM)*WIDTH-1:0] i_wa, i_wo, i_wi, i_wf;
+input signed [WIDTH-1:0] i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state, i_layr1_d_state;
+input signed [WIDTH-1:0] i_layr2_a, i_layr2_i, i_layr2_f, i_layr2_o, i_layr2_state, i_layr2_d_state, i_layr2_h, i_layr2_t;
+
+input signed [WIDTH-1:0] i_layr1_wa, i_layr1_wi, i_layr1_wf, i_layr1_wo;
+input signed [WIDTH-1:0] i_layr1_ua, i_layr1_ui, i_layr1_uf, i_layr1_uo;
+input signed [WIDTH-1:0] i_layr1_ba, i_layr1_bi, i_layr1_bf, i_layr1_bo;
+input signed [WIDTH-1:0] i_layr2_wa, i_layr2_wi, i_layr2_wf, i_layr2_wo;
+input signed [WIDTH-1:0] i_layr2_ua, i_layr2_ui, i_layr2_uf, i_layr2_uo;
+input signed [WIDTH-1:0] i_layr2_ba, i_layr2_bi, i_layr2_bf, i_layr2_bo;
+
+// control ports
+input sel_layr1_in1;
+input sel_layr1_in2;
+input sel_layr1_in3;
+input sel_layr1_in4;
+input sel_layr1_in5;
+input sel_layr1_x1_1;
+input sel_layr1_x1_2;
+input sel_layr1_x2_2;
+input sel_layr1_as_1;
+input sel_layr1_as_2;
+input sel_layr1_addsub;
+input sel_layr1_temp;
+
+input sel_layr2_in1;
+input sel_layr2_in2;
+input sel_layr2_in3;
+input sel_layr2_in4;
+input sel_layr2_in5;
+input sel_layr2_x1_1;
+input sel_layr2_x1_2;
+input sel_layr2_x2_2;
+input sel_layr2_as_1;
+input sel_layr2_as_2;
+input sel_layr2_addsub;
+input sel_layr2_temp;
 
 // output ports
-output signed [4*WIDTH-1:0] o_b;
-output signed [(NUM+NUM_LSTM)*WIDTH-1:0] o_wa;
-output signed [(NUM+NUM_LSTM)*WIDTH-1:0] o_wi;
-output signed [(NUM+NUM_LSTM)*WIDTH-1:0] o_wf;
-output signed [(NUM+NUM_LSTM)*WIDTH-1:0] o_wo;
-output signed [WIDTH-1:0] o_d_loss;
+
 
 // registers
 
+
 // wires
-wire signed [TIMESTEP*WIDTH-1:0] d_c_next_pass, d_f_prev_pass, d_d_c_prev_pass, d_d_c_next_pass, d_loss;
-wire signed [NUM_LSTM*TIMESTEP*WIDTH-1:0] d_d_h_prev_pass, d_d_h_next_pass ;
+wire signed [WIDTH-1:0] wr_da2, wr_di2, wr_df2, wr_do2;
+wire signed [WIDTH-1:0] rd_addr_da2, rd_addr_di2, rd_addr_df2, rd_addr_do2;
+wire signed [WIDTH-1:0] wr_addr_da2, wr_addr_di2, wr_addr_df2, wr_addr_do2;
 
-// d_gates structure:
-// [   delta_tn  |------|   delta_t0  ]
-// [ do|df|di|da |------| do|df|di|da ]
-wire signed [TIMESTEP*4*WIDTH-1:0] d_gates;
+wire signed [WIDTH-1:0] wr_da1, wr_di1, wr_df1, wr_do1;
+wire signed [WIDTH-1:0] rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1;
+wire signed [WIDTH-1:0] wr_addr_da1, wr_addr_di1, wr_addr_df1, wr_addr_do1;
 
-// Signal to pass on to next delta module
-assign d_c_next_pass = {i_c[(TIMESTEP-1)*WIDTH-1:0], {WIDTH{1'b0}}};
-assign d_f_prev_pass = {{WIDTH{1'b0}}, i_f[TIMESTEP*WIDTH-1:WIDTH]};
+wire signed [WIDTH-1:0] da1, di1, df1, do1, da2, di2, df2, do2;
 
-assign d_d_h_prev_pass[TIMESTEP*NUM_LSTM*WIDTH-1:(TIMESTEP-1)*NUM_LSTM*WIDTH] = {NUM_LSTM{32'b0}};
-assign d_d_c_prev_pass[TIMESTEP*WIDTH-1:(TIMESTEP-1)*WIDTH] = {WIDTH{1'b0}};
 
-assign d_d_h_prev_pass[(TIMESTEP-1)*NUM_LSTM*WIDTH-1:0] = d_d_h_next_pass[TIMESTEP*NUM_LSTM*WIDTH-1:NUM_LSTM*WIDTH];
-assign d_d_c_prev_pass[(TIMESTEP-1)*WIDTH-1:0] = d_d_c_next_pass[TIMESTEP*WIDTH-1:WIDTH];
+// LAYER 2 Delta
+// in: i_layr2_a, i_layr2_i, i_layr2_f, i_layr2_o, i_layr2_state, i_layr2_h, i_layr2_t
+// out: odgate
+delta #(
+        .WIDTH(WIDTH),
+        .FRAC(FRAC)
+    ) layr2_delta (
+        .clk        (clk),
+        .rst        (rst),
+        .sel_in1    (sel_layr2_in1),
+        .sel_in2    (sel_layr2_in2),
+        .sel_in3    (sel_layr2_in3),
+        .sel_in4    (sel_layr2_in4),
+        .sel_in5    (sel_layr2_in5),
+        .sel_x1_1   (sel_layr2_x1_1),
+        .sel_x1_2   (sel_layr2_x1_2),
+        .sel_x2_2   (sel_layr2_x2_2),
+        .sel_as_1   (sel_layr2_as_1),
+        .sel_as_2   (sel_layr2_as_2),
+        .sel_addsub (sel_layr2_addsub),
+        .sel_temp   (sel_layr2_temp),
+        .at         (i_layr2_a),
+        .it         (i_layr2_i),
+        .ft         (i_layr2_f),
+        .ot         (i_layr2_o),
+        .h          (),
+        .t          (),
+        .state      (i_layr2_state),
+        .d_state    (i_layr2_d_state),
+        .d_out      (),
+        .o_dgate    (dgate_layr2)
+    );
 
-assign o_d_loss = d_loss[TIMESTEP*WIDTH-1: (TIMESTEP-1)*WIDTH];
 
-generate
-    genvar i;
-    genvar j;
-    for (i = TIMESTEP; i > 0; i = i - 1)
-    begin:timestep
+// LAYER 2 dA, dI, dF, dO Memory
+// out: da2, di2, df2, do2
+memory_dgates #(
+        .WIDTH(WIDTH),
+        .NUM_LSTM(LAYR2_CELL),
+        .TIMESTEP(TIMESTEP),
+        .FILENAME(LAYR2_dA)
+    ) mem_da2 (
+        .clk     (clk),
+        .rst     (rst),
+        .wr      (wr_da2),
+        .rd_addr (rd_addr_da2),
+        .wr_addr (wr_addr_da2),
+        .i       (dgate_layr2),
+        .o       (da2)
+    );
 
-        delta #(
-            .WIDTH(WIDTH),
-            .FRAC(FRAC),
-            .NUM(NUM),
-            .NUM_LSTM(NUM_LSTM)
-        ) d (
-            .i_d_h_prev (d_d_h_prev_pass[i*NUM_LSTM*WIDTH-1:(i-1)*NUM_LSTM*WIDTH]),
-            .i_h        (i_h            [i*WIDTH-1:(i-1)*WIDTH]),
-            .i_d_c_prev (d_d_c_prev_pass[i*WIDTH-1:(i-1)*WIDTH]),
-            .i_c_next   (d_c_next_pass  [i*WIDTH-1:(i-1)*WIDTH]),
-            .i_c        (i_c            [i*WIDTH-1:(i-1)*WIDTH]),
-            .i_t        (i_t            [i*WIDTH-1:(i-1)*WIDTH]),
-            .i_a        (i_a            [i*WIDTH-1:(i-1)*WIDTH]),
-            .i_i        (i_i            [i*WIDTH-1:(i-1)*WIDTH]),
-            .i_f        (i_f            [i*WIDTH-1:(i-1)*WIDTH]),
-            .i_o        (i_o            [i*WIDTH-1:(i-1)*WIDTH]),
-            .i_f_prev   (d_f_prev_pass  [i*WIDTH-1:(i-1)*WIDTH]),
-            .w_a        (i_wa           [(NUM+NUM_LSTM)*WIDTH-1:0]),
-            .w_o        (i_wo           [(NUM+NUM_LSTM)*WIDTH-1:0]),
-            .w_i        (i_wi           [(NUM+NUM_LSTM)*WIDTH-1:0]),
-            .w_f        (i_wf           [(NUM+NUM_LSTM)*WIDTH-1:0]),
-            .o_d_tot    (d_loss         [i*WIDTH-1:(i-1)*WIDTH]),
-            .o_dgates   (d_gates        [4*i*WIDTH-1:4*(i-1)*WIDTH]),
-            .o_d_x_now  (),
-            .o_d_h_next (d_d_h_next_pass[i*NUM_LSTM*WIDTH-1:(i-1)*NUM_LSTM*WIDTH]),
-            .o_d_c_next (d_d_c_next_pass[i*WIDTH-1:(i-1)*WIDTH])
-        );
-    end
+memory_dgates #(
+        .WIDTH(WIDTH),
+        .NUM_LSTM(LAYR2_CELL),
+        .TIMESTEP(TIMESTEP),
+        .FILENAME(LAYR2_dI)
+    ) mem_di2 (
+        .clk     (clk),
+        .rst     (rst),
+        .wr      (wr_di2),
+        .rd_addr (rd_addr_di2),
+        .wr_addr (wr_addr_di2),
+        .i       (dgate_layr2),
+        .o       (di2)
+    );
 
-    // Calculate multiplication of δa, δi, δf, δo with inputs
-    wire signed [TIMESTEP*(NUM+NUM_LSTM)*WIDTH-1:0] o_mult_a, o_mult_i, o_mult_f, o_mult_o;
+memory_dgates #(
+        .WIDTH(WIDTH),
+        .NUM_LSTM(LAYR2_CELL),
+        .TIMESTEP(TIMESTEP),
+        .FILENAME(LAYR2_dF)
+    ) mem_df2 (
+        .clk     (clk),
+        .rst     (rst),
+        .wr      (wr_df2),
+        .rd_addr (rd_addr_df2),
+        .wr_addr (wr_addr_df2),
+        .i       (dgate_layr2),
+        .o       (df2)
+    );
 
-    // i stands for number of inputs
-    for (i = 0; i < (NUM+NUM_LSTM); i = i + 1)
-    begin:x
-        // j stands for number of timesteps
-        for (j = 0; j < TIMESTEP; j = j + 1)
-        begin:mult
-            mult_2in #(
-                .WIDTH(WIDTH),
-                .FRAC(FRAC)
-            ) m_a (
-                .i_a( d_gates   [ (4*j+1)*WIDTH-1 : (4*j+0)*WIDTH ] ),
-                .i_b( i_x       [ (((NUM+NUM_LSTM)*j)+i+1)*WIDTH-1 : (((NUM+NUM_LSTM)*j)+i)*WIDTH] ),
-                .o( o_mult_a    [ ((TIMESTEP*i)+j+1)*WIDTH-1 : ((TIMESTEP*i)+j)*WIDTH] )
-            );
-            mult_2in #(
-                .WIDTH(WIDTH),
-                .FRAC(FRAC)
-            ) m_i (
-                .i_a( d_gates   [ (4*j+2)*WIDTH-1 : (4*j+1)*WIDTH ] ),
-                .i_b( i_x       [ (((NUM+NUM_LSTM)*j)+i+1)*WIDTH-1 : (((NUM+NUM_LSTM)*j)+i)*WIDTH] ),
-                .o( o_mult_i    [ ((TIMESTEP*i)+j+1)*WIDTH-1 : ((TIMESTEP*i)+j)*WIDTH] )
-            );
-            mult_2in #(
-                .WIDTH(WIDTH),
-                .FRAC(FRAC)
-            ) m_f (
-                .i_a( d_gates   [ (4*j+3)*WIDTH-1 : (4*j+2)*WIDTH ] ),
-                .i_b( i_x       [ (((NUM+NUM_LSTM)*j)+i+1)*WIDTH-1 : (((NUM+NUM_LSTM)*j)+i)*WIDTH] ),
-                .o( o_mult_f    [ ((TIMESTEP*i)+j+1)*WIDTH-1 : ((TIMESTEP*i)+j)*WIDTH] )
-            );
-            mult_2in #(
-                .WIDTH(WIDTH),
-                .FRAC(FRAC)
-            ) m_o (
-                .i_a( d_gates   [ (4*j+4)*WIDTH-1 : (4*j+3)*WIDTH ] ),
-                .i_b( i_x       [ (((NUM+NUM_LSTM)*j)+i+1)*WIDTH-1 : (((NUM+NUM_LSTM)*j)+i)*WIDTH] ),
-                .o( o_mult_o    [ ((TIMESTEP*i)+j+1)*WIDTH-1 : ((TIMESTEP*i)+j)*WIDTH] )
-            );
-        end
-    end
+memory_dgates #(
+        .WIDTH(WIDTH),
+        .NUM_LSTM(LAYR2_CELL),
+        .TIMESTEP(TIMESTEP),
+        .FILENAME(LAYR2_dO)
+    ) mem_do2 (
+        .clk     (clk),
+        .rst     (rst),
+        .wr      (wr_do2),
+        .rd_addr (rd_addr_do2),
+        .wr_addr (wr_addr_do2),
+        .i       (dgate_layr2),
+        .o       (do2)
+    );
 
-    // Adding signals for W
-    for (i = 0; i < NUM; i = i + 1)
-    begin:weight
-        adder #(
-            .NUM(TIMESTEP),
-            .WIDTH(WIDTH)
-        ) add_a (
-            .i( o_mult_a    [ (i+1)*TIMESTEP*WIDTH-1 : i*TIMESTEP*WIDTH ] ),
-            .o( o_wa        [ (i+1)*WIDTH-1 : i*WIDTH ] )
-        );
-        adder #(
-            .NUM(TIMESTEP),
-            .WIDTH(WIDTH)
-        ) add_i (
-            .i( o_mult_i    [ (i+1)*TIMESTEP*WIDTH-1 : i*TIMESTEP*WIDTH ] ),
-            .o( o_wi        [ (i+1)*WIDTH-1 : i*WIDTH ] )
-        );
-        adder #(
-            .NUM(TIMESTEP),
-            .WIDTH(WIDTH)
-        ) add_f (
-            .i( o_mult_f    [ (i+1)*TIMESTEP*WIDTH-1 : i*TIMESTEP*WIDTH ] ),
-            .o( o_wf        [ (i+1)*WIDTH-1 : i*WIDTH ] )
-        );
-        adder #(
-            .NUM(TIMESTEP),
-            .WIDTH(WIDTH)
-        ) add_o (
-            .i( o_mult_o    [ (i+1)*TIMESTEP*WIDTH-1 : i*TIMESTEP*WIDTH ] ),
-            .o( o_wo        [ (i+1)*WIDTH-1 : i*WIDTH ] )
-        );
-    end
+// LAYER 2 ACC Array for dX and delta Out
+// in: da, di, df, do
+// out: dx, delta Out
 
-    // Adding signals for U
-    for (i = NUM; i < NUM+NUM_LSTM; i = i + 1)
-    begin:U
-        adder #(
-            .NUM(TIMESTEP),
-            .WIDTH(WIDTH)
-        ) add_a (
-            .i( o_mult_a    [ ((i+1)*TIMESTEP)*WIDTH-1 : i*TIMESTEP*WIDTH ] ),
-            .o( o_wa        [ (i+1)*WIDTH-1 : i*WIDTH ] )
-        );
-        adder #(
-            .NUM(TIMESTEP),
-            .WIDTH(WIDTH)
-        ) add_i (
-            .i( o_mult_i    [ ((i+1)*TIMESTEP)*WIDTH-1 : i*TIMESTEP*WIDTH ] ),
-            .o( o_wi        [ (i+1)*WIDTH-1 : i*WIDTH ] )
-        );
-        adder #(
-            .NUM(TIMESTEP),
-            .WIDTH(WIDTH)
-        ) add_f (
-            .i( o_mult_f    [ ((i+1)*TIMESTEP)*WIDTH-1 : i*TIMESTEP*WIDTH ] ),
-            .o( o_wf        [ (i+1)*WIDTH-1 : i*WIDTH ] )
-        );
-        adder #(
-            .NUM(TIMESTEP),
-            .WIDTH(WIDTH)
-        ) add_o (
-            .i( o_mult_o    [ ((i+1)*TIMESTEP)*WIDTH-1 : i*TIMESTEP*WIDTH ] ),
-            .o( o_wo        [ (i+1)*WIDTH-1 : i*WIDTH ] )
-        );
-    end
 
-    // Calculate B
-    wire signed [TIMESTEP*WIDTH-1:0] da, di, df, do;
+// LAYER 2 Multiplexer
+// in: dgates memory
+// out: da/di/df/do
 
-    for (i = 0; i < TIMESTEP; i = i + 1)
-    begin:bias
-        assign da[(i+1)*WIDTH-1:i*WIDTH] = d_gates[ (4*i+1)*WIDTH-1 : (4*i+0)*WIDTH ];
-        assign di[(i+1)*WIDTH-1:i*WIDTH] = d_gates[ (4*i+2)*WIDTH-1 : (4*i+1)*WIDTH ];
-        assign df[(i+1)*WIDTH-1:i*WIDTH] = d_gates[ (4*i+3)*WIDTH-1 : (4*i+2)*WIDTH ];
-        assign do[(i+1)*WIDTH-1:i*WIDTH] = d_gates[ (4*i+4)*WIDTH-1 : (4*i+3)*WIDTH ];
-    end
 
-    adder #(.NUM(TIMESTEP),.WIDTH(WIDTH)) ba (.i( da ), .o( o_b[1*WIDTH-1:0*WIDTH] ));
-    adder #(.NUM(TIMESTEP),.WIDTH(WIDTH)) bi (.i( di ), .o( o_b[2*WIDTH-1:1*WIDTH] ));
-    adder #(.NUM(TIMESTEP),.WIDTH(WIDTH)) bf (.i( df ), .o( o_b[3*WIDTH-1:2*WIDTH] ));
-    adder #(.NUM(TIMESTEP),.WIDTH(WIDTH)) bo (.i( do ), .o( o_b[4*WIDTH-1:3*WIDTH] ));
+// LAYER 2 MAC
+// in: dgate
+// out: dX/delta Out
 
-endgenerate
+
+// LAYER 2 dX Memory
+// in: acc_o
+
+
+// LAYER 2 delta Out Memory
+// in: acc_o
+
+
+// LAYER 1 Delta
+// in: i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state;
+// out: odgate
+delta #(
+        .WIDTH(WIDTH),
+        .FRAC(FRAC)
+    ) layr1_delta (
+        .clk        (clk),
+        .rst        (rst),
+        .sel_in1    (sel_layr1_in1),
+        .sel_in2    (sel_layr1_in2),
+        .sel_in3    (sel_layr1_in3),
+        .sel_in4    (sel_layr1_in4),
+        .sel_in5    (sel_layr1_in5),
+        .sel_x1_1   (sel_layr1_x1_1),
+        .sel_x1_2   (sel_layr1_x1_2),
+        .sel_x2_2   (sel_layr1_x2_2),
+        .sel_as_1   (sel_layr1_as_1),
+        .sel_as_2   (sel_layr1_as_2),
+        .sel_addsub (sel_layr1_addsub),
+        .sel_temp   (sel_layr1_temp),
+        .at         (i_layr1_a),
+        .it         (i_layr1_i),
+        .ft         (i_layr1_f),
+        .ot         (i_layr1_o),
+        .h          (),
+        .t          (),
+        .state      (i_layr1_state),
+        .d_state    (i_layr1_d_state),
+        .d_out      (),
+        .o_dgate    (dgate_layr1)
+    );
+
+// LAYER 1 dA, dI, dF, dO Memory
+// in: addr, wr, odgate
+// out: da, di, df, do
+memory_dgates #(
+        .WIDTH(WIDTH),
+        .NUM_LSTM(LAYR1_CELL),
+        .TIMESTEP(TIMESTEP),
+        .FILENAME(LAYR1_dA)
+    ) mem_da1 (
+        .clk     (clk),
+        .rst     (rst),
+        .wr      (wr_da1),
+        .rd_addr (rd_addr_da1),
+        .wr_addr (wr_addr_da1),
+        .i       (dgate_layr1),
+        .o       (da1)
+    );
+
+memory_dgates #(
+        .WIDTH(WIDTH),
+        .NUM_LSTM(LAYR1_CELL),
+        .TIMESTEP(TIMESTEP),
+        .FILENAME(LAYR1_dI)
+    ) mem_di1 (
+        .clk     (clk),
+        .rst     (rst),
+        .wr      (wr_di1),
+        .rd_addr (rd_addr_di1),
+        .wr_addr (wr_addr_di1),
+        .i       (dgate_layr1),
+        .o       (di1)
+    );
+
+memory_dgates #(
+        .WIDTH(WIDTH),
+        .NUM_LSTM(LAYR1_CELL),
+        .TIMESTEP(TIMESTEP),
+        .FILENAME(LAYR1_dF)
+    ) mem_df1 (
+        .clk     (clk),
+        .rst     (rst),
+        .wr      (wr_df1),
+        .rd_addr (rd_addr_df1),
+        .wr_addr (wr_addr_df1),
+        .i       (dgate_layr1),
+        .o       (df1)
+    );
+
+memory_dgates #(
+        .WIDTH(WIDTH),
+        .NUM_LSTM(LAYR1_CELL),
+        .TIMESTEP(TIMESTEP),
+        .FILENAME(LAYR1_dO)
+    ) mem_do1 (
+        .clk     (clk),
+        .rst     (rst),
+        .wr      (wr_do1),
+        .rd_addr (rd_addr_do1),
+        .wr_addr (wr_addr_do1),
+        .i       (dgate_layr1),
+        .o       (do1)
+    );
+
+
+// LAYER 1 ACC Array
+// in: dgates memory
+// out: da/di/df/do
+
+
+// LAYER 1 Multiplexer
+// in: dgates memory
+// out: da/di/df/do
+
+
+// LAYER 1 MAC
+// in: dgate
+// out: dX/delta Out
+
+
+// LAYER 1 delta Out Memory
+// in: delta Out
+// out: reg delta Out
+
 
 endmodule
