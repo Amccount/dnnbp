@@ -2,163 +2,155 @@
 //
 // By : Joshua, Teresia Savera, Yashael Faith
 // 
-// Module Name      : LSTM Delta Calculation
+// Module Name      : Delta Module
 // File Name        : delta.v
-// Version          : 1.0
-// Description      : Calculate delta in backpropagation
+// Version          : 2.0
+// Description      : Calculate delta with 2 multiplier and one add/sub
+//
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module delta(i_d_h_prev, i_h, i_d_c_prev, i_c_next, i_c, i_t, i_a, i_i, i_f, i_o, i_f_prev,
-			 w_a, w_o, w_i, w_f, o_d_tot, o_dgates, o_d_x_now, o_d_h_next, o_d_c_next);
+module delta(clk, rst, sel_in1, sel_in2, sel_in3, sel_in4, sel_in5,
+			 sel_x1_1, sel_x1_2, sel_x2_2, sel_as_1, sel_as_2, sel_addsub, sel_temp, 
+			 at, it, ft, ot, h, t, state, d_state, d_out, o_dgate);
 
 // parameters
 parameter WIDTH = 32;
-parameter FRAC  = 24;
-parameter NUM = 2;
-parameter NUM_LSTM = 1;
-
-// common ports
-
-// control ports
+parameter FRAC = 24;
 
 // input ports
-input[WIDTH-1:0] i_t, i_h;
-input[NUM_LSTM*WIDTH-1:0] i_d_h_prev;
-input[WIDTH-1:0] i_d_c_prev, i_c_next, i_c;
-input[WIDTH-1:0] i_a, i_i, i_f, i_o;
-input[WIDTH-1:0] i_f_prev;
-input[(NUM+NUM_LSTM)*WIDTH-1:0] w_a, w_o, w_i, w_f;
+//-------- LEGEND ----------
+// d_state 	= δstate
+// d_out	= Δout
+// h 		= output
+// t 		= label
+//--------------------------
+input clk, rst;
+input [WIDTH-1:0] at, it, ft, ot, h, t, state, d_state, d_out;
+
+// control ports
+input [1:0] sel_in1;
+input [1:0] sel_in2;
+input sel_in3;
+input [1:0] sel_in4;
+input [2:0] sel_in5;
+
+input [1:0] sel_x1_1;
+input sel_x1_2;
+input [1:0] sel_x2_2;
+input sel_as_1;
+input [1:0] sel_as_2;
+input sel_addsub;
+input [1:0] sel_temp;
 
 // output ports
-output[WIDTH-1:0] o_d_tot;
-output[WIDTH-1:0] o_d_c_next;
-output[4*WIDTH-1:0] o_dgates;
-output[NUM*WIDTH-1:0] o_d_x_now;
-output[NUM_LSTM*WIDTH-1:0] o_d_h_next;
+output [WIDTH-1:0] o_dgate;
 
-wire[WIDTH-1:0] temp_d_c_next;
-wire[WIDTH-1:0] o_tan_c;
-wire[WIDTH-1:0] temp_d_s01, temp_d_s02, temp_d_s03, temp_d_s04;
-wire[WIDTH-1:0] temp_d_i01, temp_d_i02, temp_d_i03;
-wire[WIDTH-1:0] temp_d_a01, temp_d_a02, temp_d_a03;
-wire[WIDTH-1:0] temp_d_f01, temp_d_f02, temp_d_f03;
-wire[WIDTH-1:0] temp_d_o01, temp_d_o02, temp_d_o03;
-wire[4*WIDTH-1:0] dgates;
-wire[WIDTH-1:0] d_h;
-wire[WIDTH-1:0] d_ao, d_ai, d_af, d_aa;
-wire[WIDTH-1:0] o_d_c_next;
+// wires
+wire [WIDTH-1:0] o_mux_in1, o_mux_in2, o_mux_in3, o_mux_in4;
+wire [WIDTH-1:0] o_mux_in_x1_1, o_mux_in_x1_2, o_mux_in_x2_2;
+wire [WIDTH-1:0] o_mux_in_as_1, o_mux_in_as_2;
+wire [WIDTH-1:0] o_mux_temp;
+wire [WIDTH-1:0] o_mul1, o_mul2, o_addsub;
+wire [WIDTH-1:0] o_tanh, o_tanh2;
 
-//////////////////////////////////////
-// START OF δc_next CALCULATION //
-//////////////////////////////////////
-
-// Calculate error Δnow
-assign o_d_tot = i_h - i_t;
-
-// Calculate delta out and delta c
-// δh_now
-assign d_h = o_d_tot + i_d_h_prev;
-
-// TANH(c)
-tanh #(.WIDTH(WIDTH)) inst_tanh (.i(i_c), .o(o_tan_c));
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult01 (.i_a(d_h), .i_b(i_o), .o(temp_d_s01));
-
-// 1-tanh^2(c_now)
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult02 (.i_a(o_tan_c), .i_b(o_tan_c), .o(temp_d_s02));
-assign temp_d_s03 = 32'h01000000 - temp_d_s02;
+// registers
+reg [WIDTH-1:0] o_mux_in5;
+reg [WIDTH-1:0] in1, in2, in3, in4, in5;
+reg [WIDTH-1:0] temp;
+reg [WIDTH-1:0] o_x1, o_x2, o_as;
 
 
-// Term 1 δc_next
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult03 (.i_a(temp_d_s01), .i_b(temp_d_s03), .o(temp_d_s04));
+// multiplexer for input register
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in1 (.i_a(at), .i_b(it), .i_c(d_state), .i_d(ft), .sel(sel_in1), .o(o_mux_in1));
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in2 (.i_a(at), .i_b(state), .i_c(o_tanh), .i_d(ft), .sel(sel_in2), .o(o_mux_in2));
+multiplexer 	 #(.WIDTH(WIDTH)) inst_mux_in3 (.i_a(ot), .i_b(it), .sel(sel_in3), .o(o_mux_in3));
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in4 (.i_a(d_out),
+												.i_b(h),
+												.i_c(32'h01000000),
+												.i_d({(WIDTH){1'b0}}),
+												.sel(sel_in4),
+												.o(o_mux_in4));
 
-// Term 2 δc_next
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult04 (.i_a(i_f_prev), .i_b(i_d_c_prev), .o(temp_d_c_next));
+// multiplexer for multiplier and addsub
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in_x1_1 (.i_a(in1), .i_b(o_x2), .i_c(temp), .i_d({(WIDTH){1'b0}}), .sel(sel_x1_1), .o(o_mux_in_x1_1));
+multiplexer 	 #(.WIDTH(WIDTH)) inst_mux_in_x1_2 (.i_a(in2), .i_b(o_x1), .sel(sel_x1_2), .o(o_mux_in_x1_2));
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in_x2_2 (.i_a(in3), .i_b(o_x1), .i_c(o_x2), .i_d({(WIDTH){1'b0}}), .sel(sel_x2_2), .o(o_mux_in_x2_2));
+multiplexer 	 #(.WIDTH(WIDTH)) inst_mux_in_as_1 (.i_a(in4), .i_b(o_x2), .sel(sel_as_1), .o(o_mux_in_as_1));
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in_as_2 (.i_a(in5), .i_b(o_x1), .i_c(temp), .i_d(o_as), .sel(sel_as_2), .o(o_mux_in_as_2));
 
+// multiplier for temporary register
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in_reg (.i_a(o_mul1), .i_b(o_addsub), .i_c(temp), .i_d({(WIDTH){1'b0}}), .sel(sel_temp), .o(o_mux_temp));
 
-assign o_d_c_next = temp_d_c_next + temp_d_s04;
-////////////////////////////////////
-// END OF δc_next CALCULATION //
-////////////////////////////////////
+// Multiplexer - in_5
+always@(sel_in5 or t or o_tanh2 or it or ft or ot)
+begin
+	if (sel_in5 == 3'b000)
+	begin
+		o_mux_in5 <= t;
+	end
+	else if (sel_in5 == 3'b001)
+	begin
+		o_mux_in5 <= o_tanh2;
+	end
+	else if (sel_in5 == 3'b010)
+	begin
+		o_mux_in5 <= it;
+	end
+	else if (sel_in5 == 3'b011)
+	begin
+		o_mux_in5 <= ft;
+	end
+	else if (sel_in5 == 3'b100)
+	begin
+		o_mux_in5 <= ot;
+	end
+	else
+	begin
+		o_mux_in5 <= {(WIDTH){1'b0}};
+	end
+end
 
+// Tanh and Tanh^2
+tanh #(.WIDTH(WIDTH)) inst_tanh (.i(state), .o(o_tanh));
+tanh_qdrt #(.WIDTH(WIDTH)) inst_tanh_qdrt (.i(state), .o(o_tanh2));
 
-////////////////////////////////////
-// START OF δGATES CALCULATION    //
-////////////////////////////////////
+// Multipliers
+mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult_1 (.i_a(o_mux_in_x1_1), .i_b(o_mux_in_x1_2), .o(o_mul1));
+mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult_2 (.i_a(o_as), .i_b(o_mux_in_x2_2), .o(o_mul2));
 
-// δaa
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult05 (.i_a(o_d_c_next), .i_b(i_i), .o(temp_d_i01));
+// Adder
+addsub #(.WIDTH(WIDTH)) addsub (.i_a(o_mux_in_as_1), .i_b(o_mux_in_as_2), .sel(sel_addsub), .o(o_addsub));
 
-// 1-aa^2
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult06 (.i_a(i_a), .i_b(i_a), .o(temp_d_i02));
-assign temp_d_i03 = 32'h01000000 - temp_d_i02;
+// Handle registers
+always@(posedge(clk) or posedge(rst))
+begin
+	if (rst)
+	begin
+		in1 <= {(WIDTH){1'b0}};
+		in2 <= {(WIDTH){1'b0}};
+		in3 <= {(WIDTH){1'b0}};
+		in4 <= {(WIDTH){1'b0}};
+		in5 <= {(WIDTH){1'b0}};
+		o_x1 <= {(WIDTH){1'b0}};
+		o_x2 <= {(WIDTH){1'b0}};
+		o_as <= {(WIDTH){1'b0}};
+		temp <= {(WIDTH){1'b0}};
+	end
+	else
+	begin
+		in1 <= o_mux_in1;
+		in2 <= o_mux_in2;
+		in3 <= o_mux_in3;
+		in4 <= o_mux_in4;
+		in5 <= o_mux_in5;
+		o_x1 <= o_mul1;
+		o_x2 <= o_mul2;
+		o_as <= o_addsub;
+		temp <= o_mux_temp;
+	end
+end
 
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult07 (.i_a(temp_d_i01), .i_b(temp_d_i03), .o(d_aa));
+assign o_dgate = o_x2;
 
-/*------------------------------------------------------------------------------------------*/
-
-// δai
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult08 (.i_a(o_d_c_next), .i_b(i_a), .o(temp_d_a01));
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult09 (.i_a(temp_d_a01), .i_b(i_i), .o(temp_d_a02));
-//1-ai
-assign temp_d_a03 = 32'h01000000 - i_i;
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult10 (.i_a(temp_d_a02), .i_b(temp_d_a03), .o(d_ai));
-
-/*------------------------------------------------------------------------------------------*/
-
-// δaf
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult11 (.i_a(o_d_c_next), .i_b(i_c_next), .o(temp_d_f01));
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult12 (.i_a(temp_d_f01), .i_b(i_f), .o(temp_d_f02));
-//1-af
-assign temp_d_f03 = 32'h01000000 - i_f;
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult13 (.i_a(temp_d_f02), .i_b(temp_d_f03), .o(d_af));
-
-/*------------------------------------------------------------------------------------------*/
-
-// δao
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult14 (.i_a(d_h), .i_b(o_tan_c), .o(temp_d_o01));
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult15 (.i_a(temp_d_o01), .i_b(i_o), .o(temp_d_o02));
-//1-ao
-assign temp_d_o03 = 32'h01000000 - i_o;
-mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult16 (.i_a(temp_d_o02), .i_b(temp_d_o03), .o(d_ao));
-
-/*------------------------------------------------------------------------------------------*/
-
-
-// Calculate δgates
-assign dgates = {d_ao, d_af, d_ai, d_aa};
-
-////////////////////////////////////
-// END OF δGATES CALCULATION      //
-////////////////////////////////////
-
-
-generate
-    genvar i;
-    for (i = NUM; i > 0; i = i - 1)
-    begin: dx
-    	wire[4*WIDTH-1:0] temp1;
-    	wire[4*WIDTH-1:0] out_mul_1;
-    	
-    	//δX_NOW
-    	assign temp1 = {w_o[i*WIDTH-1:(i-1)*WIDTH],w_f[i*WIDTH-1:(i-1)*WIDTH],w_i[i*WIDTH-1:(i-1)*WIDTH],w_a[i*WIDTH-1:(i-1)*WIDTH]};
-    	mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult17[3:0] (.i_a(dgates), .i_b(temp1), .o(out_mul_1));
-		adder #(.NUM(4), .WIDTH(WIDTH)) ad (.i(out_mul_1), .o(o_d_x_now[i*WIDTH-1:(i-1)*WIDTH]));
-    end
-
-    //ΔH_NEXT
-    for (i = (NUM+NUM_LSTM); i > NUM; i = i - 1)
-    begin: d_h_next
-
-        wire[4*WIDTH-1:0] temp_u, out_mul_2;
-
-        assign temp_u = {w_o[i*WIDTH-1:(i-1)*WIDTH],w_f[i*WIDTH-1:(i-1)*WIDTH],w_i[i*WIDTH-1:(i-1)*WIDTH],w_a[i*WIDTH-1:(i-1)*WIDTH]};
-        mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) mult18[3:0] (.i_a(dgates), .i_b(temp_u), .o(out_mul_2));
-        adder #(.NUM(4), .WIDTH(WIDTH)) add (.i(out_mul_2), .o(o_d_h_next[(i-NUM)*WIDTH-1:(i-1-NUM)*WIDTH]));
-    end
-endgenerate
-
-
-// Assign d gates as output
-assign o_dgates = dgates;
 endmodule
