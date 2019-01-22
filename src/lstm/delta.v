@@ -12,7 +12,7 @@
 
 module delta(clk, rst, sel_in1, sel_in2, sel_in3, sel_in4, sel_in5,
 			 sel_x1_1, sel_x1_2, sel_x2_2, sel_as_1, sel_as_2, sel_addsub, sel_temp, 
-			 at, it, ft, ot, h, t, state, d_state, d_out, o_dgate);
+			 at, it, ft, ot, h, t, state, d_state, d_out, o_dgate, o_d_state);
 
 // parameters
 parameter WIDTH = 32;
@@ -45,6 +45,7 @@ input [1:0] sel_temp;
 
 // output ports
 output [WIDTH-1:0] o_dgate;
+output [WIDTH-1:0] o_d_state;
 
 // wires
 wire [WIDTH-1:0] o_mux_in1, o_mux_in2, o_mux_in3, o_mux_in4;
@@ -152,5 +153,6 @@ begin
 end
 
 assign o_dgate = o_x2;
+assign o_d_state = temp;
 
 endmodule

@@ -35,6 +35,9 @@ module bp ( clk, rst, i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state,
             wr_addr_da2, wr_addr_di2, wr_addr_df2, wr_addr_do2,
             rd_addr_dx2, rd_addr_dout2, rd_addr_dout1,
             wr_addr_dx2, wr_addr_dout2, wr_addr_dout1,
+            load_d_state1, load_d_state2,
+            sel_dgate1, sel_dgate2,
+            sel_wghts1, sel_wghts2
             );
 
 // parameters
@@ -91,6 +94,12 @@ input sel_layr1_temp, sel_layr2_temp;
 input acc_da1, acc_di1, acc_df1, acc_do1;
 input acc_da2, acc_di2, acc_df2, acc_do2;
 input acc_mac1, acc_mac2;
+
+input load_d_state1, load_d_state2;
+
+input [1:0] sel_dgate1, sel_dgate2;
+input [2:0] sel_wghts1, sel_wghts2;
+
 
 input [WIDTH-1:0] wr_da1, wr_di1, wr_df1, wr_do1;
 input [WIDTH-1:0] rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1;
@@ -154,15 +163,21 @@ delta #(
         .state      (i_layr2_state),
         .d_state    (reg_d_state2),
         .d_out      (),
-        .o_dgate    (dgate_layr2)
+        .o_dgate    (dgate_layr2),
+        .o_d_state  (layr2_d_state)
     );
 
 // LAYER 2 delta State Delay Register
-always @(posedge clk)
+always @(posedge clk or posedge rst)
 begin
-    reg_d_state2 = layr2_d_state;
+    if (rst) 
+        reg_d_state2 = {WIDTH{1'b0}};
+    else
+    begin
+        if (load_d_state2)
+            reg_d_state2 = layr2_d_state;
+    end
 end
-
 
 // LAYER 2 dA, dI, dF, dO Memory
 // out: da2, di2, df2, do2
@@ -246,12 +261,14 @@ acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_do_2 (.clk(clk), .rst(rst), .acc(acc_do2),
 // LAYER 2 dgates Multiplexer
 // in: o_acc_da2, o_acc_di2, o_acc_df2, o_acc_do2
 // out: dgate_mux2
-
+multiplexer_4to1 #(.WIDTH(WIDTH)) mux_x2 (.i_a(o_acc_da2), .i_b(o_acc_di2), .i_c(o_acc_df2), .i_d(o_acc_do2), .sel(sel_dgate2), .o(dgate_mux2));
 
 // LAYER 2 W & U Memory Multiplexer
 // in: i_layr2_wa, i_layr2_wi, i_layr2_wf, i_layr2_wo,i_layr2_ua, i_layr2_ui, i_layr2_uf, i_layr2_uo
 // out: wghts_mux2
-
+multiplexer_4to1 #(.WIDTH(WIDTH)) mux_dout2_1 (.i_a(i_layr2_wa), .i_b(i_layr2_wi), .i_c(i_layr2_wf), .i_d(i_layr2_wo), .sel(sel_wghts2[1:0]), .o(layr2_w));
+multiplexer_4to1 #(.WIDTH(WIDTH)) mux_dout2_2 (.i_a(i_layr2_ua), .i_b(i_layr2_ui), .i_c(i_layr2_uf), .i_d(i_layr2_uo), .sel(sel_wghts2[1:0]), .o(layr2_u));
+assign wghts_mux2 = sel_wghts2[2] ? layr2_u : layr2_w;
 
 // LAYER 2 MAC
 // in: dgate
@@ -338,13 +355,20 @@ delta #(
         .state      (i_layr1_state),
         .d_state    (),
         .d_out      (),
-        .o_dgate    (dgate_layr1)
+        .o_dgate    (dgate_layr1),
+        .o_d_state  (layr1_d_state)
     );
 
-// LAYER 2 delta State Delay Register
-always @(posedge clk)
+// LAYER 1 delta State Delay Register
+always @(posedge clk or posedge rst)
 begin
-    reg_d_state1 = layr1_d_state;
+    if (rst) 
+        reg_d_state1 = {WIDTH{1'b0}};
+    else
+    begin
+        if (load_d_state1)
+            reg_d_state1 = layr1_d_state;
+    end
 end
 
 // LAYER 1 dA, dI, dF, dO Memory
@@ -432,11 +456,15 @@ acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_do_1 (.clk(clk), .rst(rst), .acc(acc_do1),
 // LAYER 1 dgates Multiplexer
 // in: o_acc_da1, o_acc_di1, o_acc_df1, o_acc_do1
 // out: dgate_mux1
+multiplexer_4to1 #(.WIDTH(WIDTH)) mux_x1 (.i_a(o_acc_da1), .i_b(o_acc_di1), .i_c(o_acc_df1), .i_d(o_acc_do1), .sel(sel_dgate1), .o(dgate_mux1));
 
 
 // LAYER 1 U Memory Multiplexer
 // in: i_layr1_wa, i_layr1_wi, i_layr1_wf, i_layr1_wo,i_layr1_ua, i_layr1_ui, i_layr1_uf, i_layr1_uo
 // out: wghts_mux1
+multiplexer_4to1 #(.WIDTH(WIDTH)) mux_dout1_1 (.i_a(i_layr1_wa), .i_b(i_layr1_wi), .i_c(i_layr1_wf), .i_d(i_layr1_wo), .sel(sel_wghts1[1:0]), .o(layr1_w));
+multiplexer_4to1 #(.WIDTH(WIDTH)) mux_dout1_2 (.i_a(i_layr1_ua), .i_b(i_layr1_ui), .i_c(i_layr1_uf), .i_d(i_layr1_uo), .sel(sel_wghts1[1:0]), .o(layr1_u));
+assign wghts_mux1 = sel_wghts1[2] ? layr1_u : layr1_w;
 
 
 // LAYER 1 MAC
