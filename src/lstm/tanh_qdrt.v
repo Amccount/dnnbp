@@ -54,7 +54,7 @@ addsub #(.WIDTH(WIDTH)) inst_addsub_2 (.i_a(out_add_sub_1), .i_b(out_mux_const),
 
 multiplexer #(.WIDTH(WIDTH)) mux_const_2 (.i_a(quarter_input), .i_b(32'h00000000), .sel(sel_coef_2), .o(out_mux_coef_2));
 
-multiplexer_3in #(.WIDTH(WIDTH)) inst_mux_const (.i_a(32'h00666666), .i_b(32'h00AE147A), .i_c(32'h00C49BA5), .sel({sel_coef_1, sel_coef_2}), .o(out_mux_const));
+multiplexer_3in #(.WIDTH(WIDTH)) inst_mux_const (.i_a(32'h00266666), .i_b(32'h00400000), .i_c(32'h00AE147A), .sel({sel_coef_1, sel_coef_2}), .o(out_mux_const));
 
 multiplexer #(.WIDTH(WIDTH)) mux_region (.i_a(32'h00000000), .i_b(32'h01000000), .sel(sel_region), .o(out_mux_region));
 multiplexer #(.WIDTH(WIDTH)) mux_result (.i_a(out_mux_region), .i_b(out_add_sub_2), .sel(sel_result), .o(o));
@@ -62,8 +62,8 @@ multiplexer #(.WIDTH(WIDTH)) mux_result (.i_a(out_mux_region), .i_b(out_add_sub_
 assign sel_coef_1 = abs_input>32'h01000000;
 assign sel_coef_2 = abs_input>32'h01B851EB;
 assign sel_sign = abs_input> 32'h01000000; 
-assign sel_result = abs_input<32'h02000000 && abs_input > 32'h00333333;
-assign sel_region = abs_input >32'h02000000;
+assign sel_result = abs_input<32'h02800000 && abs_input > 32'h00333333;
+assign sel_region = abs_input >32'h00333333;
 
 always @(i)
 begin

@@ -10,8 +10,9 @@ parameter FILENAME = "memory_c.list";
 input clk, rst;
 
 // control ports
+
 input wr;
-input [8:0] rd_addr, wr_addr;
+input [11:0] rd_addr, wr_addr;
 
 // input ports
 input signed [WIDTH-1:0] i;
@@ -19,7 +20,7 @@ input signed [WIDTH-1:0] i;
 // output ports
 output signed [WIDTH-1:0] o;
 
-reg signed [WIDTH-1:0] memory [0:NUM_LSTM*WIDTH*(TIMESTEP+1)-1];
+reg signed [WIDTH-1:0] memory [0:NUM_LSTM*(TIMESTEP+1)-1];
 
 always @(posedge clk or posedge rst) begin
 	if (rst)
@@ -37,3 +38,4 @@ end
 assign o = memory[rd_addr];
 
 endmodule
+
