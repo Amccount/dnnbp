@@ -61,6 +61,8 @@ reg [11:0] wr_addr_c2;
 reg wr_layr2;
 reg [11:0] rd_addr_layr2;
 reg [11:0] wr_addr_layr2;
+reg [11:0] lstm;
+reg [11:0] timestep;
 
 
 	datapath #(
@@ -130,68 +132,84 @@ begin
 	rst <= 1;
 	acc_x_1 <=0;
 	acc_h_1 <=0;
+	lstm <= 12'd0;
+	timestep <=12'd0;
 	addr_x1 <= 32'd0; 
 	rd_addr_h1 <= 12'd0; 
-	wr_addr_h1 <= 12'd52; 
-	wr_addr_c1 <= 12'd52;
+	rd_addr_c1 <= 12'd0;
+	wr_addr_h1 <= 12'd0; 
+	wr_addr_c1 <= 12'd0;
 	rd_addr_w_1 <= 12'd0;
 	rd_addr_b_1 <= 12'd0;
 	rd_addr_u_1 <= 12'd0;
+	wr_c1 <=0;
 	#100
 	rst <=0;
-	rd_addr_w_1 <= 12'd0;
-	rd_addr_b_1 <= 12'd0;
-	rd_addr_u_1 <= 12'd0;
 	#100
 
-
-	// calculating h and c on 1 time step
-	repeat (53)
-	
+	//repeat until 7 time step
+	repeat (7)
 	begin
+		timestep <= timestep +1 ;
 
-		// obtaining h on each cell
-		repeat (52)
+		// calculating h and c on 1 time step
+		repeat (53)
 		begin
-			addr_x1 <= addr_x1+1;
-			rd_addr_w_1 <= rd_addr_w_1+1;
-			rd_addr_b_1 <= rd_addr_b_1+1;
-			rd_addr_u_1 <= rd_addr_u_1+1;
-			rd_addr_h1 <= rd_addr_h1+1;
+			lstm <= lstm +1;
+
+			
+			// obtaining h on each cell
+			repeat (52)
+			begin
+				addr_x1 <= addr_x1+1;
+				rd_addr_w_1 <= rd_addr_w_1+1;
+				rd_addr_b_1 <= rd_addr_b_1+1;
+				rd_addr_u_1 <= rd_addr_u_1+1;
+				wr_addr_h1 <= wr_addr_h1+1;
+				acc_x_1 <=1;
+				acc_h_1 <=1;
+				#100;
+			end
+
 			acc_x_1 <=1;
 			acc_h_1 <=1;
+			addr_x1 <=12'd0;
 			#100;
-		end
 
-		acc_x_1<=0;
-		acc_h_1<=0;
+			acc_x_1<=0;
+			acc_h_1<=0;
 
-		#100
+			#100
 
-		//enable write h
-		wr_h1 <=1;
-		rd_addr_h1 <= 12'd0; 
-		wr_addr_h1 <= wr_addr_h1 + 1;
+			//enable write h
+			wr_h1 <=1;
+			wr_addr_h1 <= (53*timestep) +lstm-1; //write 
 
+			//enable write state
+			wr_c1 <= 1; 
+			wr_addr_c1 <= (53*timestep) + lstm-1;
+			
+			// wr_x2 <= 1;
+			// rd_addr_x2 <= 9'd0; wr_addr_x2 <= 9'd0;
+			// wr_h2 <= 1; 
+			// rd_addr_h2 <= 9'd0; wr_addr_h2 <= 9'd8;
+			// wr_c2 <= 1;
+			// rd_addr_c2 <= 9'd0; wr_addr_c2 <= 9'd8;
+			
+			#100;
+			wr_h1 <=0;
+			wr_c1 <=0;
+			#100
+			wr_addr_h1 <= (timestep-1)*53;
+			addr_x1 <= (timestep-1)*53;
+			// rd_addr_w_1 <= (timestep-1)*53
+			// rd_addr_b_1 <= 12'd0;
+			// rd_addr_u_1 <= 12'd0;
+			#100;
+			// h(i) and state(i) are stored here
+		end 
 
-		//enable write state
-		wr_c1 <= 1;
-		rd_addr_c1 <= 12'd0; 
-		wr_addr_c1 <= wr_addr_c1 + 1;
-		
-		// wr_x2 <= 1;
-		// rd_addr_x2 <= 9'd0; wr_addr_x2 <= 9'd0;
-		// wr_h2 <= 1; 
-		// rd_addr_h2 <= 9'd0; wr_addr_h2 <= 9'd8;
-		// wr_c2 <= 1;
-		// rd_addr_c2 <= 9'd0; wr_addr_c2 <= 9'd8;
-		
-		#100;
-		wr_h1 <=0;
-		wr_c1 <=0;
-		// h(i) and state(i) are stored here
-
-	end 
+	end
 
 	// repeat(52)
 	// begin

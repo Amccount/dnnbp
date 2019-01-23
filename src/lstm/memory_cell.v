@@ -14,7 +14,7 @@ module memory_cell(clk, rst, wr_a, addr_a, addr_b, i_a, i_b, o_a, o_b);
 
 // parameters
 parameter WIDTH = 32;
-parameter NUM = 53*53;
+parameter NUM = 53;
 parameter TIMESTEP = 1;
 parameter FILENAME = "layer_act.list";
 
@@ -38,7 +38,7 @@ output reg signed [WIDTH-1:0] o_b;
 reg signed [WIDTH-1:0] memory [0:NUM*TIMESTEP-1];
 initial 
 begin
-    $readmemh("layer_act.list", memory);
+    $readmemh(FILENAME, memory);
 end
 
 always @(posedge clk) 

@@ -96,7 +96,7 @@ wire signed [WIDTH-1:0] prev_c1, prev_c2;
 wire signed [WIDTH-1:0] i_mem_h1, i_mem_x2, i_mem_h2;
 wire signed [WIDTH-1:0] i_mem_c1, i_mem_c2;
 wire signed [WIDTH-1:0] o_mem_c1, o_mem_c2;
-wire signed [WIDTH-1:0] o_mem_h1, o_mem_x2;
+wire signed [WIDTH-1:0] o_mem_h1_a, o_mem_h1_b, o_mem_x2;
 wire signed [WIDTH-1:0] o_mem_h2;
 wire signed [WIDTH-1:0] o_mem_a1, o_mem_a2;
 wire signed [WIDTH-1:0] o_mem_i1, o_mem_i2;
@@ -167,20 +167,24 @@ memory_x #(
 // LAYER 1 Output Memory
 // in: i (WIDTH)
 // out: o (53*WIDTH)
-memory_h1 #(
-		.WIDTH(WIDTH),
-		.NUM_LSTM(LAYR1_CELL),
-		.TIMESTEP(TIMESTEP),
-		.FILENAME(LAYR1_H)
-	) mem_h1 (
-		.clk     (clk),
-		.rst     (rst),
-		.wr      (wr_h1),
-		.rd_addr (rd_addr_h1),
-		.wr_addr (wr_addr_h1),
-		.i       (i_mem_h1),
-		.o       (o_mem_h1)
-	);
+
+memory_cell #(
+			.WIDTH(WIDTH),
+			.NUM(LAYR1_CELL),
+			.TIMESTEP(TIMESTEP+1),
+			.FILENAME(LAYR1_H)
+		) inst_memory_h1 (
+			.clk    (clk),
+			.rst    (rst),
+			.wr_a   (wr_h1),
+			.addr_a (wr_addr_h1),
+			.addr_b (rd_addr_h1),
+			.i_a    (i_mem_h1),
+			.i_b    (),
+			.o_a    (o_mem_h1_a),
+			.o_b    (o_mem_h1_b)
+);
+
 
 //LAYER 1 WEIGHT MEMORY
 memory_cell #(
@@ -403,20 +407,26 @@ memory_cell #(
 // LAYER 1 State Memory
 // in: i (WIDTH)
 // out: o (WIDTH)
-memory_c #(
-		.WIDTH(WIDTH),
-		.NUM_LSTM(LAYR1_CELL),
-		.TIMESTEP(TIMESTEP),
-		.FILENAME(LAYR1_C)
-	) mem_c1 (
-		.clk     (clk),
-		.rst     (rst),
-		.wr      (wr_c1),
-		.rd_addr (rd_addr_c1),
-		.wr_addr (wr_addr_c1),
-		.i       (i_mem_c1),
-		.o       (prev_c1)
-	);
+
+
+
+	memory_cell #(
+			.WIDTH(WIDTH),
+			.NUM(LAYR1_CELL),
+			.TIMESTEP(TIMESTEP+1),
+			.FILENAME("layer1_c.list")
+		) inst_mem_c (
+			.clk    (clk),
+			.rst    (rst),
+			.wr_a   (wr_c1),
+			.addr_a (wr_addr_c1),
+			.addr_b (rd_addr_c1),
+			.i_a    (i_mem_c1),
+			.i_b    (),
+			.o_a    (prev_c1),
+			.o_b    ()
+		);
+
 
 // LAYER 1 State Pipeline Register
 // in: data (WIDTH)
@@ -439,7 +449,7 @@ lstm_cell #(
 		.acc_x        (acc_x_1),
 		.acc_h        (acc_h_1),
 		.i_x          (data_x1),
-		.i_h          (o_mem_h1),
+		.i_h          (o_mem_h1_a),
 		.i_prev_state (prev_c1),
 		.i_w_a        (w_a_1),
 		.i_w_i        (w_i_1),
@@ -460,6 +470,7 @@ lstm_cell #(
 		.o_c          (c1),
 		.o_h          (h1)
 	);
+
 
 // Write a1 to memory
 
@@ -802,6 +813,23 @@ memory_h2 #(
 // LAYER 2 State Memory
 // in: i (WIDTH)
 // out: o (WIDTH)
+memory_cell #(
+			.WIDTH(WIDTH),
+			.NUM(LAYR2_CELL),
+			.TIMESTEP(TIMESTEP+1),
+			.FILENAME("layer2_c.list")
+		) inst_mem_c2 (
+			.clk    (clk),
+			.rst    (rst),
+			.wr_a   (wr_c2),
+			.addr_a (wr_addr_c1),
+			.addr_b (rd_addr_c1),
+			.i_a    (i_mem_c2),
+			.i_b    (),
+			.o_a    (prev_c2),
+			.o_b    ()
+		);
+
 memory_c #(
 		.WIDTH(WIDTH),
 		.NUM_LSTM(LAYR2_CELL),
@@ -853,12 +881,12 @@ lstm_cell #(
 		.i_b_i        (b_i_2),
 		.i_b_f        (b_f_2),
 		.i_b_o        (b_o_2),
-		.o_a          (a1),
-		.o_i          (i1),
-		.o_f          (f1),
-		.o_o          (o1),
-		.o_c          (c1),
-		.o_h          (h1)
+		.o_a          (a2),
+		.o_i          (i2),
+		.o_f          (f2),
+		.o_o          (o2),
+		.o_c          (c2),
+		.o_h          (h2)
 	);
 
 
@@ -877,7 +905,7 @@ memory_cell #(
 		.wr_a   (wr_act_2),
 		.addr_a (wr_addr_act_2),
 		.addr_b (),
- 		.i_a    (a1),
+ 		.i_a    (a2),
 		.i_b    (),
 		.o_a    (o_mem_a2),
 		.o_b    ()
@@ -895,7 +923,7 @@ memory_cell #(
 		.wr_a   (wr_act_2),
 		.addr_a (wr_addr_act_2),
 		.addr_b (),
-		.i_a    (a1),
+		.i_a    (f2),
 		.i_b    (),
 		.o_a    (o_mem_f2),
 		.o_b    ()
@@ -913,7 +941,7 @@ memory_cell #(
 		.wr_a   (wr_act_2),
 		.addr_a (wr_addr_act_2),
 		.addr_b (),
-		.i_a    (a1),
+		.i_a    (i2),
 		.i_b    (),
 		.o_a    (o_mem_i2),
 		.o_b    ()
@@ -930,7 +958,7 @@ memory_cell #(
 		.wr_a   (wr_act_2),
 		.addr_a (wr_addr_act_2),
 		.addr_b (),
-		.i_a    (a1),
+		.i_a    (o2),
 		.i_b    (),
 		.o_a    (o_mem_o2),
 		.o_b    ()
