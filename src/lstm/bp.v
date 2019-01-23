@@ -10,7 +10,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module bp ( clk, rst, i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state,
+module bp ( clk, rst, rst_acc1, rst_acc2,
+            i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state,
             i_layr2_a, i_layr2_i, i_layr2_f, i_layr2_o, i_layr2_state, i_layr2_h, i_layr2_t,
             i_layr1_wa, i_layr1_wi, i_layr1_wf, i_layr1_wo,
             i_layr1_ua, i_layr1_ui, i_layr1_uf, i_layr1_uo,
@@ -64,7 +65,7 @@ parameter LAYR2_dX = "layer2_dX.list";
 parameter LAYR2_dOut = "layer2_dOut.list";
 
 // common ports
-input clk, rst;
+input clk, rst, rst_acc1, rst_acc2;
 
 // input ports
 input signed [WIDTH-1:0] i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state;
@@ -78,18 +79,18 @@ input signed [WIDTH-1:0] i_layr2_ua, i_layr2_ui, i_layr2_uf, i_layr2_uo;
 input signed [WIDTH-1:0] i_layr2_ba, i_layr2_bi, i_layr2_bf, i_layr2_bo;
 
 // control ports
-input sel_layr1_in1, sel_layr2_in1;
-input sel_layr1_in2, sel_layr2_in2;
+input [1:0] sel_layr1_in1, sel_layr2_in1;
+input [1:0] sel_layr1_in2, sel_layr2_in2;
 input sel_layr1_in3, sel_layr2_in3;
-input sel_layr1_in4, sel_layr2_in4;
-input sel_layr1_in5, sel_layr2_in5;
-input sel_layr1_x1_1, sel_layr2_x1_1;
+input [1:0] sel_layr1_in4, sel_layr2_in4;
+input [2:0] sel_layr1_in5, sel_layr2_in5;
+input [1:0] sel_layr1_x1_1, sel_layr2_x1_1;
 input sel_layr1_x1_2, sel_layr2_x1_2;
-input sel_layr1_x2_2, sel_layr2_x2_2;
+input [1:0] sel_layr1_x2_2, sel_layr2_x2_2;
 input sel_layr1_as_1, sel_layr2_as_1;
-input sel_layr1_as_2, sel_layr2_as_2;
+input [1:0] sel_layr1_as_2, sel_layr2_as_2;
 input sel_layr1_addsub, sel_layr2_addsub;
-input sel_layr1_temp, sel_layr2_temp;
+input [1:0] sel_layr1_temp, sel_layr2_temp;
 
 input acc_da1, acc_di1, acc_df1, acc_do1;
 input acc_da2, acc_di2, acc_df2, acc_do2;
@@ -100,18 +101,18 @@ input load_d_state1, load_d_state2;
 input [1:0] sel_dgate1, sel_dgate2;
 input [2:0] sel_wghts1, sel_wghts2;
 
+input wr_da1, wr_di1, wr_df1, wr_do1;
+input [8:0] rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1;
+input [8:0] wr_addr_da1, wr_addr_di1, wr_addr_df1, wr_addr_do1;
 
-input [WIDTH-1:0] wr_da1, wr_di1, wr_df1, wr_do1;
-input [WIDTH-1:0] rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1;
-input [WIDTH-1:0] wr_addr_da1, wr_addr_di1, wr_addr_df1, wr_addr_do1;
+input wr_da2, wr_di2, wr_df2, wr_do2;
+input [5:0] rd_addr_da2, rd_addr_di2, rd_addr_df2, rd_addr_do2;
+input [5:0] wr_addr_da2, wr_addr_di2, wr_addr_df2, wr_addr_do2;
 
-input [WIDTH-1:0] wr_da2, wr_di2, wr_df2, wr_do2;
-input [WIDTH-1:0] rd_addr_da2, rd_addr_di2, rd_addr_df2, rd_addr_do2;
-input [WIDTH-1:0] wr_addr_da2, wr_addr_di2, wr_addr_df2, wr_addr_do2;
-
-input [WIDTH-1:0] wr_dx2, wr_dout2, wr_dout1;
-input [WIDTH-1:0] rd_addr_dx2, rd_addr_dout2, rd_addr_dout1;
-input [WIDTH-1:0] wr_addr_dx2, wr_addr_dout2, wr_addr_dout1;
+input wr_dx2, wr_dout2, wr_dout1;
+input [8:0] rd_addr_dx2, wr_addr_dx2;
+input [3:0] rd_addr_dout2, wr_addr_dout2;
+input [6:0] rd_addr_dout1, wr_addr_dout1;
 // output ports
 
 
@@ -132,6 +133,8 @@ wire signed [WIDTH-1:0] wghts_mux1, wghts_mux2;
 wire signed [WIDTH-1:0] o_mac1, o_mac2;
 
 wire signed [WIDTH-1:0] dx2, dout1, dout2;
+
+wire signed [WIDTH-1:0] layr2_w, layr2_u, layr1_w, layr1_u;
 
 // LAYER 2 Delta
 // in: i_layr2_a, i_layr2_i, i_layr2_f, i_layr2_o, i_layr2_state, i_layr2_h, i_layr2_t
@@ -158,11 +161,11 @@ delta #(
         .it         (i_layr2_i),
         .ft         (i_layr2_f),
         .ot         (i_layr2_o),
-        .h          (),
-        .t          (),
+        .h          (i_layr2_h),
+        .t          (i_layr2_t),
         .state      (i_layr2_state),
         .d_state    (reg_d_state2),
-        .d_out      (),
+        .d_out      (dout2),
         .o_dgate    (dgate_layr2),
         .o_d_state  (layr2_d_state)
     );
@@ -253,10 +256,10 @@ memory_cell #(
 // LAYER 2 ACC Array for dX and delta Out
 // in: da, di, df, do
 // out: dx, delta Out
-acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_da_2 (.clk(clk), .rst(rst), .acc(acc_da2), .i(dgate_layr2), .o(o_acc_da2));
-acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_di_2 (.clk(clk), .rst(rst), .acc(acc_di2), .i(dgate_layr2), .o(o_acc_di2));
-acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_df_2 (.clk(clk), .rst(rst), .acc(acc_df2), .i(dgate_layr2), .o(o_acc_df2));
-acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_do_2 (.clk(clk), .rst(rst), .acc(acc_do2), .i(dgate_layr2), .o(o_acc_do2));
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_da_2 (.clk(clk), .rst(rst_acc2), .acc(acc_da2), .i(dgate_layr2), .o(o_acc_da2));
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_di_2 (.clk(clk), .rst(rst_acc2), .acc(acc_di2), .i(dgate_layr2), .o(o_acc_di2));
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_df_2 (.clk(clk), .rst(rst_acc2), .acc(acc_df2), .i(dgate_layr2), .o(o_acc_df2));
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_do_2 (.clk(clk), .rst(rst_acc2), .acc(acc_do2), .i(dgate_layr2), .o(o_acc_do2));
 
 // LAYER 2 dgates Multiplexer
 // in: o_acc_da2, o_acc_di2, o_acc_df2, o_acc_do2
@@ -353,8 +356,8 @@ delta #(
         .h          (),
         .t          (),
         .state      (i_layr1_state),
-        .d_state    (),
-        .d_out      (),
+        .d_state    (reg_d_state1),
+        .d_out      (dout1),
         .o_dgate    (dgate_layr1),
         .o_d_state  (layr1_d_state)
     );
@@ -447,10 +450,10 @@ memory_cell #(
 // out: da/di/df/do
 // input acc_da1, acc_di1, acc_df1, acc_do1;
 // wire signed [WIDTH-1:0] o_acc_da1, o_acc_di1, o_acc_df1, o_acc_do1;
-acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_da_1 (.clk(clk), .rst(rst), .acc(acc_da1), .i(dgate_layr1), .o(o_acc_da1));
-acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_di_1 (.clk(clk), .rst(rst), .acc(acc_di1), .i(dgate_layr1), .o(o_acc_di1));
-acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_df_1 (.clk(clk), .rst(rst), .acc(acc_df1), .i(dgate_layr1), .o(o_acc_df1));
-acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_do_1 (.clk(clk), .rst(rst), .acc(acc_do1), .i(dgate_layr1), .o(o_acc_do1));
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_da_1 (.clk(clk), .rst(rst_acc1), .acc(acc_da1), .i(dgate_layr1), .o(o_acc_da1));
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_di_1 (.clk(clk), .rst(rst_acc1), .acc(acc_di1), .i(dgate_layr1), .o(o_acc_di1));
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_df_1 (.clk(clk), .rst(rst_acc1), .acc(acc_df1), .i(dgate_layr1), .o(o_acc_df1));
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) acc_do_1 (.clk(clk), .rst(rst_acc1), .acc(acc_do1), .i(dgate_layr1), .o(o_acc_do1));
 
 
 // LAYER 1 dgates Multiplexer

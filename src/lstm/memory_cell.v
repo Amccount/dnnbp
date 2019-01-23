@@ -37,7 +37,7 @@ output reg signed [WIDTH-1:0] o_b;
 reg signed [WIDTH-1:0] memory [0:NUM*TIMESTEP-1];
 initial 
 begin
-    $readmemh("layer_act.list", memory);
+    $readmemh(FILENAME, memory);
 end
 
 always @(posedge clk) 
