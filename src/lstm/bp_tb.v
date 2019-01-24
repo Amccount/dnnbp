@@ -103,6 +103,10 @@ wire signed [WIDTH-1:0] i_layr2_wa, i_layr2_wi, i_layr2_wf, i_layr2_wo;
 wire signed [WIDTH-1:0] i_layr2_ua, i_layr2_ui, i_layr2_uf, i_layr2_uo;
 
 
+/////////////////////
+reg [2:0] tstep;
+/////////////////////
+
 memory_cell #(
 		.ADDR(9),
 		.WIDTH(WIDTH),
@@ -470,529 +474,38 @@ begin
 	rd_layr1_uf <= 6'd0;
 	rd_layr1_uo <= 6'd0;
 
-	rd_addr_dstate1 <= 7'd0;
-	rd_addr_dout1 <= 7'd0;
 	rd_addr_dstate2 <= 4'd0;
 	rd_addr_dout2 <= 4'd0;
+
+	rd_addr_dx2 <= 9'd0;
+	rd_addr_dout1 <= 7'd0;
+	
+	rd_addr_dstate1 <= 7'd0;
 
 	wr_dx2 <= 1'b0;
-	wr_addr_dx2 <= 9'b0;
-	wr_addr_dout2 <= 4'b0;
-	wr_addr_dout1 <= 7'b0;
-	#100;
+	wr_addr_dx2 <= 9'd0;
+	wr_addr_dout2 <= 4'd8;
+	wr_addr_dout1 <= 7'd53;
 
-	/////////////// START LAYER 2 DELTA ///////////////////
-	////////////// 1 ST  CELL ////////////////////////////
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h1;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h0;
-	i_layr2_a <= 32'h00d98c7e; 
-	i_layr2_i <= 32'h00fb2e9c; 
-	i_layr2_f <= 32'h00000000; 
-	i_layr2_o <= 32'h00d99503; 
-	i_layr2_h <= 32'h00c59fd3; 
-	i_layr2_t <= 32'h01400000; 
-	i_layr2_state <= 32'h0184816f; 
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	rd_addr_dout2 <= 4'd0;
-	rd_addr_dstate2 <= 4'd0;
-	rd_addr_dx2 <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
 	wr_addr_da2 <= 6'd0;
 	wr_addr_di2 <= 6'd0;
 	wr_addr_df2 <= 6'd0;
 	wr_addr_do2 <= 6'd0;
 	wr_addr_dstate2 <= 4'd8;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
+
+	wr_addr_da1 <= 9'd0;
+	wr_addr_di1 <= 9'd0;
+	wr_addr_df1 <= 9'd0;
+	wr_addr_do1 <= 9'd0;
+	wr_addr_dstate1 <= 7'd53;
+
+	tstep <= 3'd0;
 	#100;
 
-	// CLOCK 1
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h0;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h0;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00000000;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	// CLOCK 2
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h2;
-	sel_in2 <= 2'h3;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h1;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h3;
-	sel_addsub <= 1'h1;
-	sel_temp   <= 2'h0;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00000000;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	// CLOCK 3
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h2;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h4;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h0;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00000000;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	// CLOCK 4
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h0;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h1;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h2;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00decbfb;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	// CLOCK 5
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h1;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h1;
-	sel_as_1 <= 1'h1;
-	sel_as_2 <= 2'h2;
-	sel_addsub <= 1'h1;
-	sel_temp   <= 2'h1;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00decbfb;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	// CLOCK 6
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h1;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h2;
-	sel_x1_1 <= 2'h2;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h1;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00decbfb;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b1;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b1;
-	#100;
-	// $display("dot <= %h \n", o_dgate);
-
-	// CLOCK 7
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h1;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h3;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h1;
-	sel_x2_2 <= 2'h2;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00decbfb;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h00c924f2;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-	
-	// CLOCK 8
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h3;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h3;	
-	sel_x1_1 <= 2'h2;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h1;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00decbfb;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h00c924f2;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b1;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b1;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-	// $display("dat <= %h \n", o_dgate);
-
-	// CLOCK 9
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h0;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h1;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00decbfb;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h00c924f2;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b1;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b1;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-	// $display("dit <= %h \n", o_dgate);
-
-
-	// CLOCK 10
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 0;
-	sel_i <= 0;
-	sel_f <= 0;
-	sel_o <= 0;
-	sel_h <= 0;
-	sel_t <= 0;
-	sel_state <= 0;
-	sel_dstate <= 0;
-	sel_dout <= 0;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h0;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h1;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr2_a <= 32'h00d98c7e;
-	i_layr2_i <= 32'h00fb2e9c;
-	i_layr2_f <= 32'h00decbfb;
-	i_layr2_o <= 32'h00d99503;
-	i_layr2_h <= 32'h00c59fd3;
-	i_layr2_t <= 32'h01400000;
-	i_layr2_state <= 32'h00c924f2;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b0;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	wr_da2 <= 1'b0;
-	wr_di2 <= 1'b0;
-	wr_df2 <= 1'b1;
-	wr_do2 <= 1'b0;
-	wr_dstate2 <= 1'b1;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b1;
-	acc_do <= 1'b0;
-	#100;
-	// $display("dft = %h \n", o_dgate);
-
-	//////////////// 2 ND TO LAST CELL ///////////////////////
-	repeat(8-1)
+	repeat(7)
 	begin
+		/////////////// START LAYER 2 DELTA ///////////////////
+		////////////// 1 ST  CELL ////////////////////////////
 		rst <= 0;
 		rst_acc <= 0;
 		sel_a <= 0;
@@ -1023,26 +536,20 @@ begin
 		i_layr2_h <= 32'h00c59fd3; 
 		i_layr2_t <= 32'h01400000; 
 		i_layr2_state <= 32'h0184816f; 
-		// d_state <= 32'h00000000;
-		// d_out   <= 32'h00000000;
-		rd_addr_dout2 <= rd_addr_dout2 + 4'd1;
-		rd_addr_dstate2 <= rd_addr_dstate2 + 4'd1;
-		rd_addr_dx2 <= rd_addr_dx2 + 32'd1;
+		
+		// rd_addr_dout2 <= 4'd0;
+		// rd_addr_dstate2 <= 4'd0;
+		// rd_addr_dx2 <= 32'h00000000;
 		wr_da2 <= 1'b0;
 		wr_di2 <= 1'b0;
 		wr_df2 <= 1'b0;
 		wr_do2 <= 1'b0;
 		wr_dstate2 <= 1'b0;
-		wr_addr_da2 <= wr_addr_da2 + 6'd1;
-		wr_addr_di2 <= wr_addr_di2 + 6'd1;
-		wr_addr_df2 <= wr_addr_df2 + 6'd1;
-		wr_addr_do2 <= wr_addr_do2 + 6'd1;
-		wr_addr_dstate2 <= wr_addr_dstate2 + 4'd1;
+		
 		acc_da <= 1'b0;
 		acc_di <= 1'b0;
 		acc_df <= 1'b0;
 		acc_do <= 1'b0;
-		acc_mac <= 1'b0;
 		#100;
 
 		// CLOCK 1
@@ -1487,8 +994,6 @@ begin
 		acc_di <= 1'b0;
 		acc_df <= 1'b0;
 		acc_do <= 1'b0;
-
-		rst_mac <= 1'b1;
 		#100;
 
 		wr_da2 <= 1'b0;
@@ -1500,35 +1005,592 @@ begin
 		acc_di <= 1'b0;
 		acc_df <= 1'b1;
 		acc_do <= 1'b0;
-
-		rst_mac <= 1'b0;
-		acc_mac <= 1'b1;
 		#100;
+		// $display("dft = %h \n", o_dgate);
 
-	end 
-	////////////////// END LAYER 2 DELTA ///////////////////////////
+		//////////////// 2 ND TO LAST CELL ///////////////////////
+		repeat(8-1)
+		begin
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h1;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h0;
+			i_layr2_a <= 32'h00d98c7e; 
+			i_layr2_i <= 32'h00fb2e9c; 
+			i_layr2_f <= 32'h00000000; 
+			i_layr2_o <= 32'h00d99503; 
+			i_layr2_h <= 32'h00c59fd3; 
+			i_layr2_t <= 32'h01400000; 
+			i_layr2_state <= 32'h0184816f; 
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			rd_addr_dout2 <= rd_addr_dout2 + 4'd1;
+			rd_addr_dstate2 <= rd_addr_dstate2 + 4'd1;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			wr_addr_da2 <= wr_addr_da2 + 6'd1;
+			wr_addr_di2 <= wr_addr_di2 + 6'd1;
+			wr_addr_df2 <= wr_addr_df2 + 6'd1;
+			wr_addr_do2 <= wr_addr_do2 + 6'd1;
+			wr_addr_dstate2 <= wr_addr_dstate2 + 4'd1;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			acc_mac <= 1'b0;
+			#100;
 
-	///////////////// START  CALCULATE dX2 /////////////////////////
-	repeat(53-1)
-	begin
-		wr_da2 <= 1'b0;
-		wr_di2 <= 1'b0;
-		wr_df2 <= 1'b0;
-		wr_do2 <= 1'b0;
-		wr_dstate2 <= 1'b0;
-		acc_da <= 1'b0;
-		acc_di <= 1'b0;
-		acc_df <= 1'b0;
-		acc_do <= 1'b0;
+			// CLOCK 1
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h0;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h0;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00000000;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
 
+			// CLOCK 2
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h2;
+			sel_in2 <= 2'h3;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h1;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h3;
+			sel_addsub <= 1'h1;
+			sel_temp   <= 2'h0;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00000000;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+
+			// CLOCK 3
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h2;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h4;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h0;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00000000;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+
+			// CLOCK 4
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h0;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h1;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h2;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00decbfb;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+
+			// CLOCK 5
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h1;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h1;
+			sel_as_1 <= 1'h1;
+			sel_as_2 <= 2'h2;
+			sel_addsub <= 1'h1;
+			sel_temp   <= 2'h1;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00decbfb;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+
+			// CLOCK 6
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h1;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h2;
+			sel_x1_1 <= 2'h2;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h1;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00decbfb;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b1;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b1;
+			#100;
+			// $display("dot <= %h \n", o_dgate);
+
+			// CLOCK 7
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h1;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h3;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h1;
+			sel_x2_2 <= 2'h2;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00decbfb;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h00c924f2;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+			
+			// CLOCK 8
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h3;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h3;	
+			sel_x1_1 <= 2'h2;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h1;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00decbfb;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h00c924f2;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b1;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b1;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+			// $display("dat <= %h \n", o_dgate);
+
+			// CLOCK 9
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h0;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h1;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00decbfb;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h00c924f2;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b1;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b1;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+			// $display("dit <= %h \n", o_dgate);
+
+
+			// CLOCK 10
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 0;
+			sel_i <= 0;
+			sel_f <= 0;
+			sel_o <= 0;
+			sel_h <= 0;
+			sel_t <= 0;
+			sel_state <= 0;
+			sel_dstate <= 0;
+			sel_dout <= 0;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h0;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h1;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr2_a <= 32'h00d98c7e;
+			i_layr2_i <= 32'h00fb2e9c;
+			i_layr2_f <= 32'h00decbfb;
+			i_layr2_o <= 32'h00d99503;
+			i_layr2_h <= 32'h00c59fd3;
+			i_layr2_t <= 32'h01400000;
+			i_layr2_state <= 32'h00c924f2;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+
+			rst_mac <= 1'b1;
+			#100;
+
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b1;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b1;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b1;
+			acc_do <= 1'b0;
+
+			rst_mac <= 1'b0;
+			acc_mac <= 1'b1;
+			#100;
+
+		end 
+		////////////////// END LAYER 2 DELTA ///////////////////////////
+
+		///////////////// START  CALCULATE dX2 /////////////////////////
+		repeat(53-1)
+		begin
+			wr_da2 <= 1'b0;
+			wr_di2 <= 1'b0;
+			wr_df2 <= 1'b0;
+			wr_do2 <= 1'b0;
+			wr_dstate2 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+
+			sel_dgate <= 2'b01;
+			sel_wghts2 <= 3'b001;
+			sel_wght <= 1'b0;
+			acc_mac <= 1'b1;
+
+			rst_mac = 1'b0;
+			wr_dx2 <= 1'b0;
+			
+			#100;
+
+			sel_dgate <= 2'b10;
+			sel_wghts2 <= 3'b010;
+			sel_wght <= 1'b0;
+			acc_mac <= 1'b1;
+
+			wr_dx2 <= 1'b0;
+			#100;
+
+			sel_dgate <= 2'b11;
+			sel_wghts2 <= 3'b011;
+			sel_wght <= 1'b0;
+			acc_mac <= 1'b1;
+
+			wr_dx2 <= 1'b0;
+			#100;
+			
+			sel_dgate <= 2'b00;
+			sel_wghts2 <= 3'b000;
+			sel_wght <= 1'b0;
+			acc_mac <= 1'b1;
+
+			wr_dx2 <= 1'b1;
+
+			rd_layr2_wa <= rd_layr2_wa + 9'd1;
+			rd_layr2_wi <= rd_layr2_wi + 9'd1;
+			rd_layr2_wf <= rd_layr2_wf + 9'd1;
+			rd_layr2_wo <= rd_layr2_wo + 9'd1;
+			#100;	
+
+			rst_mac = 1'b1;
+			wr_dx2 <= 1'b0;
+			wr_addr_dx2 <= wr_addr_dx2 + 9'd1;
+			#100;
+		end
+
+		// Last Repeat to change mux on last cycle
 		sel_dgate <= 2'b01;
 		sel_wghts2 <= 3'b001;
 		sel_wght <= 1'b0;
 		acc_mac <= 1'b1;
 
 		rst_mac = 1'b0;
-		wr_dx2 <= 1'b0;
-		
+		wr_dx2 <= 1'b0;	
 		#100;
 
 		sel_dgate <= 2'b10;
@@ -1557,627 +1619,71 @@ begin
 		rd_layr2_wa <= rd_layr2_wa + 9'd1;
 		rd_layr2_wi <= rd_layr2_wi + 9'd1;
 		rd_layr2_wf <= rd_layr2_wf + 9'd1;
-		rd_layr2_wo <= rd_layr2_wo + 9'd1;
+		rd_layr2_wo <= rd_layr2_wo + 9'd1;	
 		#100;	
 
 		rst_mac = 1'b1;
 		wr_dx2 <= 1'b0;
 		wr_addr_dx2 <= wr_addr_dx2 + 9'd1;
-		#100;
-	end
-
-	// Last Repeat to change mux on last cycle
-	sel_dgate <= 2'b01;
-	sel_wghts2 <= 3'b001;
-	sel_wght <= 1'b0;
-	acc_mac <= 1'b1;
-
-	rst_mac = 1'b0;
-	wr_dx2 <= 1'b0;	
-	#100;
-
-	sel_dgate <= 2'b10;
-	sel_wghts2 <= 3'b010;
-	sel_wght <= 1'b0;
-	acc_mac <= 1'b1;
-
-	wr_dx2 <= 1'b0;
-	#100;
-
-	sel_dgate <= 2'b11;
-	sel_wghts2 <= 3'b011;
-	sel_wght <= 1'b0;
-	acc_mac <= 1'b1;
-
-	wr_dx2 <= 1'b0;
-	#100;
-	
-	sel_dgate <= 2'b00;
-	sel_wghts2 <= 3'b000;
-	sel_wght <= 1'b0;
-	acc_mac <= 1'b1;
-
-	wr_dx2 <= 1'b1;
-
-	rd_layr2_wa <= rd_layr2_wa + 9'd1;
-	rd_layr2_wi <= rd_layr2_wi + 9'd1;
-	rd_layr2_wf <= rd_layr2_wf + 9'd1;
-	rd_layr2_wo <= rd_layr2_wo + 9'd1;	
-	#100;	
-
-	rst_mac = 1'b1;
-	wr_dx2 <= 1'b0;
-	wr_addr_dx2 <= wr_addr_dx2 + 9'd1;
-	sel_wghts2 <= 3'b100;
-	#100;
-	
-	///////////////// START  CALCULATE dOut2 /////////////////////////
-	repeat(8)
-	begin
-		sel_dgate <= 2'b01;
-		sel_wghts2 <= 3'b101;
-		sel_wght <= 1'b0;
-		acc_mac <= 1'b1;
-
-		rst_mac = 1'b0;
-		wr_dx2 <= 1'b0;
-		wr_dout2 <= 1'b0;		
-		#100;
-
-		sel_dgate <= 2'b10;
-		sel_wghts2 <= 3'b110;
-		sel_wght <= 1'b0;
-		acc_mac <= 1'b1;
-
-		wr_dx2 <= 1'b0;
-		wr_dout2 <= 1'b0;
-		#100;
-
-		sel_dgate <= 2'b11;
-		sel_wghts2 <= 3'b111;
-		sel_wght <= 1'b0;
-		acc_mac <= 1'b1;
-
-		wr_dx2 <= 1'b0;
-		wr_dout2 <= 1'b0;
+		sel_wghts2 <= 3'b100;
 		#100;
 		
-		sel_dgate <= 2'b00;
-		sel_wghts2 <= 3'b100;
-		sel_wght <= 1'b0;
-		acc_mac <= 1'b1;
+		///////////////// START  CALCULATE dOut2 /////////////////////////
+		repeat(8)
+		begin
+			sel_dgate <= 2'b01;
+			sel_wghts2 <= 3'b101;
+			sel_wght <= 1'b0;
+			acc_mac <= 1'b1;
 
-		wr_dx2 <= 1'b0;
-		wr_dout2 <= 1'b1;
+			rst_mac = 1'b0;
+			wr_dx2 <= 1'b0;
+			wr_dout2 <= 1'b0;		
+			#100;
 
-		rd_layr2_ua <= rd_layr2_ua + 6'd1;
-		rd_layr2_ui <= rd_layr2_ui + 6'd1;
-		rd_layr2_uf <= rd_layr2_uf + 6'd1;
-		rd_layr2_uo <= rd_layr2_uo + 6'd1;
-		#100;	
-	
-		rst_mac = 1'b1;
-		wr_dx2 <= 1'b0;
-		wr_dout2 <= 1'b0;	
-		wr_addr_dout2 <= wr_addr_dout2 + 4'd1;
-		#100;
-	end
+			sel_dgate <= 2'b10;
+			sel_wghts2 <= 3'b110;
+			sel_wght <= 1'b0;
+			acc_mac <= 1'b1;
 
-	///////////////// START  CALCULATE LAYER 1 DELTA /////////////////////////
-	//////////////// 1 ST CELL //////////////////////////////////////////////
-	rst <= 0;
-	rst_acc <= 1;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h1;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h0;
-	i_layr1_a <= 32'h00d98c7e; 
-	i_layr1_i <= 32'h00fb2e9c; 
-	i_layr1_f <= 32'h00000000; 
-	i_layr1_o <= 32'h00d99503; 
-	// i_layr1_h <= 32'h00c59fd3; 
-	// i_layr1_t <= 32'h01400000; 
-	i_layr1_state <= 32'h0184816f; 
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	rd_addr_dout1 <= 7'd0;
-	rd_addr_dx2 <= 9'd0;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	wr_addr_da1 <= 9'd0;
-	wr_addr_di1 <= 9'd0;
-	wr_addr_df1 <= 9'd0;
-	wr_addr_do1 <= 9'd0;
-	wr_addr_dstate1 <= 7'd53;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
+			wr_dx2 <= 1'b0;
+			wr_dout2 <= 1'b0;
+			#100;
 
-	sel_wght <= 1'b1;
-	#100;
+			sel_dgate <= 2'b11;
+			sel_wghts2 <= 3'b111;
+			sel_wght <= 1'b0;
+			acc_mac <= 1'b1;
 
-	// CLOCK 1
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h0;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h0;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00000000;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
+			wr_dx2 <= 1'b0;
+			wr_dout2 <= 1'b0;
+			#100;
+			
+			sel_dgate <= 2'b00;
+			sel_wghts2 <= 3'b100;
+			sel_wght <= 1'b0;
+			acc_mac <= 1'b1;
 
-	// CLOCK 2
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h2;
-	sel_in2 <= 2'h3;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h1;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h3;
-	sel_addsub <= 1'h1;
-	sel_temp   <= 2'h0;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00000000;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
+			wr_dx2 <= 1'b0;
+			wr_dout2 <= 1'b1;
 
-	// CLOCK 3
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h2;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h4;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h0;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00000000;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
+			rd_layr2_ua <= rd_layr2_ua + 6'd1;
+			rd_layr2_ui <= rd_layr2_ui + 6'd1;
+			rd_layr2_uf <= rd_layr2_uf + 6'd1;
+			rd_layr2_uo <= rd_layr2_uo + 6'd1;
+			#100;	
+		
+			rst_mac = 1'b1;
+			wr_dx2 <= 1'b0;
+			wr_dout2 <= 1'b0;	
+			wr_addr_dout2 <= wr_addr_dout2 + 4'd1;
+			#100;
+		end
 
-	// CLOCK 4
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h0;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h1;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h2;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00decbfb;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	// CLOCK 5
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h1;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h1;
-	sel_as_1 <= 1'h1;
-	sel_as_2 <= 2'h2;
-	sel_addsub <= 1'h1;
-	sel_temp   <= 2'h1;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00decbfb;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	// CLOCK 6
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h1;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h2;
-	sel_x1_1 <= 2'h2;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h1;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00decbfb;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h0184816f;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b1;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b1;
-	#100;
-	// $display("dot <= %h \n", o_dgate);
-
-	// CLOCK 7
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h1;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h3;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h1;
-	sel_x2_2 <= 2'h2;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00decbfb;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h00c924f2;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-	
-	// CLOCK 8
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h3;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h2;
-	sel_in5 <= 3'h3;	
-	sel_x1_1 <= 2'h2;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h1;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00decbfb;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h00c924f2;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b1;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b1;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-	// $display("dat <= %h \n", o_dgate);
-
-	// CLOCK 9
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h0;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h1;
-	sel_x2_2 <= 2'h0;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00decbfb;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h00c924f2;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b1;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b1;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-	// $display("dit <= %h \n", o_dgate);
-
-
-	// CLOCK 10
-	rst <= 0;
-	rst_acc <= 0;
-	sel_a <= 1;
-	sel_i <= 1;
-	sel_f <= 1;
-	sel_o <= 1;
-	sel_h <= 1;
-	sel_t <= 1;
-	sel_state <= 1;
-	sel_dstate <= 1;
-	sel_dout <= 1;
-	sel_in1 <= 2'h0;
-	sel_in2 <= 2'h0;
-	sel_in3 <= 1'h0;
-	sel_in4 <= 2'h0;
-	sel_in5 <= 3'h0;
-	sel_x1_1 <= 2'h0;
-	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h1;
-	sel_as_1 <= 1'h0;
-	sel_as_2 <= 2'h0;
-	sel_addsub <= 1'h0;
-	sel_temp   <= 2'h2;
-	i_layr1_a <= 32'h00d98c7e;
-	i_layr1_i <= 32'h00fb2e9c;
-	i_layr1_f <= 32'h00decbfb;
-	i_layr1_o <= 32'h00d99503;
-	// i_layr1_h <= 32'h00c59fd3;
-	// i_layr1_t <= 32'h01400000;
-	i_layr1_state <= 32'h00c924f2;
-	// d_state <= 32'h00000000;
-	// d_out   <= 32'h00000000;
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b0;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b0;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b0;
-	acc_do <= 1'b0;
-	#100;
-
-	wr_da1 <= 1'b0;
-	wr_di1 <= 1'b0;
-	wr_df1 <= 1'b1;
-	wr_do1 <= 1'b0;
-	wr_dstate1 <= 1'b1;
-	acc_da <= 1'b0;
-	acc_di <= 1'b0;
-	acc_df <= 1'b1;
-	acc_do <= 1'b0;
-	#100;
-	// $display("dft = %h \n", o_dgate);
-
-	//////////////// 2 ND TO LAST CELL //////////////////////
-	repeat(53-1)
-	begin
+		///////////////// START  CALCULATE LAYER 1 DELTA /////////////////////////
+		//////////////// 1 ST CELL //////////////////////////////////////////////
 		rst <= 0;
-		rst_acc <= 0;
+		rst_acc <= 1;
 		sel_a <= 1;
 		sel_i <= 1;
 		sel_f <= 1;
@@ -2203,28 +1709,20 @@ begin
 		i_layr1_i <= 32'h00fb2e9c; 
 		i_layr1_f <= 32'h00000000; 
 		i_layr1_o <= 32'h00d99503; 
-		// i_layr1_h <= 32'h00c59fd3; 
-		// i_layr1_t <= 32'h01400000; 
 		i_layr1_state <= 32'h0184816f; 
-		// d_state <= 32'h00000000;
-		// d_out   <= 32'h00000000;
-		rd_addr_dout1 <= rd_addr_dout1 + 7'd1;
-		rd_addr_dx2 <= rd_addr_dx2 + 9'd1;
+		
 		wr_da1 <= 1'b0;
 		wr_di1 <= 1'b0;
 		wr_df1 <= 1'b0;
 		wr_do1 <= 1'b0;
 		wr_dstate1 <= 1'b0;
-		wr_addr_da1 <= wr_addr_da1 + 9'd1;
-		wr_addr_di1 <= wr_addr_di1 + 9'd1;
-		wr_addr_df1 <= wr_addr_df1 + 9'd1;
-		wr_addr_do1 <= wr_addr_do1 + 9'd1;
-		wr_addr_dstate1 <= wr_addr_dstate1 + 7'd1;
+		
 		acc_da <= 1'b0;
 		acc_di <= 1'b0;
 		acc_df <= 1'b0;
 		acc_do <= 1'b0;
-		acc_mac <= 1'b0;
+
+		sel_wght <= 1'b1;
 		#100;
 
 		// CLOCK 1
@@ -2669,8 +2167,6 @@ begin
 		acc_di <= 1'b0;
 		acc_df <= 1'b0;
 		acc_do <= 1'b0;
-
-		rst_mac <= 1'b1;
 		#100;
 
 		wr_da1 <= 1'b0;
@@ -2682,61 +2178,647 @@ begin
 		acc_di <= 1'b0;
 		acc_df <= 1'b1;
 		acc_do <= 1'b0;
-
-		rst_mac <= 1'b0;
-		acc_mac <= 1'b1;
+		rd_addr_dx2 <= rd_addr_dx2 + 9'd1;
 		#100;
+		// $display("dft = %h \n", o_dgate);
 
-	end 
-	////////////////// END LAYER 1 DELTA ///////////////////////////
+		//////////////// 2 ND TO LAST CELL //////////////////////
+		repeat(53-1)
+		begin
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h1;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h0;
+			i_layr1_a <= 32'h00d98c7e; 
+			i_layr1_i <= 32'h00fb2e9c; 
+			i_layr1_f <= 32'h00000000; 
+			i_layr1_o <= 32'h00d99503; 
+			// i_layr1_h <= 32'h00c59fd3; 
+			// i_layr1_t <= 32'h01400000; 
+			i_layr1_state <= 32'h0184816f; 
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			rd_addr_dout1 <= rd_addr_dout1 + 7'd1;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			wr_addr_da1 <= wr_addr_da1 + 9'd1;
+			wr_addr_di1 <= wr_addr_di1 + 9'd1;
+			wr_addr_df1 <= wr_addr_df1 + 9'd1;
+			wr_addr_do1 <= wr_addr_do1 + 9'd1;
+			wr_addr_dstate1 <= wr_addr_dstate1 + 7'd1;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			acc_mac <= 1'b0;
+			#100;
 
-	///////////////// START  CALCULATE dOut2 /////////////////////////
-	repeat(53)
-	begin
-		sel_dgate <= 2'b01;
-		sel_wghts1 <= 2'b01;
-		sel_wght <= 1'b1;
-		acc_mac <= 1'b1;
+			// CLOCK 1
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h0;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h0;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00000000;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
 
-		rst_mac = 1'b0;
-		wr_dout1 <= 1'b0;		
-		#100;
+			// CLOCK 2
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h2;
+			sel_in2 <= 2'h3;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h1;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h3;
+			sel_addsub <= 1'h1;
+			sel_temp   <= 2'h0;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00000000;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
 
-		sel_dgate <= 2'b10;
-		sel_wghts1 <= 2'b10;
-		sel_wght <= 1'b1;
-		acc_mac <= 1'b1;
+			// CLOCK 3
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h2;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h4;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h0;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00000000;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
 
-		wr_dout1 <= 1'b0;
-		#100;
+			// CLOCK 4
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h0;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h1;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h2;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00decbfb;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
 
-		sel_dgate <= 2'b11;
-		sel_wghts1 <= 2'b11;
-		sel_wght <= 1'b1;
-		acc_mac <= 1'b1;
+			// CLOCK 5
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h1;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h1;
+			sel_as_1 <= 1'h1;
+			sel_as_2 <= 2'h2;
+			sel_addsub <= 1'h1;
+			sel_temp   <= 2'h1;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00decbfb;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
 
-		wr_dout1 <= 1'b0;
-		#100;
+			// CLOCK 6
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h1;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h2;
+			sel_x1_1 <= 2'h2;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h1;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00decbfb;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h0184816f;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b1;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b1;
+			#100;
+			// $display("dot <= %h \n", o_dgate);
+
+			// CLOCK 7
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h1;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h3;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h1;
+			sel_x2_2 <= 2'h2;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00decbfb;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h00c924f2;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+			
+			// CLOCK 8
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h3;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h2;
+			sel_in5 <= 3'h3;	
+			sel_x1_1 <= 2'h2;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h1;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00decbfb;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h00c924f2;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b1;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b1;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+			// $display("dat <= %h \n", o_dgate);
+
+			// CLOCK 9
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h0;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h1;
+			sel_x2_2 <= 2'h0;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00decbfb;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h00c924f2;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b1;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b1;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+			#100;
+			// $display("dit <= %h \n", o_dgate);
+
+
+			// CLOCK 10
+			rst <= 0;
+			rst_acc <= 0;
+			sel_a <= 1;
+			sel_i <= 1;
+			sel_f <= 1;
+			sel_o <= 1;
+			sel_h <= 1;
+			sel_t <= 1;
+			sel_state <= 1;
+			sel_dstate <= 1;
+			sel_dout <= 1;
+			sel_in1 <= 2'h0;
+			sel_in2 <= 2'h0;
+			sel_in3 <= 1'h0;
+			sel_in4 <= 2'h0;
+			sel_in5 <= 3'h0;
+			sel_x1_1 <= 2'h0;
+			sel_x1_2 <= 1'h0;
+			sel_x2_2 <= 2'h1;
+			sel_as_1 <= 1'h0;
+			sel_as_2 <= 2'h0;
+			sel_addsub <= 1'h0;
+			sel_temp   <= 2'h2;
+			i_layr1_a <= 32'h00d98c7e;
+			i_layr1_i <= 32'h00fb2e9c;
+			i_layr1_f <= 32'h00decbfb;
+			i_layr1_o <= 32'h00d99503;
+			// i_layr1_h <= 32'h00c59fd3;
+			// i_layr1_t <= 32'h01400000;
+			i_layr1_state <= 32'h00c924f2;
+			// d_state <= 32'h00000000;
+			// d_out   <= 32'h00000000;
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b0;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b0;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+
+			rst_mac <= 1'b1;
+			#100;
+
+			wr_da1 <= 1'b0;
+			wr_di1 <= 1'b0;
+			wr_df1 <= 1'b1;
+			wr_do1 <= 1'b0;
+			wr_dstate1 <= 1'b1;
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b1;
+			acc_do <= 1'b0;
+
+			rst_mac <= 1'b0;
+			acc_mac <= 1'b1;
+			rd_addr_dx2 <= rd_addr_dx2 + 9'd1;
+			#100;
+
+		end 
+		////////////////// END LAYER 1 DELTA ///////////////////////////
+
+		///////////////// START  CALCULATE dOut2 /////////////////////////
+		repeat(53)
+		begin
+			acc_da <= 1'b0;
+			acc_di <= 1'b0;
+			acc_df <= 1'b0;
+			acc_do <= 1'b0;
+
+			sel_dgate <= 2'b01;
+			sel_wghts1 <= 2'b01;
+			sel_wght <= 1'b1;
+			acc_mac <= 1'b1;
+
+			rst_mac = 1'b0;
+			wr_dout1 <= 1'b0;		
+			#100;
+
+			sel_dgate <= 2'b10;
+			sel_wghts1 <= 2'b10;
+			sel_wght <= 1'b1;
+			acc_mac <= 1'b1;
+
+			wr_dout1 <= 1'b0;
+			#100;
+
+			sel_dgate <= 2'b11;
+			sel_wghts1 <= 2'b11;
+			sel_wght <= 1'b1;
+			acc_mac <= 1'b1;
+
+			wr_dout1 <= 1'b0;
+			#100;
+			
+			sel_dgate <= 2'b00;
+			sel_wghts1 <= 2'b00;
+			sel_wght <= 1'b1;
+			acc_mac <= 1'b1;
+
+			wr_dout1 <= 1'b1;
+
+			rd_layr1_ua <= rd_layr1_ua + 6'd1;
+			rd_layr1_ui <= rd_layr1_ui + 6'd1;
+			rd_layr1_uf <= rd_layr1_uf + 6'd1;
+			rd_layr1_uo <= rd_layr1_uo + 6'd1;
+			#100;	
 		
+			rst_mac = 1'b1;
+			wr_dout1 <= 1'b0;	
+			wr_addr_dout1 <= wr_addr_dout1 + 4'd1;
+			#100;
+		end
+
+		//// CONDITIONING FOR NEXT TIME STEP
+		rst <= 1;
+		rst_acc <= 1;
+
 		sel_dgate <= 2'b00;
+		sel_wghts2 <= 3'b000;
 		sel_wghts1 <= 2'b00;
-		sel_wght <= 1'b1;
-		acc_mac <= 1'b1;
+		sel_wght <= 1'b0;
+		acc_mac <= 1'b0;
 
-		wr_dout1 <= 1'b1;
+		rd_layr2_wa <= 9'd0;
+		rd_layr2_wi <= 9'd0;
+		rd_layr2_wf <= 9'd0;
+		rd_layr2_wo <= 9'd0;
+		rd_layr2_ua <= 6'd0;
+		rd_layr2_ui <= 6'd0;
+		rd_layr2_uf <= 6'd0;
+		rd_layr2_uo <= 6'd0;
 
-		rd_layr1_ua <= rd_layr1_ua + 6'd1;
-		rd_layr1_ui <= rd_layr1_ui + 6'd1;
-		rd_layr1_uf <= rd_layr1_uf + 6'd1;
-		rd_layr1_uo <= rd_layr1_uo + 6'd1;
-		#100;	
-	
-		rst_mac = 1'b1;
-		wr_dout1 <= 1'b0;	
-		wr_addr_dout1 <= wr_addr_dout1 + 4'd1;
+		rd_layr1_ua <= 6'd0;
+		rd_layr1_ui <= 6'd0;
+		rd_layr1_uf <= 6'd0;
+		rd_layr1_uo <= 6'd0;
+
+		if (tstep[0] == 1'b1) 
+		begin
+			rd_addr_dstate2 <= 4'd0;
+			rd_addr_dout2 <= 4'd0;
+			rd_addr_dout1 <= 7'd0;
+			rd_addr_dstate1 <= 7'd0;
+
+			wr_addr_dstate2 <= 4'd8;
+			wr_addr_dout2 <= 4'd8;
+			wr_addr_dout1 <= 7'd53;
+			wr_addr_dstate1 <= 7'd53;
+		end
+		else 
+		begin
+			rd_addr_dstate2 <= 4'd8;
+			rd_addr_dout2 <= 4'd8;
+			rd_addr_dout1 <= 7'd53;
+			rd_addr_dstate1 <= 7'd53;
+
+			wr_addr_dstate2 <= 4'd0;
+			wr_addr_dout2 <= 4'd0;
+			wr_addr_dout1 <= 7'd0;
+			wr_addr_dstate1 <= 7'd0;
+		end
+
+		wr_dx2 <= 1'b0;
+
+		// rd_addr_dx2 <= rd_addr_dx2 + 9'd53;
+		// wr_addr_dx2 <= wr_addr_dx2 + 9'd53;
+
+		// wr_addr_da2 <= wr_addr_da2 + 6'd8;
+		// wr_addr_di2 <= wr_addr_di2 + 6'd8;
+		// wr_addr_df2 <= wr_addr_df2 + 6'd8;
+		// wr_addr_do2 <= wr_addr_do2 + 6'd8;
+
+		// wr_addr_da1 <= wr_addr_da1 + 9'd53;
+		// wr_addr_di1 <= wr_addr_di1 + 9'd53;
+		// wr_addr_df1 <= wr_addr_df1 + 9'd53;
+		// wr_addr_do1 <= wr_addr_do1 + 9'd53;
+
+		tstep <= tstep + 3'd1;
 		#100;
-	end
 
+	end
 end
 	
 always 
