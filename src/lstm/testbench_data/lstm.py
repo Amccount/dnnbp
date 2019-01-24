@@ -404,18 +404,18 @@ if __name__ == "__main__":
 
 	from numpy import genfromtxt
 	
-	W_a = genfromtxt('Forward_Simul2\\sigmoidTrained2\\wa', delimiter=',')
-	W_i = genfromtxt('Forward_Simul2\\sigmoidTrained2\\wi', delimiter=',')
-	W_f = genfromtxt('Forward_Simul2\\sigmoidTrained2\\wf', delimiter=',')
-	W_o = genfromtxt('Forward_Simul2\\sigmoidTrained2\\wo', delimiter=',')
-	U_a = genfromtxt('Forward_Simul2\\sigmoidTrained2\\ua', delimiter=',')
-	U_i = genfromtxt('Forward_Simul2\\sigmoidTrained2\\ui', delimiter=',')
-	U_f = genfromtxt('Forward_Simul2\\sigmoidTrained2\\uf', delimiter=',')
-	U_o = genfromtxt('Forward_Simul2\\sigmoidTrained2\\uo', delimiter=',')
-	B_a = genfromtxt('Forward_Simul2\\sigmoidTrained2\\ba', delimiter=',')
-	B_i = genfromtxt('Forward_Simul2\\sigmoidTrained2\\bi', delimiter=',')
-	B_f = genfromtxt('Forward_Simul2\\sigmoidTrained2\\bf', delimiter=',')
-	B_o = genfromtxt('Forward_Simul2\\sigmoidTrained2\\bo', delimiter=',')
+	W_a = genfromtxt('wa_1', delimiter=',')
+	W_i = genfromtxt('wi_1', delimiter=',')
+	W_f = genfromtxt('wf_1', delimiter=',')
+	W_o = genfromtxt('wo_1', delimiter=',')
+	U_a = genfromtxt('ua_1', delimiter=',')
+	U_i = genfromtxt('ui_1', delimiter=',')
+	U_f = genfromtxt('uf_1', delimiter=',')
+	U_o = genfromtxt('uo_1', delimiter=',')
+	B_a = genfromtxt('ba_1', delimiter=',')
+	B_i = genfromtxt('bi_1', delimiter=',')
+	B_f = genfromtxt('bf_1', delimiter=',')
+	B_o = genfromtxt('bo_1', delimiter=',')
 
 	WA = []
 	WI = []

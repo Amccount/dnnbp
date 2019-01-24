@@ -15,7 +15,7 @@ module memory_cell(clk, rst, wr_a, addr_a, addr_b, i_a, o_a, o_b);
 // parameters
 parameter ADDR = 12;
 parameter WIDTH = 32;
-parameter NUM = 53*53;
+parameter NUM = 53;
 parameter TIMESTEP = 1;
 parameter FILENAME = "layer_act.list";
 
