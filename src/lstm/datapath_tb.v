@@ -15,7 +15,7 @@ parameter LAYR2_H = "layer2_h.list";
 parameter LAYR2_C = "layer2_c.list";
 
 // common ports
-reg clk, rst, acc_x_1, acc_h_1, acc_x_2, acc_h_2;
+reg clk, rst, rst_2, acc_x_1, acc_h_1, acc_x_2, acc_h_2;
 
 // control ports
 reg [11:0] addr_x1;
@@ -61,7 +61,7 @@ reg [11:0] wr_addr_c2;
 reg wr_layr2;
 reg [11:0] rd_addr_layr2;
 reg [11:0] wr_addr_layr2;
-reg [11:0] lstm;
+reg [11:0] lstm, lstm_2;
 reg [11:0] timestep;
 
 
@@ -81,6 +81,7 @@ reg [11:0] timestep;
 		) inst_datapath (
 			.clk           (clk),
 			.rst           (rst),
+			.rst_2 	       (rst_2),
 			.acc_x_1       (acc_x_1),
 			.acc_h_1       (acc_h_1), 			
 			.acc_x_2       (acc_x_2), 
@@ -130,11 +131,13 @@ initial
 begin
 	clk = 1;
 	rst <= 1;
+	rst_2 <= 1;
 	acc_x_1 <=0;
 	acc_h_1 <=0;
 	lstm <= 12'd0;
+	lstm_2 <= 12'd0;
 	timestep <=12'd0;
-	addr_x1 <= 32'd0; 
+	addr_x1 <= 12'd0; 
 	rd_addr_h1 <= 12'd0; 
 	rd_addr_c1 <= 12'd0;
 	wr_addr_h1 <= 12'd0; 
@@ -143,16 +146,36 @@ begin
 	rd_addr_b_1 <= 12'd0;
 	rd_addr_u_1 <= 12'd0;
 	wr_c1 <=0;
-	#100
+	#100;
 	rst <=0;
-	#100
+	#100;
 
 	//repeat until 7 time step
+
 	repeat (7)
 	begin
 		timestep <= timestep +1 ;
+		rd_addr_w_1 <= 12'd0;
+		rd_addr_b_1 <= 12'd0;
+		rd_addr_u_1 <= 12'd0;
+		wr_addr_h1 <= (timestep-1)*53;
+		rd_addr_h1 <= 12'd0; 
+		rd_addr_c1 <= 12'd0;
+		wr_addr_h1 <= 12'd0; 
+		lstm <= 12'd0;
+		lstm_2 <= 12'd0;
+		acc_x_2 <=0;
+		acc_h_2 <=0;
+		rd_addr_h2 <= 12'd0; 
+		rd_addr_c2 <= 12'd0;
+		wr_addr_h2 <= 12'd0; 
+		wr_addr_c2 <= 12'd0;
+		rd_addr_w_2 <= 12'd0;
+		rd_addr_b_2 <= 12'd0;
+		rd_addr_u_2 <= 12'd0;
+		#100
 
-		// calculating h and c on 1 time step
+		// calculating h and c on 1 time step on first layer
 		repeat (53)
 		begin
 			lstm <= lstm +1;
@@ -163,7 +186,6 @@ begin
 			begin
 				addr_x1 <= addr_x1+1;
 				rd_addr_w_1 <= rd_addr_w_1+1;
-				rd_addr_b_1 <= rd_addr_b_1+1;
 				rd_addr_u_1 <= rd_addr_u_1+1;
 				wr_addr_h1 <= wr_addr_h1+1;
 				acc_x_1 <=1;
@@ -173,7 +195,7 @@ begin
 
 			acc_x_1 <=1;
 			acc_h_1 <=1;
-			addr_x1 <=12'd0;
+			addr_x1 <=(timestep-1)*53;
 			#100;
 
 			acc_x_1<=0;
@@ -199,15 +221,94 @@ begin
 			#100;
 			wr_h1 <=0;
 			wr_c1 <=0;
-			#100
+			rst <=1;
 			wr_addr_h1 <= (timestep-1)*53;
-			addr_x1 <= (timestep-1)*53;
-			// rd_addr_w_1 <= (timestep-1)*53
-			// rd_addr_b_1 <= 12'd0;
-			// rd_addr_u_1 <= 12'd0;
+			wr_addr_c1 <= lstm;
+			rd_addr_b_1 <= lstm;
+			rd_addr_w_1 <= rd_addr_w_1 + 1;
+			rd_addr_u_1 <= rd_addr_u_1 + 1;
 			#100;
-			// h(i) and state(i) are stored here
-		end 
+			rst <=0;
+			#100;	
+                       // h(i) and state(i) are stored here
+		end
+
+
+		rst_2 <=0;
+		rst <=1;
+		wr_addr_h1 <= (53*timestep) + lstm_2; 
+		wr_h2 <=0;
+	    #100
+
+		// calculating h and c on 1 time step on second layer
+		repeat (8)
+		begin
+			lstm_2 <= lstm_2 +1;
+			// obtaining h on each cell
+			repeat (7)
+			begin
+				wr_addr_h1 <= wr_addr_h1+1;
+				rd_addr_w_2 <= rd_addr_w_2+1;
+				rd_addr_u_2 <= rd_addr_u_2+1;
+				wr_addr_h2 <= wr_addr_h2+1;
+				acc_x_2 <=1;
+				acc_h_2 <=1;
+				#100;
+			end
+
+			acc_x_2<=1;
+			acc_h_2<=1;
+			#100
+
+			repeat (44)
+			begin
+				wr_addr_h1 <= wr_addr_h1+1;
+				rd_addr_w_2 <= rd_addr_w_2+1;
+				acc_x_2 <=1;
+				acc_h_2 <=0;
+				#100;
+			end
+
+			acc_x_2 <=1;
+			wr_addr_h1 <=timestep*53;
+			#100;
+
+			acc_x_2<=0;
+			acc_h_2<=0;
+
+			#100
+
+			//enable write h
+			wr_h2 <=1;
+			wr_addr_h2 <= (53*timestep) +lstm_2-1; //write 
+
+			//enable write state
+			wr_c2 <= 1; 
+			wr_addr_c2 <= (53*timestep) + lstm_2-1;
+			
+			// wr_x2 <= 1;
+			// rd_addr_x2 <= 9'd0; wr_addr_x2 <= 9'd0;
+			// wr_h2 <= 1; 
+			// rd_addr_h2 <= 9'd0; wr_addr_h2 <= 9'd8;
+			// wr_c2 <= 1;
+			// rd_addr_c2 <= 9'd0; wr_addr_c2 <= 9'd8;
+			
+			#100;
+			wr_h2 <=0;
+			wr_c2 <=0;
+			rst_2 <=1;
+			wr_addr_h2 <= (timestep-1)*53;
+			wr_addr_c2 <= lstm_2;
+			rd_addr_b_2 <= lstm_2;
+			wr_addr_h1 <= timestep*53 ;
+			rd_addr_w_2 <= rd_addr_w_2 + 1;
+			rd_addr_u_2 <= rd_addr_u_2 + 1;
+			#100;
+			rst_2 <=0;
+			#100;	
+                       // h(i) and state(i) are stored here
+		end
+
 
 	end
 

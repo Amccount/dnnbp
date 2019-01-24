@@ -46,7 +46,7 @@ begin
     if (wr_a)
 	begin
 		memory[addr_a]<=i_a;
-		o_a <= memory[addr_a];
+		//o_a <= memory[addr_a];
 	end
 	else 
 	begin
