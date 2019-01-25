@@ -15,6 +15,8 @@ module lstm_cell (clk, rst, acc_x, acc_h, i_x, i_h, i_prev_state,
 i_w_a, i_w_i, i_w_f, i_w_o,
 i_u_a, i_u_i, i_u_f, i_u_o,  
 i_b_a, i_b_i, i_b_f, i_b_o,
+o_mul_1, o_mul_2, o_mul_3, o_mul_4,
+o_mul_5, o_mul_6, o_mul_7, o_mul_8,
 o_a, o_i, o_f, o_o, o_c, o_h);
 
 // parameters
@@ -48,6 +50,15 @@ input signed [WIDTH-1:0] i_b_f;
 input signed [WIDTH-1:0] i_b_o;
 
 // output ports
+output signed [WIDTH-1:0] o_mul_1;
+output signed [WIDTH-1:0] o_mul_2;
+output signed [WIDTH-1:0] o_mul_3;
+output signed [WIDTH-1:0] o_mul_4;
+output signed [WIDTH-1:0] o_mul_5;
+output signed [WIDTH-1:0] o_mul_6;
+output signed [WIDTH-1:0] o_mul_7;
+output signed [WIDTH-1:0] o_mul_8;
+
 output signed [WIDTH-1:0] o_c;
 output signed [WIDTH-1:0] o_h;
 output signed [WIDTH-1:0] o_a;
@@ -78,16 +89,18 @@ act_tanh #(
 			.WIDTH(WIDTH),
 			.FRAC(FRAC)
 		) inst_act_tanh (
-			.clk (clk),
-			.rst (rst),
+			.clk   (clk),
+			.rst   (rst),
 			.acc_x (acc_x),
 			.acc_h (acc_h),
-			.i_x (i_x),
-			.i_w (i_w_a),
-			.i_h (i_h),
-			.i_u (i_u_a),
-			.i_b (i_b_a),
-			.o   (temp_a)
+			.i_x   (i_x),
+			.i_w   (i_w_a),
+			.i_h   (i_h),
+			.i_u   (i_u_a),
+			.i_b   (i_b_a),
+			.o_mul_1 (o_mul_1),
+			.o_mul_2 (o_mul_2),
+			.o_act   (temp_a)
 		);
 
 // Input gate
@@ -95,16 +108,18 @@ act_sigmoid #(
 			.WIDTH(WIDTH),
 			.FRAC(FRAC)
 		) inst_perceptron_i (
-			.clk (clk),
-			.rst (rst),
+			.clk   (clk),
+			.rst   (rst),
 			.acc_x (acc_x),
 			.acc_h (acc_h),
-			.i_x (i_x),
-			.i_w (i_w_i),
-			.i_h (i_h),
-			.i_u (i_u_i),
-			.i_b (i_b_i),
-			.o   (temp_i)
+			.i_x   (i_x),
+			.i_w   (i_w_i),
+			.i_h   (i_h),
+			.i_u   (i_u_i),
+			.i_b   (i_b_i),
+			.o_mul_1 (o_mul_3),
+			.o_mul_2 (o_mul_4),
+			.o_act   (temp_i)
 		);
 
 // Forget gate
@@ -112,16 +127,18 @@ act_sigmoid #(
 			.WIDTH(WIDTH),
 			.FRAC(FRAC)
 		) inst_perceptron_f (
-			.clk (clk),
-			.rst (rst),
+			.clk   (clk),
+			.rst   (rst),
 			.acc_x (acc_x),
 			.acc_h (acc_h),
-			.i_x (i_x),
-			.i_w (i_w_f),
-			.i_h (i_h),
-			.i_u (i_u_f),
-			.i_b (i_b_f),
-			.o   (temp_f)
+			.i_x   (i_x),
+			.i_w   (i_w_f),
+			.i_h   (i_h),
+			.i_u   (i_u_f),
+			.i_b   (i_b_f),
+			.o_mul_1 (o_mul_5),
+			.o_mul_2 (o_mul_6),
+			.o_act   (temp_f)
 		);
 
 // Output gate
@@ -129,16 +146,18 @@ act_sigmoid #(
 			.WIDTH(WIDTH),
 			.FRAC(FRAC)
 		) inst_perceptron_o (
-			.clk (clk),
-			.rst (rst),
+			.clk   (clk),
+			.rst   (rst),
 			.acc_x (acc_x),
 			.acc_h (acc_h),
-			.i_x (i_x),
-			.i_w (i_w_o),
-			.i_h (i_h),
-			.i_u (i_u_o),
-			.i_b (i_b_o),
-			.o   (temp_o)
+			.i_x   (i_x),
+			.i_w   (i_w_o),
+			.i_h   (i_h),
+			.i_u   (i_u_o),
+			.i_b   (i_b_o),
+			.o_mul_1 (o_mul_7),
+			.o_mul_2 (o_mul_8),
+			.o_act   (temp_o)
 		);
 
 // Pipeline register after activation

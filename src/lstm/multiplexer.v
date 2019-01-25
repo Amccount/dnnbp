@@ -11,9 +11,16 @@ input signed [WIDTH-1:0] i_b;
 input sel;
 
 // output ports
-output signed [WIDTH-1:0] o;
+output reg signed [WIDTH-1:0] o;
 
-assign o = sel ? i_b : i_a;
+always @*
+begin
+    if (sel==1'b1) 
+        o <= i_b;
+    else
+        o <= i_a;
+end
+
  
 endmodule
  

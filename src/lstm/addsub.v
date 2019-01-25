@@ -19,13 +19,19 @@ input [WIDTH-1:0] i_a;
 input [WIDTH-1:0] i_b;
 
 // output ports
-output[WIDTH-1:0] o;
+output reg [WIDTH-1:0] o;
 
 // control ports
 input sel;
 
+always @*
+begin
+    if (sel==1'b1)  
+        o <= i_a+i_b;
+    else
+        o <= i_a-i_b;
+end
 
-assign o =  sel ? i_a + i_b : i_a - i_b;
 
 endmodule
 
