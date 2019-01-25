@@ -104,14 +104,6 @@ wire signed [WIDTH-1:0] o_mem_o1, o_mem_o2;
 
 wire signed [WIDTH-1:0] data_x2;
 
-wire signed [WIDTH-1:0] w_a1;
-wire signed [WIDTH-1:0] w_i1;
-wire signed [WIDTH-1:0] w_f1;
-wire signed [WIDTH-1:0] w_o1;
-wire signed [WIDTH-1:0] w_a2;
-wire signed [WIDTH-1:0] w_i2;
-wire signed [WIDTH-1:0] w_f2;
-wire signed [WIDTH-1:0] w_o2;
 wire signed [WIDTH-1:0] w_a_1;
 wire signed [WIDTH-1:0] w_i_1;
 wire signed [WIDTH-1:0] w_f_1;
@@ -136,10 +128,6 @@ wire signed [WIDTH-1:0] b_a_2;
 wire signed [WIDTH-1:0] b_i_2;
 wire signed [WIDTH-1:0] b_f_2;
 wire signed [WIDTH-1:0] b_o_2;
-wire signed [WIDTH-1:0] b_a1, b_a2;
-wire signed [WIDTH-1:0] b_i1, b_i2;
-wire signed [WIDTH-1:0] b_f1, b_f2;
-wire signed [WIDTH-1:0] b_o1, b_o2;
 wire signed [WIDTH-1:0] c1, c2;
 wire signed [WIDTH-1:0] h1, h2;
 wire signed [WIDTH-1:0] a1, a2;
@@ -152,17 +140,23 @@ wire signed [WIDTH-1:0] o1, o2;
 
 // Input Memory
 // out: data (53*WIDTH)
-memory_x #(
-		.WIDTH(WIDTH),
-		.NUM(LAYR1_INPUT),
-		.TIMESTEP(TIMESTEP),
-		.FILENAME(LAYR1_X)
-	) mem_x1 (
-		.clk  (clk),
-		.rst  (rst),
-		.addr (addr_x1),
-		.data (data_x1)
-	);
+
+memory_cell #(
+			.WIDTH(WIDTH),
+			.NUM(LAYR1_INPUT),
+			.TIMESTEP(TIMESTEP),
+			.FILENAME(LAYR1_X)
+		) mem_x1(
+			.clk    (clk),
+			.rst    (rst),
+			.wr_a   (),
+			.addr_a (),
+			.addr_b (addr_x1),
+			.i_a    (),
+			.o_a    (),
+			.o_b    (data_x1)
+);
+
 
 // LAYER 1 Output Memory
 // in: i (WIDTH)
@@ -180,7 +174,6 @@ memory_cell #(
 			.addr_a (wr_addr_h1),
 			.addr_b (rd_addr_h1),
 			.i_a    (i_mem_h1),
-			.i_b    (),
 			.o_a    (o_mem_h1_a),
 			.o_b    (o_mem_h1_b)
 );
@@ -199,7 +192,6 @@ memory_cell #(
 		.addr_a (wr_addr_w_1),
 		.addr_b (rd_addr_w_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (w_a_1)
 	);
@@ -216,7 +208,6 @@ memory_cell #(
 		.addr_a (wr_addr_w_1),
 		.addr_b (rd_addr_w_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (w_i_1)
 	);
@@ -233,7 +224,6 @@ memory_cell #(
 		.addr_a (wr_addr_w_1),
 		.addr_b (rd_addr_w_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (w_f_1)
 	);
@@ -250,7 +240,6 @@ memory_cell #(
 		.addr_a (wr_addr_w_1),
 		.addr_b (rd_addr_w_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (w_o_1)
 	);
@@ -267,7 +256,6 @@ memory_cell #(
 		.addr_a (wr_addr_u_1),
 		.addr_b (rd_addr_u_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (u_a_1)
 	);
@@ -284,7 +272,6 @@ memory_cell #(
 		.addr_a (wr_addr_u_1),
 		.addr_b (rd_addr_u_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (u_i_1)
 	);
@@ -301,7 +288,6 @@ memory_cell #(
 		.addr_a (wr_addr_u_1),
 		.addr_b (rd_addr_u_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (u_f_1)
 	);
@@ -318,7 +304,6 @@ memory_cell #(
 		.addr_a (wr_addr_u_1),
 		.addr_b (rd_addr_u_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (u_o_1)
 	);
@@ -335,7 +320,6 @@ memory_cell #(
 		.addr_a (wr_addr_b_1),
 		.addr_b (rd_addr_b_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (b_a_1)
 	);
@@ -352,7 +336,6 @@ memory_cell #(
 		.addr_a (wr_addr_b_1),
 		.addr_b (rd_addr_b_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (b_i_1)
 	);
@@ -369,7 +352,6 @@ memory_cell #(
 		.addr_a (wr_addr_b_1),
 		.addr_b (rd_addr_b_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (b_f_1)
 	);
@@ -386,7 +368,6 @@ memory_cell #(
 		.addr_a (wr_addr_b_1),
 		.addr_b (rd_addr_b_1),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (b_o_1)
 	);
@@ -422,7 +403,6 @@ memory_cell #(
 			.addr_a (wr_addr_c1),
 			.addr_b (rd_addr_c1),
 			.i_a    (i_mem_c1),
-			.i_b    (),
 			.o_a    (prev_c1),
 			.o_b    ()
 		);
@@ -485,7 +465,6 @@ memory_cell #(
 		.addr_a (wr_addr_act_1),
 		.addr_b (),
 		.i_a    (a1),
-		.i_b    (),
 		.o_a    (o_mem_a1),
 		.o_b    ()
 	);
@@ -503,7 +482,6 @@ memory_cell #(
 		.addr_a (wr_addr_act_1),
 		.addr_b (),
 		.i_a    (f1),
-		.i_b    (),
 		.o_a    (o_mem_f1),
 		.o_b    ()
 	);
@@ -521,7 +499,6 @@ memory_cell #(
 		.addr_a (wr_addr_act_1),
 		.addr_b (),
 		.i_a    (i1),
-		.i_b    (),
 		.o_a    (o_mem_i1),
 		.o_b    ()
 	);
@@ -538,7 +515,6 @@ memory_cell #(
 		.addr_a (wr_addr_act_1),
 		.addr_b (),
 		.i_a    (o1),
-		.i_b    (),
 		.o_a    (o_mem_o1),
 		.o_b    ()
 	);
@@ -589,7 +565,6 @@ memory_cell #(
 		.addr_a (wr_addr_w_2),
 		.addr_b (rd_addr_w_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (w_a_2)
 	);
@@ -606,7 +581,6 @@ memory_cell #(
 		.addr_a (wr_addr_w_2),
 		.addr_b (rd_addr_w_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (w_i_2)
 	);
@@ -623,7 +597,6 @@ memory_cell #(
 		.addr_a (wr_addr_w_2),
 		.addr_b (rd_addr_w_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (w_f_2)
 	);
@@ -640,7 +613,6 @@ memory_cell #(
 		.addr_a (wr_addr_w_2),
 		.addr_b (rd_addr_w_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (w_o_2)
 	);
@@ -657,7 +629,6 @@ memory_cell #(
 		.addr_a (wr_addr_u_2),
 		.addr_b (rd_addr_u_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (u_a_2)
 	);
@@ -674,7 +645,6 @@ memory_cell #(
 		.addr_a (wr_addr_u_2),
 		.addr_b (rd_addr_u_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (u_i_2)
 	);
@@ -691,7 +661,6 @@ memory_cell #(
 		.addr_a (wr_addr_u_2),
 		.addr_b (rd_addr_u_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (u_f_2)
 	);
@@ -708,7 +677,6 @@ memory_cell #(
 		.addr_a (wr_addr_u_2),
 		.addr_b (rd_addr_u_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (u_o_2)
 	);
@@ -725,7 +693,6 @@ memory_cell #(
 		.addr_a (wr_addr_b_2),
 		.addr_b (rd_addr_b_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (b_a_2)
 	);
@@ -742,7 +709,6 @@ memory_cell #(
 		.addr_a (wr_addr_b_2),
 		.addr_b (rd_addr_b_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (b_i_2)
 	);
@@ -759,7 +725,6 @@ memory_cell #(
 		.addr_a (wr_addr_b_2),
 		.addr_b (rd_addr_b_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (b_f_2)
 	);
@@ -776,7 +741,6 @@ memory_cell #(
 		.addr_a (wr_addr_b_2),
 		.addr_b (rd_addr_b_2),
 		.i_a    (),
-		.i_b    (),
 		.o_a    (),
 		.o_b    (b_o_2)
 	);
@@ -798,7 +762,6 @@ memory_cell #(
 			.addr_a (wr_addr_h2),
 			.addr_b (rd_addr_h2),
 			.i_a    (i_mem_h2),
-			.i_b    (),
 			.o_a    (o_mem_h2_a),
 			.o_b    (o_mem_h2_b)
 );
@@ -828,7 +791,6 @@ memory_cell #(
 			.addr_a (wr_addr_c2),
 			.addr_b (rd_addr_c2),
 			.i_a    (i_mem_c2),
-			.i_b    (),
 			.o_a    (prev_c2),
 			.o_b    ()
 		);
@@ -894,7 +856,6 @@ memory_cell #(
 		.addr_a (wr_addr_act_2),
 		.addr_b (),
  		.i_a    (a2),
-		.i_b    (),
 		.o_a    (o_mem_a2),
 		.o_b    ()
 	);
@@ -912,7 +873,6 @@ memory_cell #(
 		.addr_a (wr_addr_act_2),
 		.addr_b (),
 		.i_a    (f2),
-		.i_b    (),
 		.o_a    (o_mem_f2),
 		.o_b    ()
 	);
@@ -930,7 +890,6 @@ memory_cell #(
 		.addr_a (wr_addr_act_2),
 		.addr_b (),
 		.i_a    (i2),
-		.i_b    (),
 		.o_a    (o_mem_i2),
 		.o_b    ()
 	);
@@ -947,7 +906,6 @@ memory_cell #(
 		.addr_a (wr_addr_act_2),
 		.addr_b (),
 		.i_a    (o2),
-		.i_b    (),
 		.o_a    (o_mem_o2),
 		.o_b    ()
 	);

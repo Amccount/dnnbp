@@ -129,26 +129,36 @@ reg [11:0] timestep;
 
 initial
 begin
+	
+	// STATE 0
 	clk = 1;
 	rst <= 1;
 	rst_2 <= 1;
 	acc_x_1 <=0;
 	acc_h_1 <=0;
+	acc_x_2 <=0;
+	acc_h_2 <=0;
 	lstm <= 12'd0;
 	lstm_2 <= 12'd0;
 	timestep <=12'd0;
 	addr_x1 <= 12'd0; 
-	rd_addr_h1 <= 12'd0; 
-	rd_addr_c1 <= 12'd0;
 	wr_addr_h1 <= 12'd0; 
 	wr_addr_c1 <= 12'd0;
 	rd_addr_w_1 <= 12'd0;
 	rd_addr_b_1 <= 12'd0;
 	rd_addr_u_1 <= 12'd0;
+	wr_addr_h2 <= 12'd0; 
+	wr_addr_c2 <= 12'd0;
+	rd_addr_w_2 <= 12'd0;
+	rd_addr_b_2 <= 12'd0;
+	rd_addr_u_2 <= 12'd0;
 	wr_c1 <=0;
 	#100;
+
+	// STATE 1
 	rst <=0;
-	#100;
+	rst_2 <=0;
+	#100
 
 	//repeat until 7 time step
 
@@ -158,22 +168,25 @@ begin
 		rd_addr_w_1 <= 12'd0;
 		rd_addr_b_1 <= 12'd0;
 		rd_addr_u_1 <= 12'd0;
-		wr_addr_h1 <= (timestep-1)*53;
-		rd_addr_h1 <= 12'd0; 
-		rd_addr_c1 <= 12'd0;
-		wr_addr_h1 <= 12'd0; 
+		//wr_addr_h1 <= (timestep-1)*53;
+		addr_x1 <= (timestep)*53;
+		//rd_addr_h1 <= 12'd0; 
+		//wr_addr_h1 <= 12'd0; 
 		lstm <= 12'd0;
 		lstm_2 <= 12'd0;
 		acc_x_2 <=0;
 		acc_h_2 <=0;
-		rd_addr_h2 <= 12'd0; 
-		rd_addr_c2 <= 12'd0;
-		wr_addr_h2 <= 12'd0; 
-		wr_addr_c2 <= 12'd0;
+		//rd_addr_h2 <= 12'd0; 
+		//rd_addr_c2 <= 12'd0;
+		//wr_addr_h2 <= 12'd0; 
+		//wr_addr_c2 <= 12'd0;
 		rd_addr_w_2 <= 12'd0;
 		rd_addr_b_2 <= 12'd0;
 		rd_addr_u_2 <= 12'd0;
-		#100
+		//STATE 2
+		rst_2 <=1;
+		rst <= 0;
+		#200
 
 		// calculating h and c on 1 time step on first layer
 		repeat (53)
@@ -223,7 +236,7 @@ begin
 			wr_c1 <=0;
 			rst <=1;
 			wr_addr_h1 <= (timestep-1)*53;
-			wr_addr_c1 <= lstm;
+			wr_addr_c1 <= (timestep-1)*53 + lstm;
 			rd_addr_b_1 <= lstm;
 			rd_addr_w_1 <= rd_addr_w_1 + 1;
 			rd_addr_u_1 <= rd_addr_u_1 + 1;
@@ -236,8 +249,9 @@ begin
 
 		rst_2 <=0;
 		rst <=1;
-		wr_addr_h1 <= (53*timestep) + lstm_2; 
+		wr_addr_h1 <= (53*timestep); 
 		wr_h2 <=0;
+		lstm_2 <=0;
 	    #100
 
 		// calculating h and c on 1 time step on second layer
@@ -257,6 +271,8 @@ begin
 			end
 
 			acc_x_2<=1;
+			wr_addr_h1 <= wr_addr_h1+1;
+			rd_addr_w_2 <= rd_addr_w_2+1;
 			acc_h_2<=1;
 			#100
 
@@ -298,7 +314,7 @@ begin
 			wr_c2 <=0;
 			rst_2 <=1;
 			wr_addr_h2 <= (timestep-1)*53;
-			wr_addr_c2 <= lstm_2;
+			wr_addr_c2 <= (timestep-1)*53 + lstm_2;
 			rd_addr_b_2 <= lstm_2;
 			wr_addr_h1 <= timestep*53 ;
 			rd_addr_w_2 <= rd_addr_w_2 + 1;
