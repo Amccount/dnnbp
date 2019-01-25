@@ -37,7 +37,8 @@ module bp ( clk, rst, rst_acc, rst_mac,
             rd_addr_dx2, rd_addr_dout2, rd_addr_dout1,
             wr_addr_dx2, wr_addr_dout2, wr_addr_dout1,
             rd_addr_dstate2, rd_addr_dstate1,
-            wr_addr_dstate2, wr_addr_dstate1
+            wr_addr_dstate2, wr_addr_dstate1,
+            o_mac
             );
 
 // parameters
@@ -129,7 +130,7 @@ input wr_dstate1, wr_dstate2;
 input [3:0] rd_addr_dstate2, wr_addr_dstate2;
 input [6:0] rd_addr_dstate1, wr_addr_dstate1;
 // output ports
-
+output [WIDTH-1:0] o_mac;
 
 // registers
 

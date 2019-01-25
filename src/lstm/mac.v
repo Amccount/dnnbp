@@ -11,7 +11,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module mac (clk, rst, acc, i_x, i_m, o);
+module mac (clk, rst, acc, i_x, i_m, o_mul, o_mac);
 
 // parameters
 parameter WIDTH = 32;
@@ -28,7 +28,8 @@ input signed [WIDTH-1:0] i_x;
 input signed [WIDTH-1:0] i_m;
 
 // output ports
-output signed [WIDTH-1:0] o;
+output signed [WIDTH-1:0] o_mul;
+output signed [WIDTH-1:0] o_mac;
 
 // wires
 wire signed [WIDTH-1:0] o_add;
@@ -68,6 +69,6 @@ begin
 end
 
 // Assign output wire to output register
-assign o = o_reg;
+assign o_mac = o_reg;
 
 endmodule
