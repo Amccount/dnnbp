@@ -1,4 +1,4 @@
-module datapath(clk, rst, acc_x_1, acc_h_1, acc_x_2, acc_h_2, wr_h1, wr_h2, wr_c1, wr_c2, wr_x2, 
+module datapath(clk, rst, rst_2, acc_x_1, acc_h_1, acc_x_2, acc_h_2, wr_h1, wr_h2, wr_c1, wr_c2, wr_x2, 
 	            addr_x1, rd_addr_x2, wr_addr_x2, wr_addr_act_1, 
 	            wr_act_1, wr_addr_act_2, wr_act_2, wr_addr_w_1, 
 	            wr_w_1, rd_addr_w_1, wr_addr_u_1, wr_u_1, rd_addr_u_1, 
@@ -18,7 +18,6 @@ parameter LAYR2_CELL = 8;
 
 parameter LAYR1_X = "layer1_x.list";
 parameter LAYR1_H = "layer1_h.list";
-
 parameter LAYR1_C = "layer1_c.list";
 // // This holds weights & biases
 // parameter LAYR1_A = "layer1_a.list";
@@ -31,7 +30,7 @@ parameter LAYR2_H = "layer2_h.list";
 parameter LAYR2_C = "layer2_c.list";
 
 // common ports
-input clk, rst;
+input clk, rst, rst_2;
 
 input acc_x_1, acc_h_1, acc_x_2, acc_h_2;
 // control ports
@@ -97,12 +96,13 @@ wire signed [WIDTH-1:0] i_mem_h1, i_mem_x2, i_mem_h2;
 wire signed [WIDTH-1:0] i_mem_c1, i_mem_c2;
 wire signed [WIDTH-1:0] o_mem_c1, o_mem_c2;
 wire signed [WIDTH-1:0] o_mem_h1_a, o_mem_h1_b, o_mem_x2;
-wire signed [WIDTH-1:0] o_mem_h2;
+wire signed [WIDTH-1:0] o_mem_h2_a, o_mem_h2_b;
 wire signed [WIDTH-1:0] o_mem_a1, o_mem_a2;
 wire signed [WIDTH-1:0] o_mem_i1, o_mem_i2;
 wire signed [WIDTH-1:0] o_mem_f1, o_mem_f2;
 wire signed [WIDTH-1:0] o_mem_o1, o_mem_o2;
 
+wire signed [WIDTH-1:0] data_x2;
 
 wire signed [WIDTH-1:0] w_a1;
 wire signed [WIDTH-1:0] w_i1;
@@ -557,23 +557,23 @@ assign i_mem_c1 = c1; // Loop to write LAYER 1 State Memory
 //////////////////////////////////////////////////////////////////////
 
 // Write LAYER 2 Input Memory
-assign i_mem_x2 = h1; 
+assign data_x2 = o_mem_h1_a; 
 
 // LAYER 2 Input Memory
-memory_h1 #(
-		.WIDTH(WIDTH),
-		.NUM_LSTM(LAYR1_CELL),
-		.TIMESTEP(TIMESTEP),
-		.FILENAME(LAYR2_X)
-	) mem_x2 (
-		.clk     (clk),
-		.rst     (rst),
-		.wr      (wr_x2),
-		.rd_addr (rd_addr_x2),
-		.wr_addr (wr_addr_x2),
-		.i       (i_mem_x2),
-		.o       (o_mem_x2)
-	);
+// memory_h1 #(
+// 		.WIDTH(WIDTH),
+// 		.NUM_LSTM(LAYR1_CELL),
+// 		.TIMESTEP(TIMESTEP),
+// 		.FILENAME(LAYR2_X)
+// 	) mem_x2 (
+// 		.clk     (clk),
+// 		.rst     (rst),
+// 		.wr      (wr_x2),
+// 		.rd_addr (rd_addr_x2),
+// 		.wr_addr (wr_addr_x2),
+// 		.i       (i_mem_x2),
+// 		.o       (o_mem_x2)
+//	);
 
 //LAYER 2 WEIGHT MEMORY
 //LAYER 1 WEIGHT MEMORY
@@ -785,20 +785,23 @@ memory_cell #(
 // LAYER 2 Output Memory
 // in: clk, rst, wr, rd_addr, wr_addr, i (WIDTH)
 // out: o (8*WIDTH)
-memory_h2 #(
-		.WIDTH(WIDTH),
-		.NUM_LSTM(LAYR2_CELL),
-		.TIMESTEP(TIMESTEP),
-		.FILENAME(LAYR2_H)
-	) mem_h2 (
-		.clk     (clk),
-		.rst     (rst),
-		.wr      (wr_h2),
-		.rd_addr (rd_addr_h2),
-		.wr_addr (wr_addr_h2),
-		.i       (i_mem_h2),
-		.o       (o_mem_h2)
-	);
+
+memory_cell #(
+			.WIDTH(WIDTH),
+			.NUM(LAYR2_CELL),
+			.TIMESTEP(TIMESTEP+1),
+			.FILENAME("layer2_h.list")
+		) inst_memory_h2 (
+			.clk    (clk),
+			.rst    (rst),
+			.wr_a   (wr_h2),
+			.addr_a (wr_addr_h2),
+			.addr_b (rd_addr_h2),
+			.i_a    (i_mem_h2),
+			.i_b    (),
+			.o_a    (o_mem_h2_a),
+			.o_b    (o_mem_h2_b)
+);
 
 
 
@@ -822,28 +825,13 @@ memory_cell #(
 			.clk    (clk),
 			.rst    (rst),
 			.wr_a   (wr_c2),
-			.addr_a (wr_addr_c1),
-			.addr_b (rd_addr_c1),
+			.addr_a (wr_addr_c2),
+			.addr_b (rd_addr_c2),
 			.i_a    (i_mem_c2),
 			.i_b    (),
 			.o_a    (prev_c2),
 			.o_b    ()
 		);
-
-memory_c #(
-		.WIDTH(WIDTH),
-		.NUM_LSTM(LAYR2_CELL),
-		.TIMESTEP(TIMESTEP),
-		.FILENAME(LAYR2_C)
-	) mem_c2 (
-		.clk     (clk),
-		.rst     (rst),
-		.wr      (wr_c2),
-		.rd_addr (rd_addr_c2),
-		.wr_addr (wr_addr_c2),
-		.i       (i_mem_c2),
-		.o       (prev_c2)
-	);
 
 // LAYER 2 State Pipeline Register
 // in: data (WIDTH)
@@ -863,11 +851,11 @@ lstm_cell #(
 		.FRAC(FRAC)
 	) inst_lstm_cell_2 (
 		.clk          (clk),
-		.rst          (rst),
+		.rst          (rst_2),
 		.acc_x        (acc_x_2),
 		.acc_h        (acc_h_2),
-		.i_x          (o_mem_x2),
-		.i_h          (o_mem_h2),
+		.i_x          (data_x2),
+		.i_h          (o_mem_h2_a),
 		.i_prev_state (prev_c2),
 		.i_w_a        (w_a_2),
 		.i_w_i        (w_i_2),
