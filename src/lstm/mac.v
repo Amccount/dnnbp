@@ -11,7 +11,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module mac (clk, rst, acc, i_x, i_m, o);
+module mac (clk, rst, acc, i_x, i_m, o_mul, o_mac);
 
 // parameters
 parameter WIDTH = 32;
@@ -28,7 +28,8 @@ input signed [WIDTH-1:0] i_x;
 input signed [WIDTH-1:0] i_m;
 
 // output ports
-output signed [WIDTH-1:0] o;
+output signed [WIDTH-1:0] o_mul;
+output signed [WIDTH-1:0] o_mac;
 
 // wires
 wire signed [WIDTH-1:0] o_add;
@@ -42,7 +43,7 @@ mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_mult_2in (.i_a(i_x), .i_b(i_m), .o(o
 adder_2in #(.WIDTH(WIDTH)) inst_adder_2in (.i_a(o_reg), .i_b(o_mux), .o(o_add));
 
 // Multiplexing
-always@(acc or i_x or i_m)
+always@(acc or i_x or i_m or o_mul)
 begin
 	if (acc)
 	begin
@@ -68,6 +69,6 @@ begin
 end
 
 // Assign output wire to output register
-assign o = o_reg;
+assign o_mac = o_reg;
 
 endmodule

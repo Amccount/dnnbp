@@ -10,7 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module bp ( clk, rst, rst_acc, rst_mac,
+module bp ( clk, rst, rst_acc, rst_mac, rst_cost,
             i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state,
             i_layr2_a, i_layr2_i, i_layr2_f, i_layr2_o, i_layr2_state, i_layr2_h, i_layr2_t,
             // i_layr1_wa, i_layr1_wi, i_layr1_wf, i_layr1_wo,
@@ -23,21 +23,24 @@ module bp ( clk, rst, rst_acc, rst_mac,
             sel_in1, sel_in2, sel_in3, sel_in4, sel_in5,
             sel_x1_1, sel_x1_2, sel_x2_2, sel_as_1, sel_as_2, 
             sel_addsub, sel_temp,
-            acc_da, acc_di, acc_df, acc_do, acc_mac,
+            acc_da, acc_di, acc_df, acc_do, acc_cost, acc_mac,
             
             sel_dgate, sel_wght, sel_wghts1, sel_wghts2,
-            wr_da1, wr_di1, wr_df1, wr_do1,
-            wr_da2, wr_di2, wr_df2, wr_do2,
+            // da1, di1, df1, do1,
+            // da2, di2, df2, do2,
+            // wr_da1, wr_di1, wr_df1, wr_do1,
+            // wr_da2, wr_di2, wr_df2, wr_do2,
             wr_dx2, wr_dout2, wr_dout1,
             wr_dstate2, wr_dstate1,
-            rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1,
-            wr_addr_da1, wr_addr_di1, wr_addr_df1, wr_addr_do1,
-            rd_addr_da2, rd_addr_di2, rd_addr_df2, rd_addr_do2,
-            wr_addr_da2, wr_addr_di2, wr_addr_df2, wr_addr_do2,
+            // rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1,
+            // wr_addr_da1, wr_addr_di1, wr_addr_df1, wr_addr_do1,
+            // rd_addr_da2, rd_addr_di2, rd_addr_df2, rd_addr_do2,
+            // wr_addr_da2, wr_addr_di2, wr_addr_df2, wr_addr_do2,
             rd_addr_dx2, rd_addr_dout2, rd_addr_dout1,
             wr_addr_dx2, wr_addr_dout2, wr_addr_dout1,
             rd_addr_dstate2, rd_addr_dstate1,
-            wr_addr_dstate2, wr_addr_dstate1
+            wr_addr_dstate2, wr_addr_dstate1,
+            o_dgate, o_cost
             );
 
 // parameters
@@ -66,7 +69,7 @@ parameter LAYR2_dOut = "layer2_dOut.list";
 parameter LAYR2_dState = "layer2_dState.list";
 
 // common ports
-input clk, rst, rst_acc, rst_mac;
+input clk, rst, rst_acc, rst_mac, rst_cost;
 
 // input ports
 input signed [WIDTH-1:0] i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state;
@@ -103,7 +106,7 @@ input [1:0] sel_as_2;
 input sel_addsub;
 input [1:0] sel_temp;
 
-input acc_da, acc_di, acc_df, acc_do;
+input acc_da, acc_di, acc_df, acc_do, acc_cost;
 input acc_mac;
 
 input [1:0] sel_dgate;
@@ -112,24 +115,28 @@ input sel_wght;
 input [1:0] sel_wghts1;
 input [2:0] sel_wghts2;
 
-input wr_da1, wr_di1, wr_df1, wr_do1;
-input [8:0] rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1;
-input [8:0] wr_addr_da1, wr_addr_di1, wr_addr_df1, wr_addr_do1;
+// input signed [WIDTH-1:0] da1, di1, df1, do1;
+// input signed [WIDTH-1:0] da2, di2, df2, do2;
 
-input wr_da2, wr_di2, wr_df2, wr_do2;
-input [5:0] rd_addr_da2, rd_addr_di2, rd_addr_df2, rd_addr_do2;
-input [5:0] wr_addr_da2, wr_addr_di2, wr_addr_df2, wr_addr_do2;
+// input wr_da1, wr_di1, wr_df1, wr_do1;
+// input [8:0] rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1;
+// input [8:0] wr_addr_da1, wr_addr_di1, wr_addr_df1, wr_addr_do1;
+
+// input wr_da2, wr_di2, wr_df2, wr_do2;
+// input [5:0] rd_addr_da2, rd_addr_di2, rd_addr_df2, rd_addr_do2;
+// input [5:0] wr_addr_da2, wr_addr_di2, wr_addr_df2, wr_addr_do2;
 
 input wr_dx2, wr_dout2, wr_dout1;
-input [8:0] rd_addr_dx2, wr_addr_dx2;
-input [3:0] rd_addr_dout2, wr_addr_dout2;
-input [6:0] rd_addr_dout1, wr_addr_dout1;
+input [11:0] /*[8:0]*/ rd_addr_dx2, wr_addr_dx2;
+input [11:0] /*[3:0]*/ rd_addr_dout2, wr_addr_dout2;
+input [11:0] /*[6:0]*/ rd_addr_dout1, wr_addr_dout1;
 
 input wr_dstate1, wr_dstate2;
-input [3:0] rd_addr_dstate2, wr_addr_dstate2;
-input [6:0] rd_addr_dstate1, wr_addr_dstate1;
-// output ports
+input [11:0] /*[3:0]*/ rd_addr_dstate2, wr_addr_dstate2;
+input [11:0] /*[6:0]*/ rd_addr_dstate1, wr_addr_dstate1;
 
+// output ports
+output signed [WIDTH-1:0] o_dgate, o_cost;
 
 // registers
 
@@ -137,11 +144,7 @@ input [6:0] rd_addr_dstate1, wr_addr_dstate1;
 wire signed [WIDTH-1:0] i_a, i_i, i_f, i_o, i_h, i_t, i_state;
 wire signed [WIDTH-1:0] d_state, reg_d_state, reg_d_state1, reg_d_state2;
 
-wire signed [WIDTH-1:0] dgate;
-wire signed [WIDTH-1:0] da1, di1, df1, do1;
-wire signed [WIDTH-1:0] da2, di2, df2, do2;
-
-wire signed [WIDTH-1:0] o_acc_da, o_acc_di, o_acc_df, o_acc_do;
+wire signed [WIDTH-1:0] o_acc_da, o_acc_di, o_acc_df, o_acc_do, o_acc_cost;
 wire signed [WIDTH-1:0] dgate_mux;
 wire signed [WIDTH-1:0] wghts_mux1, wghts_mux2;
 
@@ -149,6 +152,8 @@ wire signed [WIDTH-1:0] o_mac;
 wire signed [WIDTH-1:0] dx2, dout, dout1, dout2;
 
 wire signed [WIDTH-1:0] layr2_w, layr2_u, layr1_w, layr1_u;
+
+wire signed [WIDTH-1:0] dgate;
 
 // Input Multiplexers
 // in: layr1_aifo and layr2_aifo
@@ -196,9 +201,11 @@ delta #(
         .o_d_state  (d_state)
     );
 
+assign o_dgate = dgate;
+
 // LAYER 2 delta State Memory
 memory_cell #(
-        .ADDR(4),
+        // .ADDR(4),
         .WIDTH(WIDTH),
         .NUM(16),
         .TIMESTEP(1),
@@ -216,7 +223,7 @@ memory_cell #(
 
 // LAYER 1 delta State Memory
 memory_cell #(
-        .ADDR(7),
+        // .ADDR(7),
         .WIDTH(WIDTH),
         .NUM(106),
         .TIMESTEP(1),
@@ -234,73 +241,73 @@ memory_cell #(
 
 // LAYER 2 dA, dI, dF, dO Memory
 // out: da2, di2, df2, do2
-memory_cell #(
-        .ADDR(6),
-        .WIDTH(WIDTH),
-        .NUM(56),
-        .TIMESTEP(1),
-        .FILENAME(LAYR2_dA)
-    ) mem_da2 (
-        .clk    (clk),
-        .rst    (rst),
-        .wr_a   (wr_da2),
-        .addr_a (wr_addr_da2),
-        .addr_b (rd_addr_da2),
-        .i_a    (dgate),
-        .o_a    (),
-        .o_b    (da2)
-    );
+// memory_cell #(
+        // .ADDR(6),
+//         .WIDTH(WIDTH),
+//         .NUM(56),
+//         .TIMESTEP(1),
+//         .FILENAME(LAYR2_dA)
+//     ) mem_da2 (
+//         .clk    (clk),
+//         .rst    (rst),
+//         .wr_a   (wr_da2),
+//         .addr_a (wr_addr_da2),
+//         .addr_b (rd_addr_da2),
+//         .i_a    (dgate),
+//         .o_a    (),
+//         .o_b    (da2)
+//     );
 
-memory_cell #(
-        .ADDR(6),
-        .WIDTH(WIDTH),
-        .NUM(56),
-        .TIMESTEP(1),
-        .FILENAME(LAYR2_dI)
-    ) mem_di2 (
-        .clk    (clk),
-        .rst    (rst),
-        .wr_a   (wr_di2),
-        .addr_a (wr_addr_di2),
-        .addr_b (rd_addr_di2),
-        .i_a    (dgate),
-        .o_a    (),
-        .o_b    (di2)
-    );
+// memory_cell #(
+        // .ADDR(6),
+//         .WIDTH(WIDTH),
+//         .NUM(56),
+//         .TIMESTEP(1),
+//         .FILENAME(LAYR2_dI)
+//     ) mem_di2 (
+//         .clk    (clk),
+//         .rst    (rst),
+//         .wr_a   (wr_di2),
+//         .addr_a (wr_addr_di2),
+//         .addr_b (rd_addr_di2),
+//         .i_a    (dgate),
+//         .o_a    (),
+//         .o_b    (di2)
+//     );
 
-memory_cell #(
-        .ADDR(6),
-        .WIDTH(WIDTH),
-        .NUM(56),
-        .TIMESTEP(1),
-        .FILENAME(LAYR2_dF)
-    ) mem_df2 (
-        .clk    (clk),
-        .rst    (rst),
-        .wr_a   (wr_df2),
-        .addr_a (wr_addr_df2),
-        .addr_b (rd_addr_df2),
-        .i_a    (dgate),
-        .o_a    (),
-        .o_b    (df2)
-    );
+// memory_cell #(
+        // .ADDR(6),
+//         .WIDTH(WIDTH),
+//         .NUM(56),
+//         .TIMESTEP(1),
+//         .FILENAME(LAYR2_dF)
+//     ) mem_df2 (
+//         .clk    (clk),
+//         .rst    (rst),
+//         .wr_a   (wr_df2),
+//         .addr_a (wr_addr_df2),
+//         .addr_b (rd_addr_df2),
+//         .i_a    (dgate),
+//         .o_a    (),
+//         .o_b    (df2)
+//     );
 
-memory_cell #(
-        .ADDR(6),
-        .WIDTH(WIDTH),
-        .NUM(56),
-        .TIMESTEP(1),
-        .FILENAME(LAYR2_dO)
-    ) mem_do2 (
-        .clk    (clk),
-        .rst    (rst),
-        .wr_a   (wr_do2),
-        .addr_a (wr_addr_do2),
-        .addr_b (rd_addr_do2),
-        .i_a    (dgate),
-        .o_a    (),
-        .o_b    (do2)
-    );
+// memory_cell #(
+        // .ADDR(6),
+//         .WIDTH(WIDTH),
+//         .NUM(56),
+//         .TIMESTEP(1),
+//         .FILENAME(LAYR2_dO)
+//     ) mem_do2 (
+//         .clk    (clk),
+//         .rst    (rst),
+//         .wr_a   (wr_do2),
+//         .addr_a (wr_addr_do2),
+//         .addr_b (rd_addr_do2),
+//         .i_a    (dgate),
+//         .o_a    (),
+//         .o_b    (do2)
+//     );
 
 
 // ACC Array for dX and delta Out
@@ -310,6 +317,10 @@ acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_da (.clk(clk), .rst(rst_acc), .acc(acc_da
 acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_di (.clk(clk), .rst(rst_acc), .acc(acc_di), .i(dgate), .o(o_acc_di));
 acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_df (.clk(clk), .rst(rst_acc), .acc(acc_df), .i(dgate), .o(o_acc_df));
 acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_do (.clk(clk), .rst(rst_acc), .acc(acc_do), .i(dgate), .o(o_acc_do));
+
+// ACCUMULATOR for Cost function
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_cost (.clk(clk), .rst(rst_cost), .acc(acc_cost), .i(dgate), .o(o_acc_cost));
+assign o_cost = o_acc_cost >> 3;
 
 // LAYER 2 dgates Multiplexer
 multiplexer_4to1 #(.WIDTH(WIDTH)) mux_x (.i_a(o_acc_da), .i_b(o_acc_di), .i_c(o_acc_df), .i_d(o_acc_do), .sel(sel_dgate), .o(dgate_mux));
@@ -335,14 +346,15 @@ mac #(
         .acc (acc_mac),
         .i_x (dgate_mux),
         .i_m (wghts_mux1),
-        .o   (o_mac)
+        .o_mul   (),
+        .o_mac   (o_mac)
     );
 
 // LAYER 2 dX Memory
 // in: o_mac2
 // out: dx2
 memory_cell #(
-        .ADDR(9),
+        // .ADDR(9),
         .WIDTH(WIDTH),
         .NUM(LAYR1_CELL),
         .TIMESTEP(1),
@@ -362,7 +374,7 @@ memory_cell #(
 // in: o_mac2
 // out: dout2
 memory_cell #(
-        .ADDR(4),
+        // .ADDR(4),
         .WIDTH(WIDTH),
         .NUM(LAYR2_CELL),
         .TIMESTEP(1),
@@ -381,79 +393,79 @@ memory_cell #(
 // LAYER 1 dA, dI, dF, dO Memory
 // in: addr, wr, odgate
 // out: da, di, df, do
-memory_cell #(
-        .ADDR(9),
-        .WIDTH(WIDTH),
-        .NUM(371),
-        .TIMESTEP(1),
-        .FILENAME(LAYR1_dA)
-    ) mem_da1 (
-        .clk    (clk),
-        .rst    (rst),
-        .wr_a   (wr_da1),
-        .addr_a (wr_addr_da1),
-        .addr_b (rd_addr_da1),
-        .i_a    (dgate),
-        .o_a    (),
-        .o_b    (da1)
-    );
+// memory_cell #(
+        // .ADDR(9),
+//         .WIDTH(WIDTH),
+//         .NUM(371),
+//         .TIMESTEP(1),
+//         .FILENAME(LAYR1_dA)
+//     ) mem_da1 (
+//         .clk    (clk),
+//         .rst    (rst),
+//         .wr_a   (wr_da1),
+//         .addr_a (wr_addr_da1),
+//         .addr_b (rd_addr_da1),
+//         .i_a    (dgate),
+//         .o_a    (),
+//         .o_b    (da1)
+//     );
 
-memory_cell #(
-        .ADDR(9),
-        .WIDTH(WIDTH),
-        .NUM(371),
-        .TIMESTEP(1),
-        .FILENAME(LAYR1_dI)
-    ) mem_di1 (
-        .clk    (clk),
-        .rst    (rst),
-        .wr_a   (wr_di1),
-        .addr_a (wr_addr_di1),
-        .addr_b (rd_addr_di1),
-        .i_a    (dgate),
-        .o_a    (),
-        .o_b    (di1)
-    );
+// memory_cell #(
+        // .ADDR(9),
+//         .WIDTH(WIDTH),
+//         .NUM(371),
+//         .TIMESTEP(1),
+//         .FILENAME(LAYR1_dI)
+//     ) mem_di1 (
+//         .clk    (clk),
+//         .rst    (rst),
+//         .wr_a   (wr_di1),
+//         .addr_a (wr_addr_di1),
+//         .addr_b (rd_addr_di1),
+//         .i_a    (dgate),
+//         .o_a    (),
+//         .o_b    (di1)
+//     );
 
-memory_cell #(
-        .ADDR(9),
-        .WIDTH(WIDTH),
-        .NUM(371),
-        .TIMESTEP(1),
-        .FILENAME(LAYR1_dF)
-    ) mem_df1 (
-        .clk    (clk),
-        .rst    (rst),
-        .wr_a   (wr_df1),
-        .addr_a (wr_addr_df1),
-        .addr_b (rd_addr_df1),
-        .i_a    (dgate),
-        .o_a    (),
-        .o_b    (df1)
-    );
+// memory_cell #(
+        // .ADDR(9),
+//         .WIDTH(WIDTH),
+//         .NUM(371),
+//         .TIMESTEP(1),
+//         .FILENAME(LAYR1_dF)
+//     ) mem_df1 (
+//         .clk    (clk),
+//         .rst    (rst),
+//         .wr_a   (wr_df1),
+//         .addr_a (wr_addr_df1),
+//         .addr_b (rd_addr_df1),
+//         .i_a    (dgate),
+//         .o_a    (),
+//         .o_b    (df1)
+//     );
 
-memory_cell #(
-        .ADDR(9),
-        .WIDTH(WIDTH),
-        .NUM(371),
-        .TIMESTEP(1),
-        .FILENAME(LAYR1_dO)
-    ) mem_do1 (
-        .clk    (clk),
-        .rst    (rst),
-        .wr_a   (wr_do1),
-        .addr_a (wr_addr_do1),
-        .addr_b (rd_addr_do1),
-        .i_a    (dgate),
-        .o_a    (),
-        .o_b    (do1)
-    );
+// memory_cell #(
+        // .ADDR(9),
+//         .WIDTH(WIDTH),
+//         .NUM(371),
+//         .TIMESTEP(1),
+//         .FILENAME(LAYR1_dO)
+//     ) mem_do1 (
+//         .clk    (clk),
+//         .rst    (rst),
+//         .wr_a   (wr_do1),
+//         .addr_a (wr_addr_do1),
+//         .addr_b (rd_addr_do1),
+//         .i_a    (dgate),
+//         .o_a    (),
+//         .o_b    (do1)
+//     );
 
 // LAYER 1 delta Out Memory
 // in: o_mac1
 // out: dout1
 memory_cell #(
-        .ADDR(7),
+        // .ADDR(7),
         .WIDTH(WIDTH),
         .NUM(LAYR1_CELL),
         .TIMESTEP(1),

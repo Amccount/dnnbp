@@ -52,8 +52,6 @@ multiplexer #(.WIDTH(WIDTH)) mux_coef_2 (.i_a(quarter_input), .i_b(32'h00000000)
 addsub #(.WIDTH(WIDTH)) inst_addsub_1 (.i_a(out_mux_coef_1), .i_b(out_mux_coef_2), .sel(1'b1), .o(out_add_sub_1));
 addsub #(.WIDTH(WIDTH)) inst_addsub_2 (.i_a(out_add_sub_1), .i_b(out_mux_const), .sel(sel_sign), .o(out_add_sub_2));
 
-multiplexer #(.WIDTH(WIDTH)) mux_const_2 (.i_a(quarter_input), .i_b(32'h00000000), .sel(sel_coef_2), .o(out_mux_coef_2));
-
 multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_const (.i_a(32'h00266666), .i_b(32'b0), .i_c(32'h00400000), .i_d(32'h00AE147A), .sel({sel_coef_1, sel_coef_2}), .o(out_mux_const));
 
 multiplexer #(.WIDTH(WIDTH)) mux_region (.i_a(32'h00000000), .i_b(32'h01000000), .sel(sel_region), .o(out_mux_region));
@@ -65,7 +63,7 @@ assign sel_sign = abs_input> 32'h01000000;
 assign sel_result = abs_input<32'h02800000 && abs_input > 32'h00333333;
 assign sel_region = abs_input >32'h00333333;
 
-always @(i)
+always @(i or abs_input)
 begin
 	temp <=abs_input;
 end

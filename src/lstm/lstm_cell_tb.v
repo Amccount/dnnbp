@@ -2,6 +2,7 @@ module lstm_cell_tb();
 
 // parameters
 parameter WIDTH = 32;
+parameter FRAC = 24;
 
 // registers
 reg clk, rst;
@@ -31,11 +32,21 @@ wire signed [WIDTH-1:0] o_c;
 wire signed [WIDTH-1:0] o_h;
 wire signed [WIDTH-1:0] o_a;
 wire signed [WIDTH-1:0] o_i;
-wire signed [WIDTH-1:0] o_f;
 wire signed [WIDTH-1:0] o_o;
+wire signed [WIDTH-1:0] o_f;
+wire signed [WIDTH-1:0] o_mul_1;
+wire signed [WIDTH-1:0] o_mul_2;
+wire signed [WIDTH-1:0] o_mul_3;
+wire signed [WIDTH-1:0] o_mul_4;
+wire signed [WIDTH-1:0] o_mul_5;
+wire signed [WIDTH-1:0] o_mul_6;
+wire signed [WIDTH-1:0] o_mul_7;
+wire signed [WIDTH-1:0] o_mul_8;
+
 
 lstm_cell #(
-		.WIDTH(WIDTH)
+		.WIDTH(WIDTH),
+		.FRAC(FRAC)
 	) inst_lstm_cell (
 		.clk          (clk),
 		.rst          (rst),
@@ -56,6 +67,14 @@ lstm_cell #(
 		.i_b_i        (i_b_i),
 		.i_b_f        (i_b_f),
 		.i_b_o        (i_b_o),
+		.o_mul_1      (o_mul_1),
+		.o_mul_2      (o_mul_2),
+		.o_mul_3      (o_mul_3),
+		.o_mul_4      (o_mul_4),
+		.o_mul_5      (o_mul_5),
+		.o_mul_6      (o_mul_6),
+		.o_mul_7      (o_mul_7),
+		.o_mul_8      (o_mul_8),
 		.o_a          (o_a),
 		.o_i          (o_i),
 		.o_f          (o_f),
@@ -63,6 +82,8 @@ lstm_cell #(
 		.o_c          (o_c),
 		.o_h          (o_h)
 	);
+
+
 
 initial begin
 	clk = 1;
