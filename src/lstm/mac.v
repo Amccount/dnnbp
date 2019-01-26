@@ -43,7 +43,7 @@ mult_2in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_mult_2in (.i_a(i_x), .i_b(i_m), .o(o
 adder_2in #(.WIDTH(WIDTH)) inst_adder_2in (.i_a(o_reg), .i_b(o_mux), .o(o_add));
 
 // Multiplexing
-always@(acc or i_x or i_m)
+always@(acc or i_x or i_m or o_mul)
 begin
 	if (acc)
 	begin

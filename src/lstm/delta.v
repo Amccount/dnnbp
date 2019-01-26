@@ -76,7 +76,7 @@ multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in4 (.i_a(d_out),
 // multiplexer for multiplier and addsub
 multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in_x1_1 (.i_a(in1), .i_b(o_x2), .i_c(temp), .i_d({(WIDTH){1'b0}}), .sel(sel_x1_1), .o(o_mux_in_x1_1));
 multiplexer 	 #(.WIDTH(WIDTH)) inst_mux_in_x1_2 (.i_a(in2), .i_b(o_x1), .sel(sel_x1_2), .o(o_mux_in_x1_2));
-multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in_x2_2 (.i_a(in3), .i_b(o_x1), .i_c(o_x2), .i_d({(WIDTH){1'b0}}), .sel(sel_x2_2), .o(o_mux_in_x2_2));
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in_x2_2 (.i_a(in3), .i_b(o_x1), .i_c(o_x2), .i_d(o_as), .sel(sel_x2_2), .o(o_mux_in_x2_2));
 multiplexer 	 #(.WIDTH(WIDTH)) inst_mux_in_as_1 (.i_a(in4), .i_b(o_x2), .sel(sel_as_1), .o(o_mux_in_as_1));
 multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in_as_2 (.i_a(in5), .i_b(o_x1), .i_c(temp), .i_d(o_as), .sel(sel_as_2), .o(o_mux_in_as_2));
 

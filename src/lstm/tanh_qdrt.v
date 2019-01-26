@@ -63,7 +63,7 @@ assign sel_sign = abs_input> 32'h01000000;
 assign sel_result = abs_input<32'h02800000 && abs_input > 32'h00333333;
 assign sel_region = abs_input >32'h00333333;
 
-always @(i)
+always @(i or abs_input)
 begin
 	temp <=abs_input;
 end

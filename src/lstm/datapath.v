@@ -7,12 +7,12 @@ module datapath(clk, rst, rst_2, acc_x_1, acc_h_1, acc_x_2, acc_h_2, wr_h1, wr_h
 	            rd_addr_b_2, wr_addr_u_2, wr_u_2, rd_addr_u_2,
                 rd_addr_h1, rd_addr_h2, rd_addr_c1, rd_addr_c2,
                 wr_addr_h1, wr_addr_h2, wr_addr_c1, wr_addr_c2,
-                rst_acc, rst_mac_bp,
+                rst_acc, rst_mac_bp, rst_cost,
 				sel_a, sel_i, sel_f, sel_o, sel_h, sel_t,
 				sel_state, sel_dstate, sel_dout,
 				sel_in1, sel_in2, sel_in3, sel_in4, sel_in5,
 				sel_x1_1, sel_x1_2, sel_x2_2, sel_as_1, sel_as_2, sel_addsub, sel_temp,
-				acc_mac,acc_da, acc_di, acc_df, acc_do,
+				acc_mac,acc_da, acc_di, acc_df, acc_do, acc_cost,
 				sel_dgate, sel_wght, sel_wghts1, sel_wghts2,
 				wr_da1, wr_di1, wr_df1, wr_do1,
 				wr_da2, wr_di2, wr_df2, wr_do2,
@@ -30,7 +30,10 @@ module datapath(clk, rst, rst_2, acc_x_1, acc_h_1, acc_x_2, acc_h_2, wr_h1, wr_h
 				rd_layr1_ua, rd_layr1_ui, rd_layr1_uf, rd_layr1_uo,
 				rd_layr1_a, rd_layr1_i, rd_layr1_f, rd_layr1_o, rd_layr1_state,
 				rd_layr2_a, rd_layr2_i, rd_layr2_f, rd_layr2_o, rd_layr2_state,
-				rd_layr2_t, rd_layr2_h
+				rd_layr2_t, rd_layr2_h,
+				update,
+				o_cost,
+				dgate, h2
 				);
 
 // parameters
@@ -116,7 +119,7 @@ input wr_c2;
 input [11:0] rd_addr_c2;
 input [11:0] wr_addr_c2;
 
-input rst_acc, rst_mac_bp;
+input rst_acc, rst_mac_bp, rst_cost;
 input sel_a, sel_i, sel_f, sel_o, sel_h, sel_t;
 input sel_state, sel_dstate, sel_dout;
 
@@ -133,7 +136,7 @@ input [1:0] sel_as_2;
 input sel_addsub;
 input [1:0] sel_temp;
 
-input acc_da, acc_di, acc_df, acc_do;
+input acc_da, acc_di, acc_df, acc_do, acc_cost;
 input acc_mac;
 
 input [1:0] sel_dgate;
@@ -166,6 +169,11 @@ input [11:0] /*[5:0]*/ rd_layr1_ua, rd_layr1_ui, rd_layr1_uf, rd_layr1_uo;
 
 input [11:0] /*[8:0]*/ rd_layr1_a, rd_layr1_i, rd_layr1_f, rd_layr1_o, rd_layr1_state;
 input [11:0] /*[5:0]*/ rd_layr2_t, rd_layr2_h, rd_layr2_a, rd_layr2_i, rd_layr2_f, rd_layr2_o, rd_layr2_state;
+
+input update;
+
+output [WIDTH-1:0] o_cost;
+output [WIDTH-1:0] dgate, h2; 
 
 // registers
 reg signed [WIDTH-1:0] reg_c1, reg_c2;
@@ -226,8 +234,33 @@ wire signed [WIDTH-1:0] i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_stat
 wire signed [WIDTH-1:0] i_layr2_t, i_layr2_h, i_layr2_a, i_layr2_i, i_layr2_f, i_layr2_o, i_layr2_state;
 
 wire signed [WIDTH-1:0] dgate;
-wire signed [WIDTH-1:0] da1, di1, df1, do1;
-wire signed [WIDTH-1:0] da2, di2, df2, do2;
+wire signed [WIDTH-1:0] d_a_1, d_i_1, d_f_1, d_o_1;
+wire signed [WIDTH-1:0] d_a_2, d_i_2, d_f_2, d_o_2;
+
+wire signed [WIDTH-1:0] sh3_x1, sh3_h1;
+wire signed [WIDTH-1:0] o_mux_x1, o_mux_h1;
+wire signed [WIDTH-1:0] sh3_da_1, sh3_di_1, sh3_df_1, sh3_do_1;
+wire signed [WIDTH-1:0] o_mux_w_a_1, o_mux_w_i_1, o_mux_w_f_1, o_mux_w_o_1;
+wire signed [WIDTH-1:0] o_mux_u_a_1, o_mux_u_i_1, o_mux_u_f_1, o_mux_u_o_1;
+wire signed [WIDTH-1:0] o_mux_b_a_1, o_mux_b_i_1, o_mux_b_f_1, o_mux_b_o_1;
+wire signed [WIDTH-1:0] new_w_a_1, new_w_i_1, new_w_f_1, new_w_o_1;
+wire signed [WIDTH-1:0] new_u_a_1, new_u_i_1, new_u_f_1, new_u_o_1;
+wire signed [WIDTH-1:0] new_b_a_1, new_b_i_1, new_b_f_1, new_b_o_1;
+wire signed [WIDTH-1:0] dw_a_1, dw_i_1, dw_f_1, dw_o_1;
+wire signed [WIDTH-1:0] du_a_1, du_i_1, du_f_1, du_o_1;
+
+wire signed [WIDTH-1:0] sh3_x2, sh3_h2;
+wire signed [WIDTH-1:0] o_mux_x2, o_mux_h2;
+wire signed [WIDTH-1:0] sh3_da_2, sh3_di_2, sh3_df_2, sh3_do_2;
+wire signed [WIDTH-1:0] o_mux_w_a_2, o_mux_w_i_2, o_mux_w_f_2, o_mux_w_o_2;
+wire signed [WIDTH-1:0] o_mux_u_a_2, o_mux_u_i_2, o_mux_u_f_2, o_mux_u_o_2;
+wire signed [WIDTH-1:0] o_mux_b_a_2, o_mux_b_i_2, o_mux_b_f_2, o_mux_b_o_2;
+wire signed [WIDTH-1:0] new_w_a_2, new_w_i_2, new_w_f_2, new_w_o_2;
+wire signed [WIDTH-1:0] new_u_a_2, new_u_i_2, new_u_f_2, new_u_o_2;
+wire signed [WIDTH-1:0] new_b_a_2, new_b_i_2, new_b_f_2, new_b_o_2;
+wire signed [WIDTH-1:0] dw_a_2, dw_i_2, dw_f_2, dw_o_2;
+wire signed [WIDTH-1:0] du_a_2, du_i_2, du_f_2, du_o_2;
+
 
 // Input Memory
 // out: data (53*WIDTH)
@@ -278,7 +311,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (wr_addr_w_1),
 		.addr_b (rd_addr_w_1),
-		.i_a    (),
+		.i_a    (new_w_a_1),
 		.o_a    (),
 		.o_b    (w_a_1)
 	);
@@ -294,7 +327,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (wr_addr_w_1),
 		.addr_b (rd_addr_w_1),
-		.i_a    (),
+		.i_a    (new_w_i_1),
 		.o_a    (),
 		.o_b    (w_i_1)
 	);
@@ -310,7 +343,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (wr_addr_w_1),
 		.addr_b (rd_addr_w_1),
-		.i_a    (),
+		.i_a    (new_w_f_1),
 		.o_a    (),
 		.o_b    (w_f_1)
 	);
@@ -326,7 +359,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (wr_addr_w_1),
 		.addr_b (rd_addr_w_1),
-		.i_a    (),
+		.i_a    (new_w_o_1),
 		.o_a    (),
 		.o_b    (w_o_1)
 	);
@@ -342,7 +375,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (rd_layr1_ua),
 		.addr_b (rd_addr_u_1),
-		.i_a    (),
+		.i_a    (new_u_a_1),
 		.o_a    (i_layr1_ua),
 		.o_b    (u_a_1)
 	);
@@ -358,7 +391,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (rd_layr1_ui),
 		.addr_b (rd_addr_u_1),
-		.i_a    (),
+		.i_a    (new_u_i_1),
 		.o_a    (i_layr1_ui),
 		.o_b    (u_i_1)
 	);
@@ -374,7 +407,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (rd_layr1_uf),
 		.addr_b (rd_addr_u_1),
-		.i_a    (),
+		.i_a    (new_u_f_1),
 		.o_a    (i_layr1_uf),
 		.o_b    (u_f_1)
 	);
@@ -390,7 +423,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (rd_layr1_uo),
 		.addr_b (rd_addr_u_1),
-		.i_a    (),
+		.i_a    (new_u_o_1),
 		.o_a    (i_layr1_uo),
 		.o_b    (u_o_1)
 	);
@@ -406,7 +439,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (wr_addr_b_1),
 		.addr_b (rd_addr_b_1),
-		.i_a    (),
+		.i_a    (new_b_a_1),
 		.o_a    (),
 		.o_b    (b_a_1)
 	);
@@ -422,7 +455,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (wr_addr_b_1),
 		.addr_b (rd_addr_b_1),
-		.i_a    (),
+		.i_a    (new_b_i_1),
 		.o_a    (),
 		.o_b    (b_i_1)
 	);
@@ -438,7 +471,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (wr_addr_b_1),
 		.addr_b (rd_addr_b_1),
-		.i_a    (),
+		.i_a    (new_b_f_1),
 		.o_a    (),
 		.o_b    (b_f_1)
 	);
@@ -454,7 +487,7 @@ memory_cell #(
 		.wr_a   (),
 		.addr_a (wr_addr_b_1),
 		.addr_b (rd_addr_b_1),
-		.i_a    (),
+		.i_a    (new_b_o_1),
 		.o_a    (),
 		.o_b    (b_o_1)
 	);
@@ -478,6 +511,27 @@ memory_cell #(
 		.o_b    (i_layr1_state)
 	);
 
+
+// LAYER 1 CELL INPUT MULTIPLEXER
+// in: shifted x1 with learning rate of 0.125 & x1
+assign sh3_x1 = data_x1[31] ? {3'b111,data_x1[31:3]} : {3'b000,data_x1[31:3]}; 
+assign o_mux_x1 = update ? sh3_x1 : data_x1;
+
+// LAYER 1 CELL INPUT MULTIPLEXER
+// in: shifted x1 with learning rate of 0.125 & x1
+assign sh3_h1 = o_mem_h1_a[31] ? {3'b111,o_mem_h1_a[31:3]} : {3'b000,o_mem_h1_a[31:3]}; 
+assign o_mux_h1 = update ? sh3_h1 : o_mem_h1_a;
+
+// LAYER 1 WEIGHT MULTIPLEXER
+assign o_mux_w_a_1 = update ? w_a_1 : d_a_1 ;
+assign o_mux_w_i_1 = update ? w_i_1 : d_i_1 ;
+assign o_mux_w_f_1 = update ? w_f_1 : d_f_1 ;
+assign o_mux_w_o_1 = update ? w_o_1 : d_o_1 ;
+assign o_mux_u_a_1 = update ? u_a_1 : d_a_1 ;
+assign o_mux_u_i_1 = update ? u_i_1 : d_i_1 ;
+assign o_mux_u_f_1 = update ? u_f_1 : d_f_1 ;
+assign o_mux_u_o_1 = update ? u_o_1 : d_o_1 ;
+
 // LAYER 1 LSTM CELL
 // in: conc_x (106*WIDTH), prev_c (WIDTH) 
 // out: o_a, o_i, o_f, o_o, o_c, o_h (WIDTH)
@@ -489,17 +543,17 @@ lstm_cell #(
 		.rst          (rst),
 		.acc_x        (acc_x_1),
 		.acc_h        (acc_h_1),
-		.i_x          (data_x1),
-		.i_h          (o_mem_h1_a),
+		.i_x          (o_mux_x1),
+		.i_h          (o_mux_h1),
 		.i_prev_state (prev_c1),
-		.i_w_a        (w_a_1),
-		.i_w_i        (w_i_1),
-		.i_w_f        (w_f_1),
-		.i_w_o        (w_o_1),
-		.i_u_a        (u_a_1),
-		.i_u_i        (u_i_1),
-		.i_u_f        (u_f_1),
-		.i_u_o        (u_o_1),
+		.i_w_a        (o_mux_w_a_1),
+		.i_w_i        (o_mux_w_i_1),
+		.i_w_f        (o_mux_w_f_1),
+		.i_w_o        (o_mux_w_o_1),
+		.i_u_a        (o_mux_u_a_1),
+		.i_u_i        (o_mux_u_i_1),
+		.i_u_f        (o_mux_u_f_1),
+		.i_u_o        (o_mux_u_o_1),
 		.i_b_a        (b_a_1),
 		.i_b_i        (b_i_1),
 		.i_b_f        (b_f_1),
@@ -509,8 +563,37 @@ lstm_cell #(
 		.o_f          (f1),
 		.o_o          (o1),
 		.o_c          (c1),
-		.o_h          (h1)
+		.o_h          (h1),
+		.o_mul_1      (dw_a_1), // wa
+		.o_mul_2      (dw_i_1), // wi
+		.o_mul_3      (dw_f_1), // wf
+		.o_mul_4      (dw_o_1), // wo
+		.o_mul_5      (du_a_1), // ua
+		.o_mul_6      (du_i_1), // ui
+		.o_mul_7      (du_f_1), // uf
+		.o_mul_8      (du_o_1)  // uo
 	);
+
+// W & dW Subtractor
+assign new_w_a_1 = w_a_1 - dw_a_1 ;
+assign new_w_i_1 = w_i_1 - dw_i_1 ;
+assign new_w_f_1 = w_f_1 - dw_f_1 ;
+assign new_w_o_1 = w_o_1 - dw_o_1 ;
+assign new_u_a_1 = u_a_1 - du_a_1 ;
+assign new_u_i_1 = u_i_1 - du_i_1 ;
+assign new_u_f_1 = u_f_1 - du_f_1 ;
+assign new_u_o_1 = u_o_1 - du_o_1 ;
+
+// dGates Shifter & B Subtractor
+assign sh3_da_1 = o_mux_w_a_1[31] ? {3'b111,o_mux_w_a_1[31:3]} : {3'b000,o_mux_w_a_1[31:3]}; 
+assign sh3_di_1 = o_mux_w_i_1[31] ? {3'b111,o_mux_w_i_1[31:3]} : {3'b000,o_mux_w_i_1[31:3]}; 
+assign sh3_df_1 = o_mux_w_f_1[31] ? {3'b111,o_mux_w_f_1[31:3]} : {3'b000,o_mux_w_f_1[31:3]}; 
+assign sh3_do_1 = o_mux_w_o_1[31] ? {3'b111,o_mux_w_o_1[31:3]} : {3'b000,o_mux_w_o_1[31:3]}; 
+
+assign new_b_a_1 = b_a_1 - sh3_da_1;
+assign new_b_i_1 = b_i_1 - sh3_di_1;
+assign new_b_f_1 = b_f_1 - sh3_df_1;
+assign new_b_o_1 = b_o_1 - sh3_do_1;
 
 // Write a1 to memory
 memory_cell #(
@@ -822,6 +905,27 @@ memory_cell #(
 			.o_b    (i_layr2_state)
 		);
 
+// LAYER 2 CELL INPUT MULTIPLEXER
+// in: shifted x1 with learning rate of 0.125 & x1
+assign sh3_x2 = data_x2[31] ? {3'b111,data_x2[31:3]} : {3'b000,data_x2[31:3]}; 
+assign o_mux_x2 = update ? sh3_x2 : data_x2;
+
+// LAYER 2 CELL INPUT MULTIPLEXER
+// in: shifted x1 with learning rate of 0.125 & x1
+assign sh3_h2 = o_mem_h2_a[31] ? {3'b111,o_mem_h2_a[31:3]} : {3'b000,o_mem_h2_a[31:3]}; 
+assign o_mux_h2 = update ? sh3_h2 : o_mem_h2_a;
+
+// LAYER 2 WEIGHT MULTIPLEXER
+assign o_mux_w_a_2 = update ? w_a_2 : d_a_2 ;
+assign o_mux_w_i_2 = update ? w_i_2 : d_i_2 ;
+assign o_mux_w_f_2 = update ? w_f_2 : d_f_2 ;
+assign o_mux_w_o_2 = update ? w_o_2 : d_o_2 ;
+assign o_mux_u_a_2 = update ? u_a_2 : d_a_2 ;
+assign o_mux_u_i_2 = update ? u_i_2 : d_i_2 ;
+assign o_mux_u_f_2 = update ? u_f_2 : d_f_2 ;
+assign o_mux_u_o_2 = update ? u_o_2 : d_o_2 ;
+
+
 // LAYER 2 LSTM CELL
 lstm_cell #(
 		.WIDTH(WIDTH),
@@ -831,17 +935,17 @@ lstm_cell #(
 		.rst          (rst_2),
 		.acc_x        (acc_x_2),
 		.acc_h        (acc_h_2),
-		.i_x          (data_x2),
-		.i_h          (o_mem_h2_a),
+		.i_x          (o_mux_x2),
+		.i_h          (o_mux_h2),
 		.i_prev_state (prev_c2),
-		.i_w_a        (w_a_2),
-		.i_w_i        (w_i_2),
-		.i_w_f        (w_f_2),
-		.i_w_o        (w_o_2),
-		.i_u_a        (u_a_2),
-		.i_u_i        (u_i_2),
-		.i_u_f        (u_f_2),
-		.i_u_o        (u_o_2),
+		.i_w_a        (o_mux_w_a_2),
+		.i_w_i        (o_mux_w_i_2),
+		.i_w_f        (o_mux_w_f_2),
+		.i_w_o        (o_mux_w_o_2),
+		.i_u_a        (o_mux_u_a_2),
+		.i_u_i        (o_mux_u_i_2),
+		.i_u_f        (o_mux_u_f_2),
+		.i_u_o        (o_mux_u_o_2),
 		.i_b_a        (b_a_2),
 		.i_b_i        (b_i_2),
 		.i_b_f        (b_f_2),
@@ -851,11 +955,40 @@ lstm_cell #(
 		.o_f          (f2),
 		.o_o          (o2),
 		.o_c          (c2),
-		.o_h          (h2)
+		.o_h          (h2),
+		.o_mul_1      (dw_a_2),
+		.o_mul_2      (dw_i_2),
+		.o_mul_3      (dw_f_2),
+		.o_mul_4      (dw_o_2),
+		.o_mul_5      (du_a_2),
+		.o_mul_6      (du_i_2),
+		.o_mul_7      (du_f_2),
+		.o_mul_8      (du_o_2)
 	);
 
 assign i_mem_h2 = h2; // Loop to write LAYER 2 Output Memory
 assign i_mem_c2 = c2; // Loop to write LAYER 2 State Memory
+
+// W & dW Subtractor
+assign new_w_a_2 = w_a_2 - dw_a_2 ;
+assign new_w_i_2 = w_i_2 - dw_i_2 ;
+assign new_w_f_2 = w_f_2 - dw_f_2 ;
+assign new_w_o_2 = w_o_2 - dw_o_2 ;
+assign new_u_a_2 = u_a_2 - du_a_2 ;
+assign new_u_i_2 = u_i_2 - du_i_2 ;
+assign new_u_f_2 = u_f_2 - du_f_2 ;
+assign new_u_o_2 = u_o_2 - du_o_2 ;
+
+// dGates Shifter & B Subtractor
+assign sh3_da_2 = o_mux_w_a_2[31] ? {3'b111,o_mux_w_a_2[31:3]} : {3'b000,o_mux_w_a_2[31:3]}; 
+assign sh3_di_2 = o_mux_w_i_2[31] ? {3'b111,o_mux_w_i_2[31:3]} : {3'b000,o_mux_w_i_2[31:3]}; 
+assign sh3_df_2 = o_mux_w_f_2[31] ? {3'b111,o_mux_w_f_2[31:3]} : {3'b000,o_mux_w_f_2[31:3]}; 
+assign sh3_do_2 = o_mux_w_o_2[31] ? {3'b111,o_mux_w_o_2[31:3]} : {3'b000,o_mux_w_o_2[31:3]}; 
+
+assign new_b_a_2 = b_a_2 - sh3_da_2;
+assign new_b_i_2 = b_i_2 - sh3_di_2;
+assign new_b_f_2 = b_f_2 - sh3_df_2;
+assign new_b_o_2 = b_o_2 - sh3_do_2;
 
 // Write a2 to memory
 memory_cell #(
@@ -964,6 +1097,7 @@ bp #(
 		.rst           (rst),
 		.rst_acc       (rst_acc),
 		.rst_mac       (rst_mac_bp),
+		.rst_cost      (rst_cost),
 		.i_layr1_a     (i_layr1_a),
 		.i_layr1_i     (i_layr1_i),
 		.i_layr1_f     (i_layr1_f),
@@ -1013,19 +1147,20 @@ bp #(
 		.acc_di        (acc_di),
 		.acc_df        (acc_df),
 		.acc_do        (acc_do),
+		.acc_cost      (acc_cost),
 		.acc_mac       (acc_mac),
 		.sel_dgate     (sel_dgate),
 		.sel_wght      (sel_wght),
 		.sel_wghts1    (sel_wghts1),
 		.sel_wghts2    (sel_wghts2),
-		.da1           (da1),
-		.di1           (di1),
-		.df1           (df1),
-		.do1           (do1),
-		.da2           (da2),
-		.di2           (di2),
-		.df2           (df2),
-		.do2           (do2),
+		// .da1           (da1),
+		// .di1           (di1),
+		// .df1           (df1),
+		// .do1           (do1),
+		// .da2           (da2),
+		// .di2           (di2),
+		// .df2           (df2),
+		// .do2           (do2),
 		.wr_dx2        (wr_dx2),
 		.wr_dout2      (wr_dout2),
 		.wr_dout1      (wr_dout1),
@@ -1041,7 +1176,8 @@ bp #(
 		.rd_addr_dstate2 (rd_addr_dstate2),
 		.wr_addr_dstate1 (wr_addr_dstate1),
 		.wr_addr_dstate2 (wr_addr_dstate2),
-		.o_dgate (dgate)
+		.o_dgate (dgate),
+		.o_cost  (o_cost)
 	);
 
 //////////////////////////////////////////////
@@ -1060,7 +1196,7 @@ memory_cell #(
         .addr_b (rd_addr_da2),
         .i_a    (dgate),
         .o_a    (),
-        .o_b    (da2)
+        .o_b    (d_a_2)
     );
 
 memory_cell #(
@@ -1077,7 +1213,7 @@ memory_cell #(
         .addr_b (rd_addr_di2),
         .i_a    (dgate),
         .o_a    (),
-        .o_b    (di2)
+        .o_b    (d_i_2)
     );
 
 memory_cell #(
@@ -1094,7 +1230,7 @@ memory_cell #(
         .addr_b (rd_addr_df2),
         .i_a    (dgate),
         .o_a    (),
-        .o_b    (df2)
+        .o_b    (d_f_2)
     );
 
 memory_cell #(
@@ -1111,7 +1247,7 @@ memory_cell #(
         .addr_b (rd_addr_do2),
         .i_a    (dgate),
         .o_a    (),
-        .o_b    (do2)
+        .o_b    (d_o_2)
     );
 
 /////////////////////////////////////////////
@@ -1130,7 +1266,7 @@ memory_cell #(
         .addr_b (rd_addr_da1),
         .i_a    (dgate),
         .o_a    (),
-        .o_b    (da1)
+        .o_b    (d_a_1)
     );
 
 memory_cell #(
@@ -1147,7 +1283,7 @@ memory_cell #(
         .addr_b (rd_addr_di1),
         .i_a    (dgate),
         .o_a    (),
-        .o_b    (di1)
+        .o_b    (d_i_1)
     );
 
 memory_cell #(
@@ -1164,7 +1300,7 @@ memory_cell #(
         .addr_b (rd_addr_df1),
         .i_a    (dgate),
         .o_a    (),
-        .o_b    (df1)
+        .o_b    (d_f_1)
     );
 
 memory_cell #(
@@ -1181,7 +1317,7 @@ memory_cell #(
         .addr_b (rd_addr_do1),
         .i_a    (dgate),
         .o_a    (),
-        .o_b    (do1)
+        .o_b    (d_o_1)
     );
 
 endmodule

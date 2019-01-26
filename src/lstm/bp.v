@@ -10,7 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module bp ( clk, rst, rst_acc, rst_mac,
+module bp ( clk, rst, rst_acc, rst_mac, rst_cost,
             i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state,
             i_layr2_a, i_layr2_i, i_layr2_f, i_layr2_o, i_layr2_state, i_layr2_h, i_layr2_t,
             // i_layr1_wa, i_layr1_wi, i_layr1_wf, i_layr1_wo,
@@ -23,11 +23,11 @@ module bp ( clk, rst, rst_acc, rst_mac,
             sel_in1, sel_in2, sel_in3, sel_in4, sel_in5,
             sel_x1_1, sel_x1_2, sel_x2_2, sel_as_1, sel_as_2, 
             sel_addsub, sel_temp,
-            acc_da, acc_di, acc_df, acc_do, acc_mac,
+            acc_da, acc_di, acc_df, acc_do, acc_cost, acc_mac,
             
             sel_dgate, sel_wght, sel_wghts1, sel_wghts2,
-            da1, di1, df1, do1,
-            da2, di2, df2, do2,
+            // da1, di1, df1, do1,
+            // da2, di2, df2, do2,
             // wr_da1, wr_di1, wr_df1, wr_do1,
             // wr_da2, wr_di2, wr_df2, wr_do2,
             wr_dx2, wr_dout2, wr_dout1,
@@ -40,7 +40,7 @@ module bp ( clk, rst, rst_acc, rst_mac,
             wr_addr_dx2, wr_addr_dout2, wr_addr_dout1,
             rd_addr_dstate2, rd_addr_dstate1,
             wr_addr_dstate2, wr_addr_dstate1,
-            o_dgate
+            o_dgate, o_cost
             );
 
 // parameters
@@ -69,7 +69,7 @@ parameter LAYR2_dOut = "layer2_dOut.list";
 parameter LAYR2_dState = "layer2_dState.list";
 
 // common ports
-input clk, rst, rst_acc, rst_mac;
+input clk, rst, rst_acc, rst_mac, rst_cost;
 
 // input ports
 input signed [WIDTH-1:0] i_layr1_a, i_layr1_i, i_layr1_f, i_layr1_o, i_layr1_state;
@@ -106,7 +106,7 @@ input [1:0] sel_as_2;
 input sel_addsub;
 input [1:0] sel_temp;
 
-input acc_da, acc_di, acc_df, acc_do;
+input acc_da, acc_di, acc_df, acc_do, acc_cost;
 input acc_mac;
 
 input [1:0] sel_dgate;
@@ -115,8 +115,8 @@ input sel_wght;
 input [1:0] sel_wghts1;
 input [2:0] sel_wghts2;
 
-input signed [WIDTH-1:0] da1, di1, df1, do1;
-input signed [WIDTH-1:0] da2, di2, df2, do2;
+// input signed [WIDTH-1:0] da1, di1, df1, do1;
+// input signed [WIDTH-1:0] da2, di2, df2, do2;
 
 // input wr_da1, wr_di1, wr_df1, wr_do1;
 // input [8:0] rd_addr_da1, rd_addr_di1, rd_addr_df1, rd_addr_do1;
@@ -136,7 +136,7 @@ input [11:0] /*[3:0]*/ rd_addr_dstate2, wr_addr_dstate2;
 input [11:0] /*[6:0]*/ rd_addr_dstate1, wr_addr_dstate1;
 
 // output ports
-output signed [WIDTH-1:0] o_dgate;
+output signed [WIDTH-1:0] o_dgate, o_cost;
 
 // registers
 
@@ -144,7 +144,7 @@ output signed [WIDTH-1:0] o_dgate;
 wire signed [WIDTH-1:0] i_a, i_i, i_f, i_o, i_h, i_t, i_state;
 wire signed [WIDTH-1:0] d_state, reg_d_state, reg_d_state1, reg_d_state2;
 
-wire signed [WIDTH-1:0] o_acc_da, o_acc_di, o_acc_df, o_acc_do;
+wire signed [WIDTH-1:0] o_acc_da, o_acc_di, o_acc_df, o_acc_do, o_acc_cost;
 wire signed [WIDTH-1:0] dgate_mux;
 wire signed [WIDTH-1:0] wghts_mux1, wghts_mux2;
 
@@ -318,6 +318,10 @@ acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_di (.clk(clk), .rst(rst_acc), .acc(acc_di
 acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_df (.clk(clk), .rst(rst_acc), .acc(acc_df), .i(dgate), .o(o_acc_df));
 acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_do (.clk(clk), .rst(rst_acc), .acc(acc_do), .i(dgate), .o(o_acc_do));
 
+// ACCUMULATOR for Cost function
+acc #(.WIDTH(WIDTH), .FRAC(FRAC)) _acc_cost (.clk(clk), .rst(rst_cost), .acc(acc_cost), .i(dgate), .o(o_acc_cost));
+assign o_cost = o_acc_cost >> 3;
+
 // LAYER 2 dgates Multiplexer
 multiplexer_4to1 #(.WIDTH(WIDTH)) mux_x (.i_a(o_acc_da), .i_b(o_acc_di), .i_c(o_acc_df), .i_d(o_acc_do), .sel(sel_dgate), .o(dgate_mux));
 
@@ -342,7 +346,8 @@ mac #(
         .acc (acc_mac),
         .i_x (dgate_mux),
         .i_m (wghts_mux1),
-        .o   (o_mac)
+        .o_mul   (),
+        .o_mac   (o_mac)
     );
 
 // LAYER 2 dX Memory
