@@ -10,7 +10,7 @@
 //                    
 //            
 ///////////////////////////////////////////////////////////////////////////////
-module fsm (clk, en, rst_fsm, rst, rst_2, rst_acc, rst_mac, acc_x_1, acc_x_2, acc_h_1, acc_h_2, wr_h1, wr_h2,  wr_c1, wr_c2, wr_act_1, wr_act_2,
+module fsm (clk, en, rst_fsm,  rst, rst_2, rst_acc, rst_mac, update, acc_x_1, acc_x_2, acc_h_1, acc_h_2, wr_h1, wr_h2,  wr_c1, wr_c2, wr_act_1, wr_act_2,
 wr_dstate1, wr_dstate2, sel_in1, sel_in2, sel_in3, sel_in4, sel_in5, sel_x1_1, sel_x1_2, sel_x2_2, sel_as_1, sel_as_2, sel_addsub, sel_temp,
 acc_da, acc_di, acc_df, acc_do, acc_mac, sel_dgate, sel_state, sel_dstate, sel_dout, sel_wght, sel_wghts1, sel_wghts2,sel_a, sel_i, sel_f, sel_o, sel_h, sel_t, wr_da1, wr_di1, 
 wr_df1, wr_do1, wr_da2, wr_di2, wr_df2, wr_do2, wr_dx2, wr_dout2, wr_dout1,);
@@ -19,6 +19,7 @@ wr_df1, wr_do1, wr_da2, wr_di2, wr_df2, wr_do2, wr_dx2, wr_dout2, wr_dout1,);
 input clk, rst_fsm;
 
 output reg en, rst, rst_2, rst_acc, rst_mac;
+output reg update;
 
 //output ports
 output reg acc_x_1, acc_h_1, acc_x_2, acc_h_2;
@@ -96,33 +97,71 @@ begin
 			wr_h2 <=0;
 			wr_c1 <=0;
 			wr_c2 <=0;
+			update <=1;
 		end
 		S1:
 		begin
 			rst <=0;
 			rst_2 <=0;
+			acc_x_1 <=0;
+			acc_h_1 <=0;
+			acc_x_2 <=0;
+			acc_h_2 <=0;
+			wr_h1 <=0;
+			wr_h2 <=0;
+			wr_c1 <=0;
+			wr_c2 <=0;
+			update <=1;
 		end
 		S2:
 		begin
+			rst <=0;
+			rst_2 <=0;
 			acc_x_2 <=0;
 			acc_h_2 <=0;
+			acc_x_1 <=0;
+			acc_h_1 <=0;
+			acc_x_2 <=0;
+			acc_h_2 <=0;
+			wr_h1 <=0;
+			wr_h2 <=0;
+			wr_c1 <=0;
+			wr_c2 <=0;
 			rst_2 <=1;
 			rst <= 0;
 		end
 
 		S3:
 		begin
+			rst <=0;
+			rst_2 <=0;
+			acc_x_1 <=0;
+			acc_h_1 <=0;
+			acc_x_2 <=0;
+			acc_h_2 <=0;
+			wr_h1 <=0;
+			wr_h2 <=0;
+			wr_c1 <=0;
+			wr_c2 <=0;
 			en <=1; 
 		end
 		// start computing for first layer -- repeat 53x -------------//
 		S4:
 		begin
+			rst <=0;
+			rst_2 <=0;			
+			en <=1;
 			acc_x_1 <=1;
 			acc_h_1 <=1;
-			rst <=0;
+			wr_h1 <=0;
+			wr_h2 <=0;
+			wr_c1 <=0;
+			wr_c2 <=0;
+
 		end
 		S5:
 		begin
+
 			acc_x_1 <= 0;
 			acc_x_1 <= 0;
 		end

@@ -303,7 +303,7 @@ memory_cell #(
 memory_cell #(
 		.WIDTH(WIDTH),
 		.NUM(LAYR1_CELL*LAYR1_INPUT),
-		.TIMESTEP(1),
+		.TIMESTEP(),
 		.FILENAME("layer1_w_a.list")
 	) inst_memory_cell_w_a (
 		.clk    (clk),
@@ -429,7 +429,7 @@ memory_cell #(
 	);
 
 memory_cell #(
-		.WIDTH(WIDTH),
+		.WIDTH(WIDTH),	
 		.NUM(LAYR1_CELL),
 		.TIMESTEP(1),
 		.FILENAME("layer1_b_a.list")
@@ -1183,7 +1183,7 @@ bp #(
 //////////////////////////////////////////////
 // LAYER 2 dA, dI, dF, dO Memory  ///////////
 memory_cell #(
-        // .ADDR(6),
+        // .ADDR(6),,
         .WIDTH(WIDTH),
         .NUM(56),
         .TIMESTEP(1),
