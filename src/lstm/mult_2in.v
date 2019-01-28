@@ -28,6 +28,6 @@ wire signed [2*WIDTH-1:0] mult;
 // and taking only 32 bits, with 24 bit FRAC
 assign mult = i_a * i_b;
 
-assign o = mult[(FRAC+31):FRAC] + {31'd0, mult[23]};
+assign o = mult[(FRAC+WIDTH-1):FRAC] + {{(WIDTH-1){1'd0}}, mult[FRAC-1]};
 
 endmodule

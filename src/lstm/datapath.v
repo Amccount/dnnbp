@@ -37,8 +37,8 @@ module datapath(clk, rst, rst_2, acc_x_1, acc_h_1, acc_x_2, acc_h_2, wr_h1, wr_h
 				);
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24;
+parameter FRAC = 20;
 parameter TIMESTEP = 7;
 parameter LAYR1_INPUT = 53;
 parameter LAYR1_CELL = 53;
@@ -303,7 +303,7 @@ memory_cell #(
 memory_cell #(
 		.WIDTH(WIDTH),
 		.NUM(LAYR1_CELL*LAYR1_INPUT),
-		.TIMESTEP(),
+		.TIMESTEP(1),
 		.FILENAME("layer1_w_a.list")
 	) inst_memory_cell_w_a (
 		.clk    (clk),
@@ -429,7 +429,7 @@ memory_cell #(
 	);
 
 memory_cell #(
-		.WIDTH(WIDTH),	
+		.WIDTH(WIDTH),
 		.NUM(LAYR1_CELL),
 		.TIMESTEP(1),
 		.FILENAME("layer1_b_a.list")
@@ -514,12 +514,12 @@ memory_cell #(
 
 // LAYER 1 CELL INPUT MULTIPLEXER
 // in: shifted x1 with learning rate of 0.125 & x1
-assign sh3_x1 = data_x1[31] ? {3'b111,data_x1[31:3]} : {3'b000,data_x1[31:3]}; 
+assign sh3_x1 = data_x1[23] ? {3'b111,data_x1[23:3]} : {3'b000,data_x1[23:3]}; 
 assign o_mux_x1 = update ? sh3_x1 : data_x1;
 
 // LAYER 1 CELL INPUT MULTIPLEXER
 // in: shifted x1 with learning rate of 0.125 & x1
-assign sh3_h1 = o_mem_h1_a[31] ? {3'b111,o_mem_h1_a[31:3]} : {3'b000,o_mem_h1_a[31:3]}; 
+assign sh3_h1 = o_mem_h1_a[23] ? {3'b111,o_mem_h1_a[23:3]} : {3'b000,o_mem_h1_a[23:3]}; 
 assign o_mux_h1 = update ? sh3_h1 : o_mem_h1_a;
 
 // LAYER 1 WEIGHT MULTIPLEXER
@@ -585,10 +585,10 @@ assign new_u_f_1 = u_f_1 - du_f_1 ;
 assign new_u_o_1 = u_o_1 - du_o_1 ;
 
 // dGates Shifter & B Subtractor
-assign sh3_da_1 = o_mux_w_a_1[31] ? {3'b111,o_mux_w_a_1[31:3]} : {3'b000,o_mux_w_a_1[31:3]}; 
-assign sh3_di_1 = o_mux_w_i_1[31] ? {3'b111,o_mux_w_i_1[31:3]} : {3'b000,o_mux_w_i_1[31:3]}; 
-assign sh3_df_1 = o_mux_w_f_1[31] ? {3'b111,o_mux_w_f_1[31:3]} : {3'b000,o_mux_w_f_1[31:3]}; 
-assign sh3_do_1 = o_mux_w_o_1[31] ? {3'b111,o_mux_w_o_1[31:3]} : {3'b000,o_mux_w_o_1[31:3]}; 
+assign sh3_da_1 = o_mux_w_a_1[23] ? {3'b111,o_mux_w_a_1[23:3]} : {3'b000,o_mux_w_a_1[23:3]}; 
+assign sh3_di_1 = o_mux_w_i_1[23] ? {3'b111,o_mux_w_i_1[23:3]} : {3'b000,o_mux_w_i_1[23:3]}; 
+assign sh3_df_1 = o_mux_w_f_1[23] ? {3'b111,o_mux_w_f_1[23:3]} : {3'b000,o_mux_w_f_1[23:3]}; 
+assign sh3_do_1 = o_mux_w_o_1[23] ? {3'b111,o_mux_w_o_1[23:3]} : {3'b000,o_mux_w_o_1[23:3]}; 
 
 assign new_b_a_1 = b_a_1 - sh3_da_1;
 assign new_b_i_1 = b_i_1 - sh3_di_1;
@@ -907,12 +907,12 @@ memory_cell #(
 
 // LAYER 2 CELL INPUT MULTIPLEXER
 // in: shifted x1 with learning rate of 0.125 & x1
-assign sh3_x2 = data_x2[31] ? {3'b111,data_x2[31:3]} : {3'b000,data_x2[31:3]}; 
+assign sh3_x2 = data_x2[23] ? {3'b111,data_x2[23:3]} : {3'b000,data_x2[23:3]}; 
 assign o_mux_x2 = update ? sh3_x2 : data_x2;
 
 // LAYER 2 CELL INPUT MULTIPLEXER
 // in: shifted x1 with learning rate of 0.125 & x1
-assign sh3_h2 = o_mem_h2_a[31] ? {3'b111,o_mem_h2_a[31:3]} : {3'b000,o_mem_h2_a[31:3]}; 
+assign sh3_h2 = o_mem_h2_a[23] ? {3'b111,o_mem_h2_a[23:3]} : {3'b000,o_mem_h2_a[23:3]}; 
 assign o_mux_h2 = update ? sh3_h2 : o_mem_h2_a;
 
 // LAYER 2 WEIGHT MULTIPLEXER
@@ -980,10 +980,10 @@ assign new_u_f_2 = u_f_2 - du_f_2 ;
 assign new_u_o_2 = u_o_2 - du_o_2 ;
 
 // dGates Shifter & B Subtractor
-assign sh3_da_2 = o_mux_w_a_2[31] ? {3'b111,o_mux_w_a_2[31:3]} : {3'b000,o_mux_w_a_2[31:3]}; 
-assign sh3_di_2 = o_mux_w_i_2[31] ? {3'b111,o_mux_w_i_2[31:3]} : {3'b000,o_mux_w_i_2[31:3]}; 
-assign sh3_df_2 = o_mux_w_f_2[31] ? {3'b111,o_mux_w_f_2[31:3]} : {3'b000,o_mux_w_f_2[31:3]}; 
-assign sh3_do_2 = o_mux_w_o_2[31] ? {3'b111,o_mux_w_o_2[31:3]} : {3'b000,o_mux_w_o_2[31:3]}; 
+assign sh3_da_2 = o_mux_w_a_2[23] ? {3'b111,o_mux_w_a_2[23:3]} : {3'b000,o_mux_w_a_2[23:3]}; 
+assign sh3_di_2 = o_mux_w_i_2[23] ? {3'b111,o_mux_w_i_2[23:3]} : {3'b000,o_mux_w_i_2[23:3]}; 
+assign sh3_df_2 = o_mux_w_f_2[23] ? {3'b111,o_mux_w_f_2[23:3]} : {3'b000,o_mux_w_f_2[23:3]}; 
+assign sh3_do_2 = o_mux_w_o_2[23] ? {3'b111,o_mux_w_o_2[23:3]} : {3'b000,o_mux_w_o_2[23:3]}; 
 
 assign new_b_a_2 = b_a_2 - sh3_da_2;
 assign new_b_i_2 = b_i_2 - sh3_di_2;
@@ -1183,7 +1183,7 @@ bp #(
 //////////////////////////////////////////////
 // LAYER 2 dA, dI, dF, dO Memory  ///////////
 memory_cell #(
-        // .ADDR(6),,
+        // .ADDR(6),
         .WIDTH(WIDTH),
         .NUM(56),
         .TIMESTEP(1),

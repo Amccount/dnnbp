@@ -12,8 +12,8 @@
 module bp_tb();
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24;
+parameter FRAC = 20;
 parameter TIMESTEP = 7;
 
 parameter LAYR1_INPUT = 53;
