@@ -13,6 +13,22 @@ parameter LAYR1_C = "layer1_c.list";
 parameter LAYR2_X = "layer2_x.list";
 parameter LAYR2_H = "layer2_h.list";
 parameter LAYR2_C = "layer2_c.list";
+parameter LAYR1_dA = "layer1_dA.list";
+parameter LAYR1_dI = "layer1_dI.list";
+parameter LAYR1_dF = "layer1_dF.list";
+parameter LAYR1_dO = "layer1_dO.list";
+parameter LAYR1_dOut = "layer1_dOut.list";
+parameter LAYR1_dState = "layer1_dState.list";
+
+// This holds d gates
+parameter LAYR2_dA = "layer2_dA.list";
+parameter LAYR2_dI = "layer2_dI.list";
+parameter LAYR2_dF = "layer2_dF.list";
+parameter LAYR2_dO = "layer2_dO.list";
+parameter LAYR2_dX = "layer2_dX.list";
+parameter LAYR2_dOut = "layer2_dOut.list";
+parameter LAYR2_dState = "layer2_dState.list";
+
 
 // common ports
 reg clk, rst, rst_2, acc_x_1, acc_h_1, acc_x_2, acc_h_2;
@@ -77,54 +93,59 @@ reg [11:0] timestep;
 			.LAYR1_C(LAYR1_C),
 			.LAYR2_X(LAYR2_X),
 			.LAYR2_H(LAYR2_H),
-			.LAYR2_C(LAYR2_C)
+			.LAYR2_C(LAYR2_C),
+			.LAYR1_dA(LAYR1_dA),
+			.LAYR1_dI(LAYR1_dI),
+			.LAYR1_dF(LAYR1_dF),
+			.LAYR1_dO(LAYR1_dO),
+			.LAYR1_dOut(LAYR1_dOut),
+			.LAYR2_dA(LAYR2_dA),
+			.LAYR2_dI(LAYR2_dI),
+			.LAYR2_dF(LAYR2_dF),
+			.LAYR2_dO(LAYR2_dO),
+			.LAYR2_dX(LAYR2_dX),
+			.LAYR2_dOut(LAYR2_dOut)
 		) inst_datapath (
-			.clk           (clk),
-			.rst           (rst),
-			.rst_2 	       (rst_2),
-			.acc_x_1       (acc_x_1),
-			.acc_h_1       (acc_h_1), 			
-			.acc_x_2       (acc_x_2), 
-			.acc_h_2       (acc_h_2), 
-			.wr_h1         (wr_h1),
-			.wr_h2         (wr_h2),
-			.wr_c1         (wr_c1),
-			.wr_c2         (wr_c2),
-			.wr_x2         (wr_x2),
-			.addr_x1       (addr_x1),
-			.rd_addr_x2    (rd_addr_x2),
-			.wr_addr_x2    (wr_addr_x2),
-			.wr_addr_act_1 (wr_addr_act_1),
-			.wr_act_1      (wr_act_1),
-			.wr_addr_act_2 (wr_addr_act_2),
-			.wr_act_2      (wr_act_2),
-			.wr_addr_w_1   (),
-			.wr_w_1        (wr_w_1),
-			.rd_addr_w_1   (rd_addr_w_1),
-			.wr_addr_u_1   (),
-			.wr_u_1        (wr_u_1),
-			.rd_addr_u_1   (rd_addr_u_1),
-			.wr_addr_b_1   (),
-			.wr_b_1        (wr_b_1),
-			.rd_addr_b_1   (rd_addr_b_1),
-			.wr_addr_w_2   (),
-			.wr_w_2        (wr_w_2),
-			.rd_addr_w_2   (rd_addr_w_2),
-			.wr_addr_b_2   (),
-			.wr_b_2        (wr_b_2),
-			.rd_addr_b_2   (rd_addr_b_2),
-			.wr_addr_u_2   (),
-			.wr_u_2        (wr_u_2),
-			.rd_addr_u_2   (rd_addr_u_2),
-			.rd_addr_h1    (rd_addr_h1),
-			.rd_addr_h2    (rd_addr_h2),
-			.rd_addr_c1    (rd_addr_c1),
-			.rd_addr_c2    (rd_addr_c2),
-			.wr_addr_h1    (wr_addr_h1),
-			.wr_addr_h2    (wr_addr_h2),
-			.wr_addr_c1    (wr_addr_c1),
-			.wr_addr_c2    (wr_addr_c2)
+			.clk             (clk),
+			.rst             (rst),
+			.rst_2           (rst_2),
+			.acc_x_1         (acc_x_1),
+			.acc_h_1         (acc_h_1),
+			.acc_x_2         (acc_x_2),
+			.acc_h_2         (acc_h_2),
+			.wr_h1           (wr_h1),
+			.wr_h2           (wr_h2),
+			.wr_c1           (wr_c1),
+			.wr_c2           (wr_c2),
+			.wr_x2           (wr_x2),
+			.addr_x1         (addr_x1),
+			.rd_addr_x2      (rd_addr_x2),
+			.wr_addr_x2      (wr_addr_x2),
+			.wr_addr_act_1   (wr_addr_act_1),
+			.wr_act_1        (wr_act_1),
+			.wr_addr_act_2   (wr_addr_act_2),
+			.wr_act_2        (wr_act_2),
+			.wr_addr_w_1     (),
+			.wr_w_1          (wr_w_1),
+			.rd_addr_w_1     (rd_addr_w_1),
+			.wr_addr_u_1     (),
+			.wr_u_1          (),
+			.rd_addr_u_1     (rd_addr_u_1),
+			.wr_addr_b_1     (),
+			.wr_b_1          (),
+			.rd_addr_b_1     (rd_addr_b_1),
+			.wr_addr_w_2     (),
+			.wr_w_2          (wr_w_2),
+			.rd_addr_w_2     (rd_addr_w_2),
+			.wr_addr_b_2     (),
+			.wr_b_2          (),
+			.rd_addr_b_2     (rd_addr_b_2),
+			.wr_addr_u_2     (),
+			.wr_u_2          (),
+			.rd_addr_u_2     (rd_addr_u_2)
 		);
+
+
 
 
 initial
@@ -241,8 +262,7 @@ begin
 			rd_addr_w_1 <= rd_addr_w_1 + 1;
 			rd_addr_u_1 <= rd_addr_u_1 + 1;
 			#100;
-			rst <=0;
-			#100;	
+			rst <=0;	
                        // h(i) and state(i) are stored here
 		end
 

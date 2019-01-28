@@ -1,5 +1,5 @@
-module datapath(clk, rst, rst_2, acc_x_1, acc_h_1, acc_x_2, acc_h_2, wr_h1, wr_h2, wr_c1, wr_c2, wr_x2, 
-	            addr_x1, rd_addr_x2, wr_addr_x2, wr_addr_act_1, 
+module datapath_zybo(clk, rst, rst_2, data_x1, acc_x_1, acc_h_1, acc_x_2, acc_h_2, wr_h1, wr_h2, wr_c1, wr_c2, wr_x2, 
+	            /*addr_x1,*/ rd_addr_x2, wr_addr_x2, wr_addr_act_1, 
 	            wr_act_1, wr_addr_act_2, wr_act_2, wr_addr_w_1, 
 	            wr_w_1, rd_addr_w_1, wr_addr_u_1, wr_u_1, rd_addr_u_1, 
 	            wr_addr_b_1, wr_b_1, rd_addr_b_1, wr_addr_w_2,wr_w_2, 
@@ -70,7 +70,7 @@ input clk, rst, rst_2;
 
 input acc_x_1, acc_h_1, acc_x_2, acc_h_2;
 // control ports
-input [11:0] addr_x1;
+// input [11:0] addr_x1;
 input [11:0] rd_addr_x2, wr_addr_x2;
 
 input wr_h1;
@@ -173,7 +173,11 @@ input [11:0] /*[5:0]*/ rd_layr2_t, rd_layr2_h, rd_layr2_a, rd_layr2_i, rd_layr2_
 input update;
 
 output [WIDTH-1:0] o_cost;
-output [WIDTH-1:0] dgate, h2; 
+output [WIDTH-1:0] dgate; 
+
+// Port for CPU Interface
+input signed [WIDTH-1:0] data_x1;
+output signed [WIDTH-1:0] h2;
 
 // registers
 reg signed [WIDTH-1:0] reg_c1, reg_c2;
@@ -181,7 +185,7 @@ reg signed [WIDTH-1:0] reg_h1, reg_h2;
 
 
 // wires
-wire signed [WIDTH-1:0] data_x1;
+
 
 wire signed [WIDTH-1:0] prev_c1, prev_c2;
 wire signed [WIDTH-1:0] i_mem_h1, i_mem_x2, i_mem_h2;
@@ -264,21 +268,21 @@ wire signed [WIDTH-1:0] du_a_2, du_i_2, du_f_2, du_o_2;
 
 // Input Memory
 // out: data (53*WIDTH)
-memory_cell #(
-			.WIDTH(WIDTH),
-			.NUM(LAYR1_INPUT),
-			.TIMESTEP(TIMESTEP),
-			.FILENAME(LAYR1_X)
-		) mem_x1(
-			.clk    (clk),
-			.rst    (rst),
-			.wr_a   (),
-			.addr_a (),
-			.addr_b (addr_x1),
-			.i_a    (),
-			.o_a    (),
-			.o_b    (data_x1)
-);
+// memory_cell #(
+// 			.WIDTH(WIDTH),
+// 			.NUM(LAYR1_INPUT),
+// 			.TIMESTEP(TIMESTEP),
+// 			.FILENAME(LAYR1_X)
+// 		) mem_x1(
+// 			.clk    (clk),
+// 			.rst    (rst),
+// 			.wr_a   (),
+// 			.addr_a (),
+// 			.addr_b (addr_x1),
+// 			.i_a    (),
+// 			.o_a    (),
+// 			.o_b    (data_x1)
+// );
 
 // LAYER 1 Output Memory
 // in: i (WIDTH)
