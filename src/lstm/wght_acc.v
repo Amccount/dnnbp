@@ -12,8 +12,8 @@
 module wght_acc (clk, rst, en, i_d, i_x, o);
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24;
+parameter FRAC = 20;
 
 // input ports 
 input signed [WIDTH-1:0] i_d;

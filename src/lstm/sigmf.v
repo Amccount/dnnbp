@@ -39,6 +39,6 @@ assign o = slc4 ? outmux3 : result;
 
 //Select wire assignment
 assign slc0 = i[WIDTH-1];                           // slc0 : 1 if negative
-assign slc1 = (i<24'hF33333)&&(i>24'h0CCCCC); // slc1 = (in<-0.8)||(in>0.8)
-assign slc4 = (i<24'hCCCCCC)&&(i>24'h333333); // slc4 = (in<-3.2)||(in>3.2)
+assign slc1 = (i<24'hF33334)&&(i>24'h0CCCCC); // slc1 = (in<-0.8)||(in>0.8)
+assign slc4 = (i<24'hCCCCCD)&&(i>24'h333333); // slc4 = (in<-3.2)||(in>3.2)
 endmodule

@@ -14,8 +14,8 @@
 module mac (clk, rst, acc, i_x, i_m, o_mul, o_mac);
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24;
+parameter FRAC = 20;
 
 // common ports
 input clk, rst;

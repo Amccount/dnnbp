@@ -12,7 +12,7 @@
 module tanh_qdrt(i, o);
 
 // parameters
-parameter WIDTH = 32;
+parameter WIDTH = 24;
 
 // input ports
 input [WIDTH-1:0] i;

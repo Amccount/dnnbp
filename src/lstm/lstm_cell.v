@@ -20,8 +20,8 @@ o_mul_5, o_mul_6, o_mul_7, o_mul_8,
 o_a, o_i, o_f, o_o, o_c, o_h);
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24;
+parameter FRAC = 20;
 
 // common ports
 input clk, rst;
