@@ -10,7 +10,7 @@
 //                    
 //            
 ///////////////////////////////////////////////////////////////////////////////
-module fsm (clk, en, rst_fsm,  rst, rst_2, rst_acc, rst_mac, update, acc_x_1, acc_x_2, acc_h_1, acc_h_2, wr_h1, wr_h2,  wr_c1, wr_c2, wr_act_1, wr_act_2,
+module fsm (clk, en, en_addr_dgates_2, en_addr_w_bp_2, rst_addr_dgates, rst_fsm,  rst, rst_2, rst_acc, rst_mac, update, acc_x_1, acc_x_2, acc_h_1, acc_h_2, wr_h1, wr_h2,  wr_c1, wr_c2, wr_act_1, wr_act_2,
 wr_dstate1, wr_dstate2, sel_in1, sel_in2, sel_in3, sel_in4, sel_in5, sel_x1_1, sel_x1_2, sel_x2_2, sel_as_1, sel_as_2, sel_addsub, sel_temp,
 acc_da, acc_di, acc_df, acc_do, acc_mac, sel_dgate, sel_state, sel_dstate, sel_dout, sel_wght, sel_wghts1, sel_wghts2,sel_a, sel_i, sel_f, sel_o, sel_h, sel_t, wr_da1, wr_di1, 
 wr_df1, wr_do1, wr_da2, wr_di2, wr_df2, wr_do2, wr_dx2, wr_dout2, wr_dout1);
@@ -18,7 +18,7 @@ wr_df1, wr_do1, wr_da2, wr_di2, wr_df2, wr_do2, wr_dx2, wr_dout2, wr_dout1);
 //common ports
 input clk, rst_fsm;
 
-output reg en, rst, rst_2, rst_acc, rst_mac;
+output reg en, en_addr_dgates_2, en_addr_w_bp_2, rst_addr_dgates, rst, rst_2, rst_acc, rst_mac;
 output reg update;
 
 //output ports
@@ -66,7 +66,7 @@ output reg wr_da2, wr_di2, wr_df2, wr_do2, wr_dstate2;
 output reg wr_dx2, wr_dout2, wr_dout1;
 
 reg [7:0] state;
-reg [7:0] count;
+reg [7:0] count, counter_cell, counter_layer, counter_timestep;
 
 
 parameter S0=0, S1=1, S2=2, S3=3, S4=4, S5=5, S6=6, S7=7, S8=8, S9=9,  
@@ -78,10 +78,10 @@ S46=46, S47=47, S48=48, S49=49, S50=50, S51=51, S52=52, S53=53, S54=54,
 S55=55, S56=56, S57=57, S58=58, S59=59, S60=60, S61=61, S62=62, S63=63, 
 S64=64, S65=65, S66=66, S67=67, S68=68, S69=69, S70=70, S71=71, S72=72, 
 S73=73, S74=74, S75=75, S76=76, S77=77, S78=78, S79=79, S80=80, S81=81, 
-S82=82, S83=83, S84=84, S85=85, S86=86;
+S82=82, S83=83, S84=84, S85=85, S86=86, S87=87;
 
 
-always @(posedge clk or posedge rst_fsm ) 
+always @(state) 
 begin
 	 case (state)
                //INITIAL START //
@@ -97,12 +97,13 @@ begin
 			wr_h2 <=0;
 			wr_c1 <=0;
 			wr_c2 <=0;
-			update <=1;
+			update <=0;
 		end
 		S1:
 		begin
 			rst <=0;
-			rst_2 <=0;
+			rst_2 <=1;
+			en <=0;
 			acc_x_1 <=0;
 			acc_h_1 <=0;
 			acc_x_2 <=0;
@@ -111,7 +112,7 @@ begin
 			wr_h2 <=0;
 			wr_c1 <=0;
 			wr_c2 <=0;
-			update <=1;
+			update <=0;
 		end
 		S2:
 		begin
@@ -148,11 +149,12 @@ begin
 		// start computing for first layer -- repeat 53x -------------//
 		S4:
 		begin
-			rst <=0;
-			rst_2 <=0;			
 			en <=1;
+			update <=0;
 			acc_x_1 <=1;
 			acc_h_1 <=1;
+			rst <=0;
+			rst_2 <=1;			
 			wr_h1 <=0;
 			wr_h2 <=0;
 			wr_c1 <=0;
@@ -168,6 +170,7 @@ begin
 		S6:
 		begin
 			//enable write h
+			rst <=1;
 			wr_h1 <=1;
 			//enable write state and activation
 			wr_c1 <= 1; 
@@ -177,7 +180,7 @@ begin
 		begin
 			wr_h1 <=0;
 			wr_c1 <=0;
-			rst <=1;
+			rst<=0;
 		end
 		// ----------------------------------------------------------//
 
@@ -275,9 +278,13 @@ begin
 		end
 		//-------repeat 7x ----------//
 		S18:
+		/////////////// START LAYER 2 DELTA ///////////////////
+		////////////// 1 ST  CELL ////////////////////////////
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			rst_addr_dgates <=1'b1;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -326,6 +333,8 @@ begin
 			
 			rst <= 0;
 			rst_acc <= 0;
+			rst_addr_dgates <=1'b1;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -370,6 +379,7 @@ begin
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -414,6 +424,7 @@ begin
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -459,6 +470,7 @@ begin
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -501,7 +513,9 @@ begin
 		end					
 		S23:
 		begin
+			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -548,6 +562,7 @@ begin
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -594,6 +609,7 @@ begin
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -639,6 +655,7 @@ begin
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -684,6 +701,7 @@ begin
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -731,6 +749,7 @@ begin
 		// CLOCK 10
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -774,7 +793,7 @@ begin
 
 		S30:
 		begin
-
+			en_addr_dgates_2 <= 1'b1;
 			wr_da2 <= 1'b0;
 			wr_di2 <= 1'b0;
 			wr_df2 <= 1'b1;
@@ -788,13 +807,13 @@ begin
 		end
 
 		//////////////// 2 ND TO LAST CELL ///////////////////////
-		// repeat(8-1)----------------
-
+		// repeat(8-1)----------------/////////////////
 
 		S31:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -844,6 +863,7 @@ begin
 			rst <= 0;
 			rst_acc <= 0;
 			sel_a <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_i <= 0;
 			sel_f <= 0;
 			sel_o <= 0;
@@ -890,6 +910,7 @@ begin
 			// CLOCK 2
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -940,6 +961,7 @@ begin
 			// CLOCK 3
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -987,6 +1009,7 @@ begin
 			// CLOCK 4
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -1034,6 +1057,7 @@ begin
 			// CLOCK 5
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -1082,6 +1106,7 @@ begin
 			// CLOCK 6
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -1130,6 +1155,7 @@ begin
 		begin
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -1177,6 +1203,7 @@ begin
 			// CLOCK 8
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -1225,6 +1252,7 @@ begin
 			// CLOCK 9
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -1273,6 +1301,7 @@ begin
 			// CLOCK 10
 			rst <= 0;
 			rst_acc <= 0;
+			en_addr_dgates_2 <= 1'b1;
 			sel_a <= 0;
 			sel_i <= 0;
 			sel_f <= 0;
@@ -1314,9 +1343,12 @@ begin
 			acc_do <= 1'b0;
 
 			rst_mac <= 1'b1;
+		end
 			
-
+		S42:
+		begin
 			wr_da2 <= 1'b0;
+			en_addr_dgates_2 <= 1'b1;
 			wr_di2 <= 1'b0;
 			wr_df2 <= 1'b1;
 			wr_do2 <= 1'b0;
@@ -1325,17 +1357,18 @@ begin
 			acc_di <= 1'b0;
 			acc_df <= 1'b1;
 			acc_do <= 1'b0;
-
 			rst_mac <= 1'b0;
 			acc_mac <= 1'b1;
 
 		end
+		////////////////// END LAYER 2 DELTA ///////////////////////////
 
 		// REPEAT 53-1 //
 
-		S42:
+		S43:
 		begin
 			wr_da2 <= 1'b0;
+			en_addr_dgates_2 <= 1'b0;
 			wr_di2 <= 1'b0;
 			wr_df2 <= 1'b0;
 			wr_do2 <= 1'b0;
@@ -1355,7 +1388,7 @@ begin
 		end
 
 
-		S43:
+		S44:
 		begin
 			sel_dgate <= 2'b10;
 			sel_wghts2 <= 3'b010;
@@ -1365,7 +1398,7 @@ begin
 			wr_dx2 <= 1'b0;
 		end
 
-		S44:
+		S45:
 		begin
 
 			sel_dgate <= 2'b11;
@@ -1377,7 +1410,7 @@ begin
 		end
 
 		
-		S45:
+		S46:
 		begin
 			sel_dgate <= 2'b00;
 			sel_wghts2 <= 3'b000;
@@ -1389,7 +1422,7 @@ begin
 		end
 
 	
-		S46:
+		S47:
 		begin
 			rst_mac = 1'b1;
 			wr_dx2 <= 1'b0;
@@ -1399,7 +1432,7 @@ begin
 		//---------------------/
 		
 		// Last Repeat to change mux on last cycle
-		S47:
+		S48:
 		begin
 			sel_dgate <= 2'b01;
 			sel_wghts2 <= 3'b001;
@@ -1410,7 +1443,7 @@ begin
 			wr_dx2 <= 1'b0;	
 		end
 
-		S48:
+		S49:
 		begin
 			sel_dgate <= 2'b10;
 			sel_wghts2 <= 3'b010;
@@ -1420,7 +1453,7 @@ begin
 			wr_dx2 <= 1'b0;
 		end
 
-		S49:
+		S50:
 		begin
 			sel_dgate <= 2'b11;
 			sel_wghts2 <= 3'b011;
@@ -1431,7 +1464,7 @@ begin
 		end
 
 		
-		S50:
+		S51:
 		begin
 			sel_dgate <= 2'b00;
 			sel_wghts2 <= 3'b000;
@@ -1442,7 +1475,7 @@ begin
 	
 		end	
 
-		S51:
+		S52:
 		begin
 			rst_mac = 1'b1;
 			wr_dx2 <= 1'b0;
@@ -1453,7 +1486,7 @@ begin
 		///////////////// START  CALCULATE dOut2 /////////////////////////
 		//REPEAT 8X //
 
-		S52:
+		S53:
 		begin
 			sel_dgate <= 2'b01;
 			sel_wghts2 <= 3'b101;
@@ -1466,7 +1499,7 @@ begin
 		end		
 	
 
-		S53:
+		S54:
 		begin
 			sel_dgate <= 2'b10;
 			sel_wghts2 <= 3'b110;
@@ -1477,7 +1510,7 @@ begin
 			wr_dout2 <= 1'b0;
 		end
 
-		S54:
+		S55:
 		begin
 			sel_dgate <= 2'b11;
 			sel_wghts2 <= 3'b111;
@@ -1489,7 +1522,7 @@ begin
 		end
 
 			
-		S55:
+		S56:
 		begin		
 			sel_dgate <= 2'b00;
 			sel_wghts2 <= 3'b100;
@@ -1501,7 +1534,7 @@ begin
 
 		end
 	
-		S56:
+		S57:
 		begin
 			rst_mac = 1'b1;
 			wr_dx2 <= 1'b0;
@@ -1512,7 +1545,7 @@ begin
 
 		///////////////// START  CALCULATE LAYER 1 DELTA /////////////////////////
 		//////////////// 1 ST CELL //////////////////////////////////////////////
-		S57:
+		S58:
 		begin
 			rst <= 0;
 			rst_acc <= 1;
@@ -1558,7 +1591,7 @@ begin
 		end 
 
 
-		S58:
+		S59:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -1605,7 +1638,7 @@ begin
 
 
 		// CLOCK 2
-		S59:
+		S60:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -1652,7 +1685,7 @@ begin
 
 
 		// CLOCK 3
-		S60:
+		S61:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -1699,7 +1732,7 @@ begin
 
 
 		// CLOCK 4
-		S61:
+		S62:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -1745,7 +1778,7 @@ begin
 		end
 
 		// CLOCK 5
-		S62:
+		S63:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -1792,7 +1825,7 @@ begin
 		
 
 		// CLOCK 6
-		S63:
+		S64:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -1841,7 +1874,7 @@ begin
 		// $display("dot <= %h \n", o_dgate);
 
 		// CLOCK 7
-		S64:
+		S65:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -1887,7 +1920,7 @@ begin
 		end
 
 		
-		S65:
+		S66:
 		begin
 		// CLOCK 8
 			rst <= 0;
@@ -1935,7 +1968,7 @@ begin
 				// $display("dat <= %h \n", o_dgate);
 
 		// CLOCK 9
-		S66:
+		S67:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -1984,7 +2017,7 @@ begin
 
 
 		// CLOCK 10
-		S67:
+		S68:
 		begin
 			rst <= 0;
 			rst_acc <= 0;
@@ -2030,7 +2063,7 @@ begin
 		end
 
 
-		S68:
+		S69:
 		begin
 			wr_da1 <= 1'b0;
 			wr_di1 <= 1'b0;
@@ -2050,7 +2083,7 @@ begin
 		// -----REPEAT 53-1------//
 
 
-		S69:
+		S70:
 		begin
 
 			rst <= 0;
@@ -2098,7 +2131,7 @@ begin
 		end
 
 
-		S70:
+		S71:
 		begin
 		// CLOCK 1
 			rst <= 0;
@@ -2144,7 +2177,7 @@ begin
 			acc_do <= 1'b0;
 		end
 
-		S71:
+		S72:
 		begin
 			// CLOCK 2
 			rst <= 0;
@@ -2190,98 +2223,98 @@ begin
 			acc_do <= 1'b0;
 			end
 
-			S72:
-			begin
-			// CLOCK 3
-			rst <= 0;
-			rst_acc <= 0;
-			sel_a <= 1;
-			sel_i <= 1;
-			sel_f <= 1;
-			sel_o <= 1;
-			sel_h <= 1;
-			sel_t <= 1;
-			sel_state <= 1;
-			sel_dstate <= 1;
-			sel_dout <= 1;
-			sel_in1 <= 2'h0;
-			sel_in2 <= 2'h2;
-			sel_in3 <= 1'h0;
-			sel_in4 <= 2'h2;
-			sel_in5 <= 3'h4;
-			sel_x1_1 <= 2'h0;
-			sel_x1_2 <= 1'h0;
-			sel_x2_2 <= 2'h0;
-			sel_as_1 <= 1'h0;
-			sel_as_2 <= 2'h0;
-			sel_addsub <= 1'h0;
-			sel_temp   <= 2'h0;
-			// i_layr1_a <= 32'h00d98c7e;
-			// i_layr1_i <= 32'h00fb2e9c;
-			// i_layr1_f <= 32'h00000000;
-			// i_layr1_o <= 32'h00d99503;
-			// i_layr1_h <= 32'h00c59fd3;
-			// i_layr1_t <= 32'h01400000;
-			// i_layr1_state <= 32'h0184816f;
-			// d_state <= 32'h00000000;
-			// d_out   <= 32'h00000000;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate1 <= 1'b0;
-			acc_da <= 1'b0;
-			acc_di <= 1'b0;
-			acc_df <= 1'b0;
-			acc_do <= 1'b0;
+		S73:
+		begin
+		// CLOCK 3
+		rst <= 0;
+		rst_acc <= 0;
+		sel_a <= 1;
+		sel_i <= 1;
+		sel_f <= 1;
+		sel_o <= 1;
+		sel_h <= 1;
+		sel_t <= 1;
+		sel_state <= 1;
+		sel_dstate <= 1;
+		sel_dout <= 1;
+		sel_in1 <= 2'h0;
+		sel_in2 <= 2'h2;
+		sel_in3 <= 1'h0;
+		sel_in4 <= 2'h2;
+		sel_in5 <= 3'h4;
+		sel_x1_1 <= 2'h0;
+		sel_x1_2 <= 1'h0;
+		sel_x2_2 <= 2'h0;
+		sel_as_1 <= 1'h0;
+		sel_as_2 <= 2'h0;
+		sel_addsub <= 1'h0;
+		sel_temp   <= 2'h0;
+		// i_layr1_a <= 32'h00d98c7e;
+		// i_layr1_i <= 32'h00fb2e9c;
+		// i_layr1_f <= 32'h00000000;
+		// i_layr1_o <= 32'h00d99503;
+		// i_layr1_h <= 32'h00c59fd3;
+		// i_layr1_t <= 32'h01400000;
+		// i_layr1_state <= 32'h0184816f;
+		// d_state <= 32'h00000000;
+		// d_out   <= 32'h00000000;
+		wr_da1 <= 1'b0;
+		wr_di1 <= 1'b0;
+		wr_df1 <= 1'b0;
+		wr_do1 <= 1'b0;
+		wr_dstate1 <= 1'b0;
+		acc_da <= 1'b0;
+		acc_di <= 1'b0;
+		acc_df <= 1'b0;
+		acc_do <= 1'b0;
+		end
 
-			end
-			S73:
-			begin
-			// CLOCK 4
-			rst <= 0;
-			rst_acc <= 0;
-			sel_a <= 1;
-			sel_i <= 1;
-			sel_f <= 1;
-			sel_o <= 1;
-			sel_h <= 1;
-			sel_t <= 1;
-			sel_state <= 1;
-			sel_dstate <= 1;
-			sel_dout <= 1;
-			sel_in1 <= 2'h0;
-			sel_in2 <= 2'h0;
-			sel_in3 <= 1'h0;
-			sel_in4 <= 2'h0;
-			sel_in5 <= 3'h0;
-			sel_x1_1 <= 2'h1;
-			sel_x1_2 <= 1'h0;
-			sel_x2_2 <= 2'h2;
-			sel_as_1 <= 1'h0;
-			sel_as_2 <= 2'h0;
-			sel_addsub <= 1'h0;
-			sel_temp   <= 2'h2;
-			// i_layr1_a <= 32'h00d98c7e;
-			// i_layr1_i <= 32'h00fb2e9c;
-			// i_layr1_f <= 32'h00decbfb;
-			// i_layr1_o <= 32'h00d99503;
-			// i_layr1_h <= 32'h00c59fd3;
-			// i_layr1_t <= 32'h01400000;
-			// i_layr1_state <= 32'h0184816f;
-			// d_state <= 32'h00000000;
-			// d_out   <= 32'h00000000;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate1 <= 1'b0;
-			acc_da <= 1'b0;
-			acc_di <= 1'b0;
-			acc_df <= 1'b0;
-			acc_do <= 1'b0;
-			end
-			S74:
+		S74:
+		begin
+		// CLOCK 4
+		rst <= 0;
+		rst_acc <= 0;
+		sel_a <= 1;
+		sel_i <= 1;
+		sel_f <= 1;
+		sel_o <= 1;
+		sel_h <= 1;
+		sel_t <= 1;
+		sel_state <= 1;
+		sel_dstate <= 1;
+		sel_dout <= 1;
+		sel_in1 <= 2'h0;
+		sel_in2 <= 2'h0;
+		sel_in3 <= 1'h0;
+		sel_in4 <= 2'h0;
+		sel_in5 <= 3'h0;
+		sel_x1_1 <= 2'h1;
+		sel_x1_2 <= 1'h0;
+		sel_x2_2 <= 2'h2;
+		sel_as_1 <= 1'h0;
+		sel_as_2 <= 2'h0;
+		sel_addsub <= 1'h0;
+		sel_temp   <= 2'h2;
+		// i_layr1_a <= 32'h00d98c7e;
+		// i_layr1_i <= 32'h00fb2e9c;
+		// i_layr1_f <= 32'h00decbfb;
+		// i_layr1_o <= 32'h00d99503;
+		// i_layr1_h <= 32'h00c59fd3;
+		// i_layr1_t <= 32'h01400000;
+		// i_layr1_state <= 32'h0184816f;
+		// d_state <= 32'h00000000;
+		// d_out   <= 32'h00000000;
+		wr_da1 <= 1'b0;
+		wr_di1 <= 1'b0;
+		wr_df1 <= 1'b0;
+		wr_do1 <= 1'b0;
+		wr_dstate1 <= 1'b0;
+		acc_da <= 1'b0;
+		acc_di <= 1'b0;
+		acc_df <= 1'b0;
+		acc_do <= 1'b0;
+		end
+			S75:
 			begin
 			// CLOCK 5
 			rst <= 0;
@@ -2326,7 +2359,7 @@ begin
 			acc_df <= 1'b0;
 			acc_do <= 1'b0;
 			end
-			S75:
+			S76:
 			begin
 			// CLOCK 6
 			rst <= 0;
@@ -2373,7 +2406,7 @@ begin
 
 			end
 			// $display("dot <= %h \n", o_dgate);
-			S76:
+			S77:
 			begin
 			// CLOCK 7
 			rst <= 0;
@@ -2418,7 +2451,7 @@ begin
 			acc_df <= 1'b0;
 			acc_do <= 1'b0;
 			end
-			S77:
+			S78:
 			begin
 			// CLOCK 8
 			rst <= 0;
@@ -2464,7 +2497,7 @@ begin
 			acc_do <= 1'b0;
 			end
 			// $display("dat <= %h \n", o_dgate);
-			S78:
+			S79:
 			begin
 			// CLOCK 9
 			rst <= 0;
@@ -2511,7 +2544,7 @@ begin
 			end
 			// $display("dit <= %h \n", o_dgate);
 
-			S79:
+			S80:
 			begin
 			// CLOCK 10
 			rst <= 0;
@@ -2559,7 +2592,7 @@ begin
 			rst_mac <= 1'b1;
 			end
 
-		S80:
+		S81:
 		begin
 			wr_da1 <= 1'b0;
 			wr_di1 <= 1'b0;
@@ -2582,7 +2615,7 @@ begin
 
 		//---- repeat 53x----//
 
-		S81:
+		S82:
 		begin
 
 			acc_da <= 1'b0;
@@ -2600,7 +2633,7 @@ begin
 			wr_df1 <= 1'b0;		
 		end
 
-		S82:
+		S83:
 		begin
 			sel_dgate <= 2'b10;
 			sel_wghts1 <= 2'b10;
@@ -2611,7 +2644,7 @@ begin
 		end
 
 
-		S83:
+		S84:
 		begin	
 			sel_dgate <= 2'b11;
 			sel_wghts1 <= 2'b11;
@@ -2622,7 +2655,7 @@ begin
 		end
 
 		
-		S84:
+		S85:
 		begin
 			sel_dgate <= 2'b00;
 			sel_wghts1 <= 2'b00;
@@ -2633,7 +2666,7 @@ begin
 		end
 
 		
-		S85:
+		S86:
 		begin
 			rst_mac = 1'b1;
 			wr_dout1 <= 1'b0;	
@@ -2643,7 +2676,7 @@ begin
 		 ///---------------/////////
 		//// CONDITIONING FOR NEXT TIME STEP
 
-		S86:
+		S87:
 		begin
 			rst <= 1;
 			rst_acc <= 1;
@@ -2670,210 +2703,225 @@ begin
            case (state)
                 S0:
                 begin
-                    count <= 5'd0;
+                    counter_cell <= 8'd0;
+                  	counter_layer <= 8'd0;
+                    counter_timestep <= 8'd0;
                     state <= S1;
                 end
                 S1:
                 begin
-                    count <= 5'd0;
+                    counter_cell <= 8'd0;
+                    counter_layer <= 8'd0;
+                    counter_timestep <= 8'd0;
                     state <= S2;
                 end
                	S2:
                 begin
-                    count <= 5'd0;
+                    counter_cell <= 8'd0;
+                    counter_layer <= 8'd0;
+                    counter_timestep <= 8'd0;
                     state <= S3;
                 end
                 S3:
                 begin
-                    count <= 5'd0;
+                    counter_cell <= counter_cell+1;
+                    counter_layer <= 8'd0;
+                    counter_timestep <= 8'd0;
                     state <= S4;
                 end
 
                 S4:
                 begin
-                   if (count <= 5'd52)
+                   if (counter_cell <= 8'd52)
                    begin
-                		count <= count+1; 
-                    	state <= S4;
+                        state <= S4;
+                		counter_cell <= counter_cell+1; 
+
                    end
                    else 
                    begin
-                    	count <= 5'd0;
+                    	counter_cell <= 8'd0;
                     	state <= S5;
                    end
                 end
 
                 S5:
                 begin
-                    count <= 5'd0;
-                    state <= S1;
+                    counter_cell <= 8'd0;
+                    state <= S6;
                 end
                 S6:
                 begin
-                    count <= 5'd0;
-                    state <= S1;
+                    counter_cell <= 8'd0;
+                    state <= S7;
                 end
                 S7:
                 begin
-                	if (count <= 5'd52)
+                	if (counter_layer != 8'd51)
                 	begin
-                		count <= count+1; 
+                		counter_layer <= counter_layer +1; 
                     	state <= S4;
                     end
                     else begin
-                    	count <= 5'd0;
+                    	counter_layer <= 8'd0;
                     	state <= S8;
                     end
                 end
-
+                // forward second and first cell
                 S8:
                 begin
-                   if (count <= 5'd7)
+                   if (counter_cell <= 8'd7)
                    begin
-                		count <= count+1; 
+                		counter_cell <= counter_cell+1; 
                     	state <= S8;
                    end
                    else begin
-                    	count <= 5'd0;
+                    	counter_cell <= 8'd0;
                     	state <= S9;
                    end
                 end
                 S9:
                 begin
-                   if (count <= 5'd44)
+                   if (counter_cell <= 8'd44)
                    begin
-                		count <= count+1; 
-                    	state <= S10;
+                		counter_cell <= counter_cell+1; 
+                    	state <= S9;
                     end
                    else begin
-                    	count <= 5'd0;
-                    	state <= S9;
+                    	counter_cell <= 8'd0;
+                    	state <= S10;
                    end
                 end
                 S10:
                 begin
-                    count <= 5'd0;
+                    counter_cell <= 8'd0;
                     state <= S11;
                 end
                 S11:
                 begin
-                	count <= 5'd0;
+                	counter_cell <= 8'd0;
                     state <= S12;
                 end
                 S12:
                 begin
-                	if (count <= 5'd7)
+                	if (counter_layer <= 8'd7)
                 	begin
-                		count <= count+1; 
+                		counter_layer <= counter_layer+1; 
                     	state <= S8;
                     end
                     else begin
-                    	count <= 5'd0;
+                    	counter_layer <= 8'd0;
                     	state <= S13;
                     end
                 end
 
                 S13:
                 begin
-                   if (count <= 5'd52)
+                   if (counter_cell <= 8'd52)
                    begin
-                		count <= count+1; 
-                    	state <= S4;
+                		counter_cell <= counter_cell+1; 
+                    	state <= S13;
                    end
                    else begin
-                    	count <= 5'd0;
-                    	state <= S5;
+                    	counter_cell <= 8'd0;
+                    	state <= S14;
                    end
                 end
                 S14:
                 begin
-                    count <= 5'd0;
-                    state <= S1;
+                    counter_cell <= 8'd0;
+                    state <= S15;
                 end
                 S15:
                 begin
-                    count <= 5'd0;
-                    state <= S1;
+                    counter_cell <= 8'd0;
+                    state <= S16;
                 end
                 S16:
                 begin
-                	if (count <= 5'd44)
+                	if (counter_layer != 8'd44)
                 	begin
-                		count <= count+1; 
+                		counter_layer <= counter_layer+1; 
                     	state <= S13;
                     end
-                    else begin
-                    	count <= 5'd0;
+                    else if (counter_timestep!= 8'd6)
+                    begin
+                    	counter_timestep <= counter_timestep+1;
+                    	state <= S14;
+                    end
+                    else
+                    begin
+                    	counter_layer <= 8'd0;
                     	state <= S17;
                     end
                 end
 
                 S17:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S18;
                 end
 
 				S18:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S19;
                 end
 
                 S19:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S20;
                 end
 
                 S20:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S21;
                 end
                 S21:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S22;
                 end
                 S22:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S23;
                 end
                 S23:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S24;
                 end
                 S24:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S25;
                 end
                 S25:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S26;
                 end
                 S26:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S27;
                 end
                 S27:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S28;
                 end
                 S28:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S29;
                 end
                 S29:
                 begin
-                    count <= 5'd0;
+                    count <= 8'd0;
                     state <= S30;
                 end
                 S30:
@@ -2882,110 +2930,110 @@ begin
                 end
                 S31:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S32;
                 end
                 S32:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S33;
                 end
                 S33:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S34;
                 end
                 S34:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S35;
                 end
                 S35:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S36;
                 end
                 S36:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S37;
                 end
                 S37:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S38;
                 end
                 S38:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S39;
                 end
                 S39:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S40;
                 end
                 S40:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S41;
                 end
                 S41:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S42;
                 end
                 //-----------REPEAT 53-1--------///
                 S42:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S43;
                 end
                 S43:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S44;
                 end
                 S44:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S45;
                 end
                 S45:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S46;
                 end
                 S46:
                 begin
-                	if (count<= 5'd51 )
+                	if (count<= 8'd51 )
                 	begin
                 		count <= count+1;
                 		state <= S42;
                 	end
                 	else begin
-                		count <= 5'd0;
+                		count <= 8'd0;
                 		state <= S47;
                 	end
                 end
                 S47:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S48;
                 end
                 S48:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S49;
                 end
                 S49:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S50;
                 end
                 S50:
                 begin
-                	count<=5'd0;
+                	count<=8'd0;
                 	state <= S51;
                 end
                 S51:
@@ -3015,7 +3063,7 @@ begin
                 end
                 S56:
                 begin
-                	if (count <=5'd7)
+                	if (count <=8'd7)
                 	begin
                 		count <= count+1;
                 		state <= 52;
@@ -3143,7 +3191,7 @@ begin
 				    end
 				S80:
 				    begin
-				    	if (count<=5'd51)
+				    	if (count<=8'd51)
 				    	begin
 				    		count <= count+1;
 				    		state <= S69;
@@ -3179,7 +3227,7 @@ begin
 				    end
 				S86:
 				    begin
-				    	if (count <= 5'd6)
+				    	if (count <= 8'd6)
 				    	begin
 				    		count <= count+1;
 				    		state <= S18;
