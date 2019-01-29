@@ -3,7 +3,7 @@ module addr_gen_b (clk, rst, en, o_addr);
 // parameters
 parameter ADDR_WIDTH = 12;
 parameter STOP = 56;
-parameter PRESCALER = 8;
+parameter PRESCALER = 53;
 parameter PAUSE_LEN = 2;
 
 // common ports

@@ -22,7 +22,7 @@ reg [1:0] sel_temp;
 
 
 // wires
-wire [WIDTH-1:0] o_dgate;
+wire [WIDTH-1:0] o_dgate, o_d_state;
 
 delta #(
 		.WIDTH(WIDTH),
@@ -51,7 +51,8 @@ delta #(
 		.state      (state),
 		.d_state    (d_state),
 		.d_out      (d_out),
-		.o_dgate    (o_dgate)
+		.o_dgate    (o_dgate),
+		.o_d_state    (o_d_state)
 	);
 
 
@@ -120,7 +121,7 @@ begin
 	sel_in5 <= 3'h1;
 	sel_x1_1 <= 2'h0;
 	sel_x1_2 <= 1'h0;
-	sel_x2_2 <= 2'h0;
+	sel_x2_2 <= 2'h3;
 	sel_as_1 <= 1'h0;
 	sel_as_2 <= 2'h3;
 	sel_addsub <= 1'h1;
@@ -160,6 +161,7 @@ begin
 	d_state <= 32'h00000000;
 	d_out   <= 32'h00000000;
 	#100;
+	$display("%x",o_dgate);
 
 	// CLOCK 4
 	rst <= 0;
