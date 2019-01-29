@@ -41,7 +41,7 @@ begin
 	begin
 		if (o_addr_c != STOP)
 		begin 
-			if (buffer == TRIG-1 + DELAY)
+			if (buffer == TRIG + DELAY)
 			begin
 				buffer <= buffer + 1;
 				offset <= offset + 1;
@@ -52,7 +52,7 @@ begin
 					offset2 <= offset2 + TRIG;
 				end
 			end
-			else if (buffer < TRIG-1 + DELAY)
+			else if (buffer < TRIG + DELAY)
 			begin
 				buffer <= buffer + 1;
 				o_addr_c <= offset;

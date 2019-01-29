@@ -516,7 +516,7 @@ memory_cell #(
 
 // in: shifted x1 with learning rate of 0.125 & x1
 assign sh3_x1 = data_x1[31] ? {3'b111,data_x1[31:3]} : {3'b000,data_x1[31:3]}; 
-assign o_mux_x1 = update ?  sh3_x1 : data_x1;
+assign o_mux_x1 = update ? sh3_x1 : data_x1;
 
 
 // LAYER 1 CELL INPUT MULTIPLEXER
@@ -525,14 +525,14 @@ assign sh3_h1 = o_mem_h1_a[23] ? {3'b111,o_mem_h1_a[23:3]} : {3'b000,o_mem_h1_a[
 assign o_mux_h1 = update ? sh3_h1 : o_mem_h1_a;
 
 // LAYER 1 WEIGHT MULTIPLEXER
-assign o_mux_w_a_1 = update ? d_a_1 : w_a_1  ;
-assign o_mux_w_i_1 = update ? d_i_1 : w_i_1  ;
-assign o_mux_w_f_1 = update ? d_f_1 : w_f_1  ;
-assign o_mux_w_o_1 = update ? d_o_1 : w_o_1  ;
-assign o_mux_u_a_1 = update ? d_a_1 : u_a_1  ;
-assign o_mux_u_i_1 = update ? d_i_1 : u_i_1  ;
-assign o_mux_u_f_1 = update ? d_f_1 : u_f_1  ;
-assign o_mux_u_o_1 = update ? d_o_1 : u_o_1  ;
+assign o_mux_w_a_1 = update ? w_a_1 : d_a_1 ;
+assign o_mux_w_i_1 = update ? w_i_1 : d_i_1 ;
+assign o_mux_w_f_1 = update ? w_f_1 : d_f_1 ;
+assign o_mux_w_o_1 = update ? w_o_1 : d_o_1 ;
+assign o_mux_u_a_1 = update ? u_a_1 : d_a_1 ;
+assign o_mux_u_i_1 = update ? u_i_1 : d_i_1 ;
+assign o_mux_u_f_1 = update ? u_f_1 : d_f_1 ;
+assign o_mux_u_o_1 = update ? u_o_1 : d_o_1 ;
 
 // LAYER 1 LSTM CELL
 // in: conc_x (106*WIDTH), prev_c (WIDTH) 
