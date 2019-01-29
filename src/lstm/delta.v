@@ -26,7 +26,7 @@ parameter FRAC = 24;
 // t 		= label
 //--------------------------
 input clk, rst;
-input [WIDTH-1:0] at, it, ft, ot, h, t, state, d_state, d_out;
+input [WIDTH-1:0] at, it, ft, ot, h, t, state, d_out, d_state;
 
 // control ports
 input [1:0] sel_in1;
@@ -68,7 +68,7 @@ multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in2 (.i_a(at), .i_b(state), .i_c(o_ta
 multiplexer 	 #(.WIDTH(WIDTH)) inst_mux_in3 (.i_a(ot), .i_b(it), .sel(sel_in3), .o(o_mux_in3));
 multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_in4 (.i_a(d_out),
 												.i_b(h),
-												.i_c(32'h01000000),
+												.i_c(24'h100000),
 												.i_d({(WIDTH){1'b0}}),
 												.sel(sel_in4),
 												.o(o_mux_in4));

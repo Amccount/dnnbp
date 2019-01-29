@@ -1,7 +1,7 @@
 module multiplexer (i_a, i_b, sel, o);             
  
 // parameters
-parameter WIDTH = 32;
+parameter WIDTH = 24;
 
 // input ports
 input signed [WIDTH-1:0] i_a;
