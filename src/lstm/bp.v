@@ -345,7 +345,7 @@ mac #(
 memory_cell #(
         .ADDR(9),
         .WIDTH(WIDTH),
-        .NUM(LAYR1_CELL),
+        .NUM(371),
         .TIMESTEP(1),
         .FILENAME(LAYR2_dX)
     ) mem_dx2 (
@@ -365,7 +365,7 @@ memory_cell #(
 memory_cell #(
         .ADDR(4),
         .WIDTH(WIDTH),
-        .NUM(LAYR2_CELL),
+        .NUM(16),
         .TIMESTEP(1),
         .FILENAME(LAYR2_dOut)
     ) mem_dout2 (
@@ -456,7 +456,7 @@ memory_cell #(
 memory_cell #(
         .ADDR(7),
         .WIDTH(WIDTH),
-        .NUM(LAYR1_CELL),
+        .NUM(106),
         .TIMESTEP(1),
         .FILENAME(LAYR1_dOut)
     ) mem_dout1 (
