@@ -81,8 +81,11 @@ S73=73, S74=74, S75=75, S76=76, S77=77, S78=78, S79=79, S80=80, S81=81,
 S82=82, S83=83, S84=84, S85=85, S86=86;
 
 
-always @(posedge clk or posedge rst_fsm ) 
+always @(posedge clk)// or posedge rst_fsm ) 
 begin
+
+    
+    
 	 case (state)
                //INITIAL START //
 		S0:

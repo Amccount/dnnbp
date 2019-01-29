@@ -1,5 +1,5 @@
 
-module top_level (clk, rst_fsm);
+module top_level (clk, rst_fsm, h2);
 
 
 parameter ADDR_WIDTH = 12;
@@ -44,6 +44,8 @@ S82=82, S83=83, S84=84, S85=85, S86=86;
 
 //common ports
 input clk, rst_fsm;
+
+output [WIDTH-1:0] h2;
 
 wire en, rst, rst_2, rst_acc, rst_mac;
 
@@ -529,7 +531,7 @@ wire signed [11:0] addr_wu_1;
 			.update          (update),
 			.o_cost          (),
 			.dgate           (),
-			.h2              ()
+			.h2              (h2)
 		);
 
 assign rd_addr_w_1 = addr_wu_1;

@@ -26,7 +26,7 @@ parameter FRAC = 24;
 // t 		= label
 //--------------------------
 input clk, rst;
-input [WIDTH-1:0] at, it, ft, ot, h, t, state, d_state, d_out;
+input [WIDTH-1:0] at, it, ft, ot, h, t, state, d_out, d_state;
 
 // control ports
 input [1:0] sel_in1;
