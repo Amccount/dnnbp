@@ -15,10 +15,10 @@ module addr_gen_bp_dwu(clk, rst, en, o_addr_d, o_addr_w);
 // parameters
 parameter ADDR_WIDTH = 12;
 parameter TIMESTEP  = 7;
-parameter NUM_CELL  = 53;
+parameter NUM_CELL  = 8;
 // parameter NUM_INPUT = 53;
 parameter NUM_INPUT = 53;
-parameter DELAY     = 2;
+parameter DELAY     = 3;
 
 // common ports
 input clk, rst;
