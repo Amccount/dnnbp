@@ -2,11 +2,11 @@
 //
 // By : Joshua, Teresia Savera, Yashael Faith
 // 
-// Module Name      : addr_gen_x_upd.v Module
-// File Name        : addr_gen_x_upd.v
+// Module Name      : addr_gen_upd_xhd.v Module
+// File Name        : addr_gen_upd_xhd.v
 // Version          : 1.0
-// Description      : Read address generator for X/H and dgates
-//
+// Description      : Read address generator for X/H and dgates for dW dU calculation
+//					  Used in update parameter stage
 //
 ////////////////////////////////////////////////////////////////////////////////
 
