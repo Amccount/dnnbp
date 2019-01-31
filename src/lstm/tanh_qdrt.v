@@ -12,7 +12,7 @@
 module tanh_qdrt(i, o);
 
 // parameters
-parameter WIDTH = 32;
+parameter WIDTH = 24;
 
 // input ports
 input [WIDTH-1:0] i;
@@ -52,16 +52,16 @@ multiplexer #(.WIDTH(WIDTH)) mux_coef_2 (.i_a(quarter_input), .i_b(24'h000000), 
 addsub #(.WIDTH(WIDTH)) inst_addsub_1 (.i_a(out_mux_coef_1), .i_b(out_mux_coef_2), .sel(1'b1), .o(out_add_sub_1));
 addsub #(.WIDTH(WIDTH)) inst_addsub_2 (.i_a(out_add_sub_1), .i_b(out_mux_const), .sel(sel_sign), .o(out_add_sub_2));
 
-multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_const (.i_a(24'h026666), .i_b(24'b0), .i_c(24'h040000), .i_d(24'h0AE147), .sel({sel_coef_1, sel_coef_2}), .o(out_mux_const));
+multiplexer_4to1 #(.WIDTH(WIDTH)) inst_mux_const (.i_a(24'h002666), .i_b(24'b0), .i_c(24'h004000), .i_d(24'h00AE14), .sel({sel_coef_1, sel_coef_2}), .o(out_mux_const));
 
-multiplexer #(.WIDTH(WIDTH)) mux_region (.i_a(24'h000000), .i_b(24'h100000), .sel(sel_region), .o(out_mux_region));
+multiplexer #(.WIDTH(WIDTH)) mux_region (.i_a(24'h000000), .i_b(24'h010000), .sel(sel_region), .o(out_mux_region));
 multiplexer #(.WIDTH(WIDTH)) mux_result (.i_a(out_mux_region), .i_b(out_add_sub_2), .sel(sel_result), .o(o));
 
-assign sel_coef_1 = abs_input>24'h100000;
-assign sel_coef_2 = abs_input>24'h1B851E;
-assign sel_sign = abs_input> 24'h100000; 
-assign sel_result = abs_input<24'h280000 && abs_input > 24'h033333;
-assign sel_region = abs_input >24'h033333;
+assign sel_coef_1 = abs_input>24'h010000;
+assign sel_coef_2 = abs_input>24'h01B851;
+assign sel_sign = abs_input> 24'h010000; 
+assign sel_result = abs_input<24'h028000 && abs_input > 24'h003333;
+assign sel_region = abs_input >24'h003333;
 
 always @(i or abs_input)
 begin

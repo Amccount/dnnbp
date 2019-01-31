@@ -74,7 +74,8 @@ module datapath(
 	rd_addr_a_da2, rd_addr_a_di2, rd_addr_a_df2, rd_addr_a_do2,
 	upd_addr_a_da2, upd_addr_a_di2, upd_addr_a_df2, upd_addr_a_do2, 
 	bp_addr_b_da2, bp_addr_b_di2, bp_addr_b_df2, bp_addr_b_do2, 
-	upd_addr_b_da2, upd_addr_b_di2, upd_addr_b_df2, upd_addr_b_do2, 
+	upd_addr_b_da2, upd_addr_b_di2, upd_addr_b_df2, upd_addr_b_do2,
+	acc_dgate2,
 
 	wr_dx2,
 	wr_addr_a_dx2, rd_addr_b_dx2,
@@ -102,7 +103,8 @@ module datapath(
 	rd_addr_a_da1, rd_addr_a_di1, rd_addr_a_df1, rd_addr_a_do1,
 	upd_addr_a_da1, upd_addr_a_di1, upd_addr_a_df1, upd_addr_a_do1, 
 	bp_addr_b_da1, bp_addr_b_di1, bp_addr_b_df1, bp_addr_b_do1, 
-	upd_addr_b_da1, upd_addr_b_di1, upd_addr_b_df1, upd_addr_b_do1, 
+	upd_addr_b_da1, upd_addr_b_di1, upd_addr_b_df1, upd_addr_b_do1,
+	acc_dgate1, 
 	
 
 	rst_cost, acc_cost,
@@ -220,6 +222,7 @@ input [11:0] rd_addr_a_da2, rd_addr_a_di2, rd_addr_a_df2, rd_addr_a_do2;
 input [11:0] upd_addr_a_da2, upd_addr_a_di2, upd_addr_a_df2, upd_addr_a_do2;
 input [11:0] upd_addr_b_da2, upd_addr_b_di2, upd_addr_b_df2, upd_addr_b_do2;
 input [11:0] bp_addr_b_da2, bp_addr_b_di2, bp_addr_b_df2, bp_addr_b_do2;
+input acc_dgate2;
 
 input wr_dx2;
 input [11:0] wr_addr_a_dx2, rd_addr_b_dx2;
@@ -248,6 +251,7 @@ input [11:0] rd_addr_a_da1, rd_addr_a_di1, rd_addr_a_df1, rd_addr_a_do1;
 input [11:0] upd_addr_a_da1, upd_addr_a_di1, upd_addr_a_df1, upd_addr_a_do1;
 input [11:0] upd_addr_b_da1, upd_addr_b_di1, upd_addr_b_df1, upd_addr_b_do1;
 input [11:0] bp_addr_b_da1, bp_addr_b_di1, bp_addr_b_df1, bp_addr_b_do1;
+input acc_dgate1;
 
 input rst_cost, acc_cost;
 
@@ -771,7 +775,7 @@ memory_cell #(
 		.FILENAME("layer2_wa.list")
 	) inst_memory_cell_wa_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_wa_2),
 		.addr_a (addr_a_wa_2),
 		.addr_b (rd_addr_b_wa_2),
 		.i_a    (new_wa_2),
@@ -785,7 +789,7 @@ memory_cell #(
 		.FILENAME("layer2_wi.list")
 	) inst_memory_cell_wi_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_wi_2),
 		.addr_a (addr_a_wi_2),
 		.addr_b (rd_addr_b_wi_2),
 		.i_a    (new_wi_2),
@@ -799,7 +803,7 @@ memory_cell #(
 		.FILENAME("layer2_wf.list")
 	) inst_memory_cell_wf_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_wf_2),
 		.addr_a (addr_a_wf_2),
 		.addr_b (rd_addr_b_wf_2),
 		.i_a    (new_wf_2),
@@ -813,7 +817,7 @@ memory_cell #(
 		.FILENAME("layer2_wo.list")
 	) inst_memory_cell_wo_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_wo_2),
 		.addr_a (addr_a_wo_2),
 		.addr_b (rd_addr_b_wo_2),
 		.i_a    (new_wo_2),
@@ -827,7 +831,7 @@ memory_cell #(
 		.FILENAME("layer2_ua.list")
 	) inst_memory_cell_ua_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_ua_2),
 		.addr_a (addr_a_ua_2),
 		.addr_b (rd_addr_b_ua_2),
 		.i_a    (new_ua_2),
@@ -841,7 +845,7 @@ memory_cell #(
 		.FILENAME("layer2_ui.list")
 	) inst_memory_cell_ui_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_ui_2),
 		.addr_a (addr_a_ui_2),
 		.addr_b (rd_addr_b_ui_2),
 		.i_a    (new_ui_2),
@@ -855,7 +859,7 @@ memory_cell #(
 		.FILENAME("layer2_uf.list")
 	) inst_memory_cell_uf_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_uf_2),
 		.addr_a (addr_a_uf_2),
 		.addr_b (rd_addr_b_uf_2),
 		.i_a    (new_uf_2),
@@ -869,7 +873,7 @@ memory_cell #(
 		.FILENAME("layer2_uo.list")
 	) inst_memory_cell_uo_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_uo_2),
 		.addr_a (addr_a_uo_2),
 		.addr_b (rd_addr_b_uo_2),
 		.i_a    (new_uo_2),
@@ -878,12 +882,12 @@ memory_cell #(
 	);
 memory_cell #(
 		.WIDTH(WIDTH),
-		.NUM(LAYR1_CELL),
+		.NUM(LAYR2_CELL),
 		.TIMESTEP(1),
 		.FILENAME("layer2_ba.list")
 	) inst_memory_cell_ba_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_ba_2),
 		.addr_a (wr_addr_a_ba_2),
 		.addr_b (rd_addr_b_ba_2),
 		.i_a    (new_ba_2),
@@ -897,7 +901,7 @@ memory_cell #(
 		.FILENAME("layer2_bi.list")
 	) inst_memory_cell_bi_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_bi_2),
 		.addr_a (wr_addr_a_bi_2),
 		.addr_b (rd_addr_b_bi_2),
 		.i_a    (new_bi_2),
@@ -911,7 +915,7 @@ memory_cell #(
 		.FILENAME("layer2_bf.list")
 	) inst_memory_cell_bf_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_bf_2),
 		.addr_a (wr_addr_a_bf_2),
 		.addr_b (rd_addr_b_bf_2),
 		.i_a    (new_bf_2),
@@ -925,7 +929,7 @@ memory_cell #(
 		.FILENAME("layer2_bo.list")
 	) inst_memory_cell_bo_2 (
 		.clk    (clk),		
-		.wr_a   (),
+		.wr_a   (wr_bo_2),
 		.addr_a (wr_addr_a_bo_2),
 		.addr_b (rd_addr_b_bo_2),
 		.i_a    (new_bo_2),
@@ -977,7 +981,7 @@ memory_cell #(
 assign prev_h2 = o_a_h2;
 assign prev_c2 = o_a_c2;
 
-assign sh_x2 = o_a_h1[WIDTH-1] ? {3'b111,o_a_h1[WIDTH-1:3]} : {3'b000,o_a_h1[WIDTH-1:3]};
+assign sh_x2 = o_b_h1[WIDTH-1] ? {3'b111,o_b_h1[WIDTH-1:3]} : {3'b000,o_b_h1[WIDTH-1:3]};
 assign sh_h2 = o_a_h2[WIDTH-1] ? {3'b111,o_a_h2[WIDTH-1:3]} : {3'b000,o_a_h2[WIDTH-1:3]};
 
 // LAYER 1 Multiplexers

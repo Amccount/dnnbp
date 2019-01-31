@@ -13,8 +13,8 @@
 module wght_bias_calc(clk, rst, en, i_x, i_h, i_da, i_di, i_df, i_do, o_b, o_wa, o_wi, o_wf, o_wo);
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24;
+parameter FRAC = 20;
 parameter N_IN = 2; // Num of Input + 1 for previous Output
 parameter N_OUT = 4;
 

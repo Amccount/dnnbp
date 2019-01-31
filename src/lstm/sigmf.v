@@ -23,9 +23,9 @@ assign quarter_input = i[WIDTH-1] ? {2'b11, i[WIDTH-1:2]} : {2'b00, i[WIDTH-1:2]
 
 //Linear region
 //mux0 : Constant selector  y1 = 0.4 or y3 = 0.6
-assign outmux0 = slc0 ? 24'h066666 : 24'h099999;
+assign outmux0 = slc0 ? 24'h006666 : 24'h009999;
 //mux1 : Constant selector outmux1 = c (outmux0 or 0.5)
-assign outmux1 = slc1 ? outmux0 : 24'h080000;
+assign outmux1 = slc1 ? outmux0 : 24'h008000;
 //mux2 : Gradien selector mx (x/8) or (x/4) 
 assign outmux2 = slc1 ? eight_input : quarter_input;
 //adder to calculate output function
@@ -33,12 +33,12 @@ assign result = outmux2 + outmux1; //mx + c
 
 //Saturation
 //mux3 : Saturation selector (0 or 1)
-assign outmux3 = slc0 ? 24'h0 : 24'h100000;
+assign outmux3 = slc0 ? 24'h0 : 24'h01000000;
 //mux4 : Output selector
 assign o = slc4 ? outmux3 : result;
 
 //Select wire assignment
 assign slc0 = i[WIDTH-1];                           // slc0 : 1 if negative
-assign slc1 = (i<24'hF33333)&&(i>24'h0CCCCC); // slc1 = (in<-0.8)||(in>0.8)
-assign slc4 = (i<24'hCCCCCC)&&(i>24'h333333); // slc4 = (in<-3.2)||(in>3.2)
+assign slc1 = (i<24'hFF3333)&&(i>24'h00CCCC); // slc1 = (in<-0.8)||(in>0.8)
+assign slc4 = (i<24'hFCCCCC)&&(i>24'h033333); // slc4 = (in<-3.2)||(in>3.2)
 endmodule
