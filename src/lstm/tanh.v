@@ -12,7 +12,7 @@
 module tanh(i, o);
 
 // parameters
-parameter WIDTH = 32;
+parameter WIDTH = 24;
 
 // input ports
 input [WIDTH-1:0] i;
@@ -38,20 +38,21 @@ wire [WIDTH-1:0] half_input;
 
 assign pos  = i[WIDTH-1] ? (~i + 1) : i; // choosing positive value
 assign quarter_input = i[WIDTH-1] ? {2'b11, i[WIDTH-1:2]} : {2'b00, i[WIDTH-1:2]};
-assign half_input = i[WIDTH-1] ? {1'b1, i[WIDTH-1:1]} : {1'b0, i[WIDTH-1:1]};
+assign half_input = i[WIDTH-1] ? {1'b1, i[WIDTH-1:1]} : {1'b0,
+ i[WIDTH-1:1]};
 
 multiplexer #(.WIDTH(WIDTH)) mux_coef_1 (.i_a( quarter_input), .i_b(half_input), .sel(sel_0), .o(out_mux_coef_1));
-multiplexer #(.WIDTH(WIDTH)) mux_const_1 (.i_a(32'h000_80000), .i_b(32'h000_40000), .sel(sel_0), .o(out_mux_const_1));
+multiplexer #(.WIDTH(WIDTH)) mux_const_1 (.i_a(24'h008000), .i_b(24'h004000), .sel(sel_0), .o(out_mux_const_1));
 multiplexer #(.WIDTH(WIDTH)) mux_coef_2 (.i_a(out_mux_coef_1), .i_b(i), .sel(sel_1), .o(out_mux_coef_2));
 multiplexer #(.WIDTH(WIDTH)) mux_const_2 (.i_a(out_mux_const_1), .i_b(0), .sel(sel_1), .o(out_mux_const_2));
 addsub #(.WIDTH(WIDTH)) inst_addsub (.i_a(out_mux_coef_2), .i_b(out_mux_const_2), .sel(sel_sign), .o(out_add_sub));
-multiplexer #(.WIDTH(WIDTH)) mux_region (.i_a(32'hFFF_00000), .i_b(32'h001_00000), .sel(sel_sign), .o(out_mux_region));
+multiplexer #(.WIDTH(WIDTH)) mux_region (.i_a(24'hFF0000), .i_b(24'h010000), .sel(sel_sign), .o(out_mux_region));
 multiplexer #(.WIDTH(WIDTH)) mux_result (.i_a(out_mux_region), .i_b(out_add_sub), .sel(sel_result), .o(o));
 
-assign sel_0 = pos<32'h001_00000;
-assign sel_1 = pos<32'h008_00000;
+assign sel_0 = pos<24'h010000;
+assign sel_1 = pos<24'h008000;
 assign sel_sign = ~i[WIDTH-1];
-assign sel_result = pos<32'h002_00000;
+assign sel_result = pos<24'h020000;
 
 
 
