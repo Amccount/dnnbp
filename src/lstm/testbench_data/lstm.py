@@ -20,6 +20,15 @@ def cell(w, x, prev_h, prev_c):
 	c = a * i + f * prev_c
 	h = np.tanh(c) * o
 
+	print("tes a :")
+	print(a)
+	print("tes i :")
+	print(i)
+	print("tes f :")
+	print(f)
+	print("tes o :")
+	print(o)
+
 	return h, c
 
 # def run(x):
@@ -581,3 +590,6 @@ if __name__ == "__main__":
 		for i in range(0,46,5):
 			print(H[i],H[i+1],H[i+2],H[i+3],H[i+4])
 		print(H[50],H[51],H[52])
+
+	print("tes")
+	print(C)
