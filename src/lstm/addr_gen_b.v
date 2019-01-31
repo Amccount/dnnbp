@@ -38,19 +38,28 @@ begin
 			end
 			else if(count2 == PAUSE_LEN)
 			begin
-				count1 <= 0;
-				count2 <= 0;
-				o_addr <= o_addr + 1;
+				if (o_addr +1 == STOP) 
+				begin
+					o_addr <= {ADDR_WIDTH{1'b0}};
+					count2 <= 0;
+					count1 <=0;	
+				end
+				else
+				begin
+					count1 <= 0;
+					count2 <= 0;
+					o_addr <= o_addr + 1;
+				end
 			end
 			else
 			begin 
 				count1 <= count1 + 1;
 			end
 		end
-		else 
-		begin
-			o_addr <= {ADDR_WIDTH{1'b0}};	
-		end
+		// else 
+		// begin
+		// 	o_addr <= {ADDR_WIDTH{1'b0}};	
+		// end
 
 	end
 end

@@ -4,7 +4,7 @@ module top_level (clk, rst_fsm, h2);
 
 parameter ADDR_WIDTH = 12;
 parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter FRAC = 20;
 parameter TIMESTEP = 7;
 parameter LAYR1_INPUT = 53;
 parameter LAYR1_CELL = 53;
@@ -183,7 +183,7 @@ wire signed [11:0] addr_wu_1;
 
 	addr_gen_b #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(52),
+			.STOP(53),
 			.PRESCALER(53),
 			.PAUSE_LEN(4)
 		) inst_addr_gen_b_1 (
@@ -238,7 +238,7 @@ wire signed [11:0] addr_wu_1;
 
 	addr_gen_b #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(7),
+			.STOP(8),
 			.PRESCALER(53),
 			.PAUSE_LEN(3)
 		) inst_addr_gen_b_2 (

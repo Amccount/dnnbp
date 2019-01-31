@@ -20,14 +20,14 @@ def cell(w, x, prev_h, prev_c):
 	c = a * i + f * prev_c
 	h = np.tanh(c) * o
 
-	print("tes a :")
-	print(a)
-	print("tes i :")
-	print(i)
-	print("tes f :")
-	print(f)
-	print("tes o :")
-	print(o)
+	# print("tes a :")
+	# print(a)
+	# print("tes i :")
+	# print(i)
+	# print("tes f :")
+	# print(f)
+	# print("tes o :")
+	# print(o)
 
 	return h, c
 

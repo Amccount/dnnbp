@@ -13,7 +13,7 @@
 module act_tanh (clk, rst, acc_x, acc_h, i_x, i_w, i_h, i_u, i_b, o_mul_1, o_mul_2, o_act);
 
 // parameters
-parameter WIDTH = 24;
+parameter WIDTH = 32;
 parameter FRAC = 20;
 
 // common ports
