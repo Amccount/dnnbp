@@ -15,7 +15,7 @@ module addr_gen_bp_dstate(clk, rst, en, o_addr_rd, o_addr_wr);
 // parameters
 parameter ADDR_WIDTH = 12;
 parameter NUM_CELL = 8;
-parameter DELAY = 20;
+parameter DELAY = 12;
 parameter DELTA_TIME = 12;
 
 // common ports
@@ -31,8 +31,6 @@ output [ADDR_WIDTH-1:0] o_addr_wr;
 // registers
 reg [ADDR_WIDTH-1:0] o_addr_rd;
 reg [ADDR_WIDTH-1:0] o_addr_wr;
-reg [ADDR_WIDTH-1:0] offset_h;
-reg [ADDR_WIDTH-1:0] offset_c;
 reg [ADDR_WIDTH-1:0] count1;
 reg [ADDR_WIDTH-1:0] count2;
 reg [ADDR_WIDTH-1:0] count3;
@@ -43,8 +41,6 @@ begin
 	if (rst) begin
 		o_addr_rd<= 0;
 		o_addr_wr<= NUM_CELL;
-		offset_h <= {ADDR_WIDTH{1'b0}};
-		offset_c <= {ADDR_WIDTH{1'b0}};
 		count1   <= {ADDR_WIDTH{1'b0}};
 		count2   <= {ADDR_WIDTH{1'b0}};
 		count3   <= {ADDR_WIDTH{1'b0}};
