@@ -505,8 +505,8 @@ addr_gen_bp_dxdout #(
 		.ADDR_WIDTH(ADDR_WIDTH),
 		.NUM_CELL(LAYR1_CELL),
 		.DELAY_RD(11),
-		.DELAY_WR(52),
-		.RD_FIRST(0)
+		.DELAY_WR(54),
+		.RD_FIRST(1)
 	) inst_addr_gen_rw_dout1 (
 		.clk    (clk),
 		.rst    (rst),
