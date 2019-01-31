@@ -2,11 +2,11 @@
 //
 // By : Joshua, Teresia Savera, Yashael Faith
 // 
-// Module Name      : addr_gen_x_upd.v Module
-// File Name        : addr_gen_x_upd.v
+// Module Name      : addr_gen_upd_xhd.v Module
+// File Name        : addr_gen_upd_xhd.v
 // Version          : 1.0
-// Description      : Read address generator for X/H and dgates
-//
+// Description      : Read address generator for X/H and dgates for dW dU calculation
+//					  Used in update parameter stage
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -15,8 +15,8 @@ module addr_gen_upd_xhd(clk, rst, en, o_addr_d, o_addr_x);
 // parameters
 parameter ADDR_WIDTH = 12;
 parameter TIMESTEP  = 7;
-parameter NUM_CELL  = 53;
-parameter NUM_INPUT = 53;
+parameter NUM_CELL  = 8;
+parameter NUM_INPUT = 8;
 parameter DELAY     = 1;
 
 // common ports

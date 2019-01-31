@@ -52,6 +52,10 @@ begin
 				count1 <= count1 + 1;
 			end
 		end
+		else 
+		begin
+			o_addr <= {ADDR_WIDTH{1'b0}};	
+		end
 	end
 end
 endmodule

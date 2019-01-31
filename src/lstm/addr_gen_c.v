@@ -19,6 +19,7 @@ parameter NUM_CELL = 53;
 parameter NUM_INPUT = 53;
 parameter DELAY = 5;
 
+
 // common ports
 input clk, rst;
 
@@ -97,5 +98,3 @@ begin
 		end
 	end
 end
-
-endmodule

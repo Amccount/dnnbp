@@ -14,10 +14,7 @@ module bp_tb();
 // parameters
 parameter WIDTH = 32;
 parameter FRAC = 24;
-parameter ADDR_WIDTH = 12;
-parameter NUM_CELL   = 8;
-parameter TIMESTEP   = 7;
-parameter DELTA_TIME = 12;
+parameter TIMESTEP = 7;
 
 parameter LAYR1_INPUT = 53;
 parameter LAYR1_CELL = 53;
@@ -103,8 +100,10 @@ reg [11:0] /*[5:0]*/ rd_layr1_ua, rd_layr1_ui, rd_layr1_uf, rd_layr1_uo;
 reg [11:0] /*[8:0]*/ rd_layr1_a, rd_layr1_i, rd_layr1_f, rd_layr1_o, rd_layr1_state;
 reg [11:0] /*[5:0]*/ rd_layr2_t, rd_layr2_h, rd_layr2_a, rd_layr2_i, rd_layr2_f, rd_layr2_o, rd_layr2_state;
 
+
 wire [11:0] o_addr_aioht;
 wire [11:0] o_addr_dgates;
+
 
 // wires
 wire signed [WIDTH-1:0] i_layr1_ua, i_layr1_ui, i_layr1_uf, i_layr1_uo;
@@ -118,26 +117,9 @@ wire signed [WIDTH-1:0] dgate, o_cost;
 wire signed [WIDTH-1:0] da1, di1, df1, do1;
 wire signed [WIDTH-1:0] da2, di2, df2, do2;
 
-reg rst_addr_gen;
-reg en_addr_gen;
-
 /////////////////////
 reg [2:0] tstep;
 /////////////////////
-
-addr_gen_bp_aiohtd #(
-			.ADDR_WIDTH(ADDR_WIDTH),
-			.NUM_CELL(NUM_CELL),
-			.TIMESTEP(TIMESTEP),
-			.DELTA_TIME(DELTA_TIME)
-		) inst_addr_gen_bp_aiohtd (
-			.clk           (clk),
-			.rst           (rst_addr_gen),
-			.en            (en_addr_gen),
-			.o_addr_aioht  (o_addr_aioht),
-			.o_addr_dgates (o_addr_dgates)
-);
-
 
 ///////////////////////////////////////////
 ////// LAYER 2 FORWARD MEMORY  ///////////
@@ -661,14 +643,14 @@ bp #(
 		.sel_wght      (sel_wght),
 		.sel_wghts1    (sel_wghts1),
 		.sel_wghts2    (sel_wghts2),
-		// .da1           (da1),
-		// .di1           (di1),
-		// .df1           (df1),
-		// .do1           (do1),
-		// .da2           (da2),
-		// .di2           (di2),
-		// .df2           (df2),
-		// .do2           (do2),
+		.da1           (da1),
+		.di1           (di1),
+		.df1           (df1),
+		.do1           (do1),
+		.da2           (da2),
+		.di2           (di2),
+		.df2           (df2),
+		.do2           (do2),
 		// .wr_da1        (wr_da1),
 		// .wr_di1        (wr_di1),
 		// .wr_df1        (wr_df1),
@@ -711,8 +693,6 @@ bp #(
 		.o_dgate (dgate),
 		.o_cost  (o_cost)
 	);
-
-
 
 //////////////////////////////////////////////
 // LAYER 2 dA, dI, dF, dO Memory  ///////////
@@ -1436,7 +1416,6 @@ begin
 		acc_do <= 1'b0;
 		acc_cost <= 1'b0;
 		#100;
-
 
 		wr_da2 <= 1'b0;
 		wr_di2 <= 1'b0;

@@ -1,8 +1,8 @@
 module datapath_tb();
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24;
+parameter FRAC = 20;
 parameter TIMESTEP = 7;
 parameter LAYR1_INPUT = 53;
 parameter LAYR1_CELL = 53;
@@ -119,15 +119,13 @@ reg [11:0] timestep;
 			.wr_c2           (wr_c2),
 			.wr_x2           (wr_x2),
 			.addr_x1         (addr_x1),
+			.wr_addr_h1		 (wr_addr_h1),
+			.wr_addr_c1      (wr_addr_c1),
 			.rd_addr_x2      (rd_addr_x2),
 			.wr_addr_x2      (wr_addr_x2),
 			.wr_addr_act_1   (wr_addr_act_1),
 			.wr_act_1        (wr_act_1),
 			.wr_addr_act_2   (wr_addr_act_2),
-			.wr_addr_h1	 	 (wr_addr_h1),
-			.wr_addr_h2	 	 (wr_addr_h2),
-			.wr_addr_c1      (wr_addr_c1),
-			.wr_addr_c2      (wr_addr_c2),
 			.wr_act_2        (wr_act_2),
 			.wr_addr_w_1     (),
 			.wr_w_1          (wr_w_1),

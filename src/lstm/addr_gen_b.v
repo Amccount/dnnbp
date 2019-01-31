@@ -2,9 +2,9 @@ module addr_gen_b (clk, rst, en, o_addr);
 
 // parameters
 parameter ADDR_WIDTH = 12;
-parameter STOP = 56;
+parameter STOP = 53;
 parameter PRESCALER = 53;
-parameter PAUSE_LEN = 2;
+parameter PAUSE_LEN = 4;
 
 // common ports
 input clk, rst;
@@ -38,15 +38,29 @@ begin
 			end
 			else if(count2 == PAUSE_LEN)
 			begin
-				count1 <= 0;
-				count2 <= 0;
-				o_addr <= o_addr + 1;
+				if (o_addr +1 == STOP) 
+				begin
+					o_addr <= {ADDR_WIDTH{1'b0}};
+					count2 <= 0;
+					count1 <=0;	
+				end
+				else
+				begin
+					count1 <= 0;
+					count2 <= 0;
+					o_addr <= o_addr + 1;
+				end
 			end
 			else
 			begin 
 				count1 <= count1 + 1;
 			end
 		end
+		// else 
+		// begin
+		// 	o_addr <= {ADDR_WIDTH{1'b0}};	
+		// end
+
 	end
 end
 endmodule
