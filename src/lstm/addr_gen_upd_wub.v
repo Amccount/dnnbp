@@ -44,9 +44,8 @@ begin
 	end
 	else if (en == 1)
 	begin
-		if (o_addr != NUM_CELL*TIMESTEP-1)
+		if (o_addr != NUM_CELL*NUM_INPUT-1)
 		begin
-			// Addressing through each feature then over timestep
 			if (count1 == DELAY-1)
 			begin
 				count1 <= 0;

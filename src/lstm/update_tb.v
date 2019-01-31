@@ -34,12 +34,12 @@ parameter LAYR2_dState = "layer2_dState.list";
 parameter LAYR2_T = "layer2_t_bp.list";
 
 // States
-parameter S0 = 5'd0,  S1 = 5'd1,  S2 = 5'd2,  S3 = 5'd3,  S4 = 5'd4;
-parameter S5 = 5'd5,  S6 = 5'd6,  S7 = 5'd7,  S8 = 5'd8,  S9 = 5'd9;
-parameter S10 = 5'd10, S11 = 5'd11, S12 = 5'd12, S13 = 5'd13, S14 = 5'd14;
-parameter S1B = 5'd20, S5B = 5'd21, S9B = 5'd22;
-parameter S1C = 5'd23, S5C = 5'd24, S9C = 5'd25;
-reg [4:0] STATE;
+parameter S0 = 8'h0,  S1 = 8'h1,  S2 = 8'h2,  S3 = 8'h3,  S4 = 8'h4;
+parameter S5 = 8'h5,  S6 = 8'h6,  S7 = 8'h7,  S8 = 8'h8,  S9 = 8'h9;
+parameter S10 = 8'h10, S11 = 8'h11, S12 = 8'h12, S13 = 8'h13, S14 = 8'h14;
+parameter S1B = 8'h1b, S5B = 8'h5b, S9B = 8'h9b;
+parameter S1C = 8'h1c, S5C = 8'h5c, S9C = 8'h9c;
+reg [7:0] STATE;
 
 // common ports
 reg clk, rst, rst_fsm;
@@ -82,6 +82,7 @@ reg rst_acc_2;
 reg [11:0] count;
 reg [11:0] count2;
 reg [11:0] count3;
+reg [11:0] count4;
 
 // Wires
 
@@ -232,7 +233,7 @@ addr_gen_upd_wub #(
 		.NUM_CELL(LAYR1_CELL),
 		.NUM_INPUT(LAYR1_INPUT),
 		.TIMESTEP(TIMESTEP),
-		.DELAY(530)
+		.DELAY(540)
 	) inst_upd_wub_b1 (
 		.clk    (clk),
 		.rst    (rst),
@@ -246,7 +247,7 @@ addr_gen_upd_wub #(
 		.NUM_CELL(LAYR2_CELL),
 		.NUM_INPUT(LAYR1_CELL),
 		.TIMESTEP(TIMESTEP),
-		.DELAY(530)
+		.DELAY(540)
 	) inst_upd_wub_b2 (
 		.clk    (clk),
 		.rst    (rst),
@@ -502,6 +503,7 @@ begin
 		count <= 0;
 		count2<= 0;
 		count3<= 0;
+		count4<= 0;
 		STATE <= S0;
 	end
 	else
@@ -518,7 +520,7 @@ begin
 					else
 					begin
 						count <= 0;
-						if (count3 == 52)
+						if (count3 == 53)
 						begin
 							count3 <= 0;
 							STATE <= S1B;
@@ -544,8 +546,9 @@ begin
 					STATE <= S4;
 				end
 			S4:	begin
-					if (count2 == LAYR2_CELL*LAYR2_CELL)
-					begin	
+					if (count2 == 8)
+					begin
+						count2 <= 0;
 						STATE <= S5;
 					end
 					else
@@ -561,8 +564,7 @@ begin
 					else
 					begin
 						count <= 0;
-
-						if (count3 == 52)
+						if (count3 == 53)
 						begin
 							count3 <= 0;
 							STATE <= S5B;
@@ -588,9 +590,18 @@ begin
 					STATE <= S8;
 				end
 			S8:	begin
-					if (count2 == LAYR2_CELL*LAYR1_CELL)
-					begin	
-						STATE <= S9;
+					if (count2 == 45)
+					begin
+						count2 <= 0;
+						if (count4 == 8)
+						begin
+							count4 <= 0;
+							STATE  <= S9;
+						end
+						else begin
+							count4 <= count4 +1 ;
+							STATE <= S1;
+						end
 					end
 					else
 					begin
@@ -605,7 +616,7 @@ begin
 					else
 					begin
 						count <= 0;
-						if (count3 == 52)
+						if (count3 == 53)
 						begin
 							count3 <= 0;
 							STATE <= S9B;
@@ -631,7 +642,7 @@ begin
 					STATE <= S12;
 				end
 			S12:begin
-					if(count2 == LAYR1_INPUT*LAYR1_CELL)
+					if(count2 == 53*45+10)
 					begin
 						STATE <= S13;
 					end
@@ -851,6 +862,7 @@ begin
 		
 */
 
+/*
 		// Multiply Accumulate All Layer
 		S1: begin 
 				rst       <= 0;
@@ -1456,8 +1468,606 @@ begin
 				rst_acc_1 <= 0;
 				rst_acc_2 <= 0;
 			end
+*/
 
-
+		S1: begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		S1B: begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 1;
+				acc_dgate2<= 1;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		S1C:begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Write mac result
+		S2: begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 1;
+				wr_u1     <= 1;
+				wr_b1     <= 1;
+				wr_w2     <= 1;
+				wr_u2     <= 1;
+				wr_b2     <= 1;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Turn WR off, transition state
+		S3: begin
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Reset MAC result
+		S4: begin
+				rst       <= 0;
+				rst_mac_1 <= 1;
+				rst_mac_2 <= 1;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 1;
+				rst_acc_2 <= 1;
+			end
+		S5: begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 0;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		S5B: begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 0;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 1;
+				acc_dgate2<= 1;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		S5C:begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 0;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Write mac result
+		S6: begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 0;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 1;
+				wr_u1     <= 1;
+				wr_b1     <= 1;
+				wr_w2     <= 1;
+				wr_u2     <= 0;
+				wr_b2     <= 1;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Turn WR off, transition state
+		S7: begin
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 0;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Reset MAC result
+		S8: begin
+				rst       <= 0;
+				rst_mac_1 <= 1;
+				rst_mac_2 <= 1;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 0;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 1;
+				rst_acc_2 <= 1;
+			end
+		S9: begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		S9B:begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 1;
+				acc_dgate2<= 1;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		S9C:begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 1;
+				acc_h1    <= 1;
+				acc_x2    <= 1;
+				acc_h2    <= 1;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Write mac result
+		S10: begin 
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 1;
+				wr_u1     <= 1;
+				wr_b1     <= 1;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Turn WR off, transition state
+		S11: begin
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
+		// Reset MAC result
+		S12: begin
+				rst       <= 0;
+				rst_mac_1 <= 1;
+				rst_mac_2 <= 1;
+				en_x1     <= 1;
+				en_x2     <= 1;
+				en_h1     <= 1;
+				en_h2     <= 1;
+				en_w1     <= 1;
+				en_w2     <= 1;
+				en_u1     <= 1;
+				en_u2     <= 1;
+				en_b1     <= 1;
+				en_b2     <= 1;
+				bp	      <= 0;
+				update    <= 1;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 1;
+				rst_acc_2 <= 1;
+			end
+		S13: begin
+				rst       <= 0;
+				rst_mac_1 <= 0;
+				rst_mac_2 <= 0;
+				en_x1     <= 0;
+				en_x2     <= 0;
+				en_h1     <= 0;
+				en_h2     <= 0;
+				en_w1     <= 0;
+				en_w2     <= 0;
+				en_u1     <= 0;
+				en_u2     <= 0;
+				en_b1     <= 0;
+				en_b2     <= 0;
+				bp	      <= 0;
+				update    <= 0;
+				wr_w1     <= 0;
+				wr_u1     <= 0;
+				wr_b1     <= 0;
+				wr_w2     <= 0;
+				wr_u2     <= 0;
+				wr_b2     <= 0;
+				acc_x1    <= 0;
+				acc_h1    <= 0;
+				acc_x2    <= 0;
+				acc_h2    <= 0;
+				acc_dgate1<= 0;
+				acc_dgate2<= 0;
+				rst_acc_1 <= 0;
+				rst_acc_2 <= 0;
+			end
 	endcase
 end
 
@@ -1467,7 +2077,7 @@ begin
 	rst_fsm <= 1;
 	#100;
 	rst_fsm <= 0;
-end
+	end
 
 always
 begin
