@@ -981,7 +981,7 @@ memory_cell #(
 assign prev_h2 = o_a_h2;
 assign prev_c2 = o_a_c2;
 
-assign sh_x2 = o_a_h1[WIDTH-1] ? {3'b111,o_a_h1[WIDTH-1:3]} : {3'b000,o_a_h1[WIDTH-1:3]};
+assign sh_x2 = o_b_h1[WIDTH-1] ? {3'b111,o_b_h1[WIDTH-1:3]} : {3'b000,o_b_h1[WIDTH-1:3]};
 assign sh_h2 = o_a_h2[WIDTH-1] ? {3'b111,o_a_h2[WIDTH-1:3]} : {3'b000,o_a_h2[WIDTH-1:3]};
 
 // LAYER 1 Multiplexers

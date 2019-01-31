@@ -93,6 +93,7 @@ wire [ADDR_WIDTH-1:0] wr_addr_a_u1;
 wire [ADDR_WIDTH-1:0] wr_addr_a_b1;
 wire [ADDR_WIDTH-1:0] rd_addr_b_x1;
 wire [ADDR_WIDTH-1:0] rd_addr_b_h1;
+wire [ADDR_WIDTH-1:0] wr_addr_a_h1;
 
 
 // Layer 2 addresses
@@ -103,7 +104,7 @@ wire [ADDR_WIDTH-1:0] wr_addr_a_u2;
 wire [ADDR_WIDTH-1:0] wr_addr_a_b2;
 wire [ADDR_WIDTH-1:0] rd_addr_b_x2;
 wire [ADDR_WIDTH-1:0] rd_addr_b_h2;
-
+wire [ADDR_WIDTH-1:0] wr_addr_a_h2;
 // Address generator dgates . X = dW
 // Layer 1
 addr_gen_upd_xhd #(
@@ -131,7 +132,7 @@ addr_gen_upd_xhd #(
 		.rst      (rst),
 		.en       (en_x2),
 		.o_addr_d (wr_addr_a_d2),
-		.o_addr_x (rd_addr_b_x2)
+		.o_addr_x (rd_addr_b_h1)
 	);
 
 // Address generator dgates . H = dU
@@ -147,7 +148,7 @@ addr_gen_upd_xhd #(
 		.rst      (rst),
 		.en       (en_h1),
 		.o_addr_d (rd_addr_b_d1),
-		.o_addr_x (rd_addr_b_h1)
+		.o_addr_x (wr_addr_a_h1)
 	);
 // Layer 2
 addr_gen_upd_xhd #(
@@ -161,7 +162,7 @@ addr_gen_upd_xhd #(
 		.rst      (rst),
 		.en       (en_h2),
 		.o_addr_d (rd_addr_b_d2),
-		.o_addr_x (rd_addr_b_h2)
+		.o_addr_x (wr_addr_a_h2)
 	);
 
 // Address generator write update W
@@ -288,7 +289,7 @@ addr_gen_upd_wub #(
 			.wr_bi_1            (wr_b1),
 			.wr_bf_1            (wr_b1),
 			.wr_bo_1            (wr_b1),
-			.wr_addr_a_h1       (),
+			.wr_addr_a_h1       (wr_addr_a_h1),
 			.wr_addr_a_c1       (),
 			.upd_addr_a_wa_1    (wr_addr_a_w1),
 			.upd_addr_a_wi_1    (wr_addr_a_w1),
@@ -313,10 +314,10 @@ addr_gen_upd_wub #(
 			.rd_addr_b_x1       (rd_addr_b_x1),
 			.rd_addr_b_h1       (rd_addr_b_h1),
 			.rd_addr_b_c1       (),
-			.rd_addr_b_wa_1     (),
-			.rd_addr_b_wi_1     (),
-			.rd_addr_b_wf_1     (),
-			.rd_addr_b_wo_1     (),
+			.rd_addr_b_wa_1     (wr_addr_a_w1),
+			.rd_addr_b_wi_1     (wr_addr_a_w1),
+			.rd_addr_b_wf_1     (wr_addr_a_w1),
+			.rd_addr_b_wo_1     (wr_addr_a_w1),
 			.rd_addr_b_ua_1     (wr_addr_a_u1),
 			.rd_addr_b_ui_1     (wr_addr_a_u1),
 			.rd_addr_b_uf_1     (wr_addr_a_u1),
@@ -350,7 +351,7 @@ addr_gen_upd_wub #(
 			.wr_bi_2            (wr_b2),
 			.wr_bf_2            (wr_b2),
 			.wr_bo_2            (wr_b2),
-			.wr_addr_a_h2       (),
+			.wr_addr_a_h2       (wr_addr_a_h2),
 			.wr_addr_a_c2       (),
 			.upd_addr_a_wa_2    (wr_addr_a_w2),
 			.upd_addr_a_wi_2    (wr_addr_a_w2),
@@ -372,7 +373,7 @@ addr_gen_upd_wub #(
 			.wr_addr_a_bi_2     (wr_addr_a_b2),
 			.wr_addr_a_bf_2     (wr_addr_a_b2),
 			.wr_addr_a_bo_2     (wr_addr_a_b2),
-			.rd_addr_b_h2       (rd_addr_b_h2),
+			.rd_addr_b_h2       (),
 			.rd_addr_b_c2       (),
 			.rd_addr_b_wa_2     (wr_addr_a_w2),
 			.rd_addr_b_wi_2     (wr_addr_a_w2),
@@ -509,43 +510,6 @@ begin
 			S0: begin
 					STATE <= S1;
 				end
-/*
-			S1: begin
-					STATE <= S2;
-				end
-			S2: begin
-					STATE <= S3;
-				end
-			S3: begin
-					STATE <= S4;
-				end
-			S4: begin
-					STATE <= S5;
-				end
-			S5: begin
-					STATE <= S6;
-				end
-			S6: begin
-					STATE <= S7;
-				end
-			S7: begin
-					STATE <= S8;
-				end
-			S8: begin
-					STATE <= S9;
-				end
-			S9: begin
-					STATE <= S10;
-				end
-			S10: begin
-					STATE <= S11;
-				end
-			S11: begin
-				STATE <= S1;
-			end
-
-*/
-
 			S1: begin
 					if (count != TIMESTEP-2)
 					begin
