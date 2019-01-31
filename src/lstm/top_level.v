@@ -3,8 +3,8 @@ module top_level (clk, rst_fsm, h2);
 
 
 parameter ADDR_WIDTH = 12;
-parameter WIDTH = 24;
-parameter FRAC = 20;
+parameter WIDTH = 32;
+parameter FRAC = 24;
 parameter TIMESTEP = 7;
 parameter LAYR1_INPUT = 53;
 parameter LAYR1_CELL = 53;
@@ -45,7 +45,7 @@ S82=82, S83=83, S84=84, S85=85, S86=86;
 //common ports
 input clk, rst_fsm;
 
-wire en, en_addr_dgate_2, en_addr_w_bp_2, rst, rst_addr_dgates, rst_2, rst_acc, rst_mac;
+wire en_1, en_2, en_h_x, en_addr_dgate_2, en_addr_w_bp_2, rst, rst_addr_dgates, rst_2, rst_acc, rst_mac, rst_bias_1, rst_bias_2;
 output [WIDTH-1:0] h2;
 
 //output ports
@@ -106,6 +106,9 @@ wire signed [11:0] rd_addr_w_2;
 wire signed [11:0] rd_addr_u_2;
 wire signed [11:0] rd_addr_b_2;
 
+
+wire signed [11:0] wr_addr_act_1;
+wire signed [11:0] wr_addr_act_2;
 wire signed [11:0] wr_addr_w_1;
 wire signed [11:0] wr_addr_b_1;
 wire signed [11:0] wr_addr_u_1;
@@ -133,17 +136,21 @@ wire signed [11:0] addr_wu_1;
 	// 		.o_addr_c ()
 	// 	);
 
-	addr_gen_wu #(
+	// ADDR GENERATOR LAYER 1
+
+	addr_gen_fwd_x #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(2809),
-			.PAUSE_STR(53),
-			.PAUSE_LEN(4)
-		) inst_addr_gen_x (
+			.NUM_CELL(53),
+			.NUM_INPUT(53),
+			.TIMESTEP(7),
+			.DELAY(4)
+		) inst_addr_gen_fwd_x (
 			.clk    (clk),
-			.rst    (rst),
-			.en     (en),
+			.rst    (rst_fsm),
+			.en     (en_h_x),
 			.o_addr (addr_x1)
-	);
+		);
+
 
 	addr_gen_c #(
 			.ADDR_WIDTH(ADDR_WIDTH),
@@ -154,85 +161,117 @@ wire signed [11:0] addr_wu_1;
 		) inst_addr_gen_c1h1 (
 			.clk      (clk),
 			.rst      (rst_fsm),
-			.en       (en),
+			.en       (en_h_x),
 			.o_addr_h (wr_addr_h1),
 			.o_addr_c (wr_addr_c1)
 		);
 
+
+	addr_gen_fwd_aifo #(
+			.ADDR_WIDTH(ADDR_WIDTH),
+			.NUM_CELL(53),
+			.NUM_INPUT(53),
+			.TIMESTEP(7),
+			.DELAY(4)
+		) inst_addr_gen_fwd_aifo (
+			.clk    (clk),
+			.rst    (rst_fsm),
+			.en     (en_1),
+			.o_addr (wr_addr_act_1)
+	);
+
+
+	addr_gen_b #(
+			.ADDR_WIDTH(ADDR_WIDTH),
+			.STOP(52),
+			.PRESCALER(53),
+			.PAUSE_LEN(4)
+		) inst_addr_gen_b_1 (
+			.clk    (clk),
+			.rst    (rst_fsm),
+			.en     (en_1),
+			.o_addr (rd_addr_b_1)
+	);
+
+
+	addr_gen_wu #(
+			.ADDR_WIDTH(ADDR_WIDTH),
+			.STOP(2808),
+			.PAUSE_STR(53),
+			.PAUSE_LEN(4)
+		) inst_addr_gen_wu_1 (
+			.clk    (clk),
+			.rst    (rst_fsm),
+			.en     (en_1),
+			.o_addr (addr_wu_1)
+	);
+
+	//ADDR GENERATOR LAYER 2
 
 	addr_gen_c #(
 			.ADDR_WIDTH(ADDR_WIDTH),
 			.TIMESTEP(7),
 			.NUM_CELL(8),
 			.NUM_INPUT(53),
-			.DELAY(4)
+			.DELAY(49)
 		) inst_addr_gen_c2h2 (
 			.clk      (clk),
 			.rst      (rst_fsm),
-			.en       (1'b0),
+			.en       (en_2),
 			.o_addr_h (wr_addr_h2),
 			.o_addr_c (wr_addr_c2)
 		);
-
-
-	addr_gen_b #(
+	
+	addr_gen_fwd_aifo #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(371),
-			.PRESCALER(53),
-			.PAUSE_LEN(4)
-		) inst_addr_gen_b_1 (
+			.NUM_CELL(8),
+			.NUM_INPUT(53),
+			.TIMESTEP(TIMESTEP),
+			.DELAY(4)
+		) inst_addr_gen_fwd_aifo_2 (
 			.clk    (clk),
 			.rst    (rst_fsm),
-			.en     (en),
-			.o_addr (rd_addr_b_1)
+			.en     (en_2),
+			.o_addr (wr_addr_act_2)
 	);
+
 
 	addr_gen_b #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(56),
-			.PRESCALER(8),
-			.PAUSE_LEN(2)
+			.STOP(7),
+			.PRESCALER(53),
+			.PAUSE_LEN(3)
 		) inst_addr_gen_b_2 (
 			.clk    (clk),
 			.rst    (rst_fsm),
-			.en     (1'b0),
+			.en     (en_2),
 			.o_addr (rd_addr_b_2)
 	);
 
-	addr_gen_wu #(
-			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(2809),
-			.PAUSE_STR(53),
-			.PAUSE_LEN(4)
-		) inst_addr_gen_wu_1 (
-			.clk    (clk),
-			.rst    (rst_fsm),
-			.en     (en),
-			.o_addr (addr_wu_1)
-	);
-
 
 	addr_gen_wu #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(424),
+			.STOP(423),
 			.PAUSE_STR(53),
 			.PAUSE_LEN(4)
 		) inst_addr_gen_w_2 (
 			.clk    (clk),
 			.rst    (rst_fsm),
-			.en     (1'b0),
+			.en     (en_2),
 			.o_addr (rd_addr_w_2)
 	);
 
+
+
 	addr_gen_wu #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(64),
+			.STOP(63),
 			.PAUSE_STR(8),
-			.PAUSE_LEN(45)
+			.PAUSE_LEN(49)
 		) inst_addr_gen_u_2 (
 			.clk    (clk),
 			.rst    (rst_fsm),
-			.en     (1'b0),
+			.en     (en_2),
 			.o_addr (rd_addr_u_2)
 	);
 
@@ -329,11 +368,15 @@ wire signed [11:0] addr_wu_1;
 		inst_fsm_module (
 			.clk        (clk),
 			.update		(update),
-			.en         (en),
+			.en_1       (en_1),
+			.en_2 		(en_2),
+			.en_h_x		(en_h_x),
 			.en_addr_dgates_2 (en_addr_dgates_2),
 			.en_addr_w_bp_2 (en_addr_w_bp_2),
 			.rst_addr_dgates (rst_addr_dgates),
 			.rst_fsm    (rst_fsm),
+			.rst_bias_1 (rst_bias_1),
+			.rst_bias_2 (rst_bias_2),
 			.rst        (rst),
 			.rst_2      (rst_2),
 			.rst_acc    (rst_acc), 
@@ -435,9 +478,9 @@ wire signed [11:0] addr_wu_1;
 			.addr_x1         (addr_x1),
 			.rd_addr_x2      (),
 			.wr_addr_x2      (),
-			.wr_addr_act_1   (),
+			.wr_addr_act_1   (wr_addr_act_1),
 			.wr_act_1        (wr_act_1),
-			.wr_addr_act_2   (),
+			.wr_addr_act_2   (wr_addr_act_2),
 			.wr_act_2        (wr_act_2),
 			.wr_addr_w_1     (wr_addr_w_1),
 			.wr_w_1          (wr_w_1),

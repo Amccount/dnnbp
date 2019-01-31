@@ -37,8 +37,8 @@ module datapath(clk, rst, rst_2, acc_x_1, acc_h_1, acc_x_2, acc_h_2, wr_h1, wr_h
 				);
 
 // parameters
-parameter WIDTH = 24;
-parameter FRAC = 20;
+parameter WIDTH = 32;
+parameter FRAC = 24;
 parameter TIMESTEP = 7;
 parameter LAYR1_INPUT = 53;
 parameter LAYR1_CELL = 53;
@@ -916,14 +916,14 @@ assign sh3_h2 = o_mem_h2_a[31] ? {3'b111,o_mem_h2_a[31:3]} : {3'b000,o_mem_h2_a[
 assign o_mux_h2 = update ? sh3_h2 : o_mem_h2_a;
 
 // LAYER 2 WEIGHT MULTIPLEXER
-assign o_mux_w_a_2 = update ? w_a_2 : d_a_2 ;
-assign o_mux_w_i_2 = update ? w_i_2 : d_i_2 ;
-assign o_mux_w_f_2 = update ? w_f_2 : d_f_2 ;
-assign o_mux_w_o_2 = update ? w_o_2 : d_o_2 ;
-assign o_mux_u_a_2 = update ? u_a_2 : d_a_2 ;
-assign o_mux_u_i_2 = update ? u_i_2 : d_i_2 ;
-assign o_mux_u_f_2 = update ? u_f_2 : d_f_2 ;
-assign o_mux_u_o_2 = update ? u_o_2 : d_o_2 ;
+assign o_mux_w_a_2 = update ? d_a_2 : w_a_2  ;
+assign o_mux_w_i_2 = update ? d_i_2 : w_i_2  ;
+assign o_mux_w_f_2 = update ? d_f_2 : w_f_2  ;
+assign o_mux_w_o_2 = update ? d_o_2 : w_o_2  ;
+assign o_mux_u_a_2 = update ? d_a_2 : u_a_2  ;
+assign o_mux_u_i_2 = update ? d_i_2 : u_i_2  ;
+assign o_mux_u_f_2 = update ? d_f_2 : u_f_2  ;
+assign o_mux_u_o_2 = update ? d_o_2 : u_o_2  ;
 
 
 // LAYER 2 LSTM CELL

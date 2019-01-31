@@ -1,7 +1,7 @@
 module multiplexer_4to1 (i_a, i_b, i_c, i_d, sel, o);             
  
 // parameters
-parameter WIDTH = 24;
+parameter WIDTH = 32;
 
 // input ports
 input signed [WIDTH-1:0] i_a;
