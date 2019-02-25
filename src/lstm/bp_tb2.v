@@ -11,7 +11,7 @@ parameter LAYR2_CELL = 8;
 
 reg clk, rst;
 
-wire en_delta;
+wire en_delta_2;
 wire update, bp;
 wire acc_x1, acc_h1;
 wire acc_x2, acc_h2;
@@ -84,11 +84,12 @@ wire [ADDR_WIDTH-1:0] wr_addr_a_di1;
 wire [ADDR_WIDTH-1:0] wr_addr_a_df1;
 wire [ADDR_WIDTH-1:0] wr_addr_a_do1;
 
-wire [ADDR_WIDTH-1:0] o_addr_aioht_2;
-wire [ADDR_WIDTH-1:0] o_addr_fc_2;
+wire [ADDR_WIDTH-1:0] o_addr_aioht_2, o_addr_aioht_1;
+wire [ADDR_WIDTH-1:0] o_addr_fc_2, o_addr_fc_1;
 
-wire [ADDR_WIDTH-1:0] o_addr_dgates_2;
+wire [ADDR_WIDTH-1:0] o_addr_dgates_2, o_addr_dgates_1;
 
+wire [ADDR_WIDTH-1:0] o_addr_dx2;
 wire [ADDR_WIDTH-1:0] o_addr_dx2_dgate;
 wire [ADDR_WIDTH-1:0] o_addr_dout2_dgate;
 wire [ADDR_WIDTH-1:0] o_addr_dout1_dgate;
@@ -96,6 +97,10 @@ wire [ADDR_WIDTH-1:0] o_addr_dx2_w;
 wire [ADDR_WIDTH-1:0] o_addr_dout2_u;
 wire [ADDR_WIDTH-1:0] o_addr_dout1_u;
 
+wire [ADDR_WIDTH-1:0] o_addr_dout_1;
+
+wire en_dx2, en_dout2, en_dout1;
+wire en_rw_dout2;
 
 datapath #(
 		.WIDTH(WIDTH),
@@ -142,7 +147,7 @@ datapath #(
 		.wr_addr_a_bo_1     (),
 		.rd_addr_b_x1       (),
 		.rd_addr_b_h1       (),
-		.rd_addr_b_c1       (rd_addr_b_c1),
+		.rd_addr_b_c1       (o_addr_fc_1),
 		.rd_addr_b_wa_1     (),
 		.rd_addr_b_wi_1     (),
 		.rd_addr_b_wf_1     (),
@@ -161,10 +166,10 @@ datapath #(
 		.acc_h1             (acc_h1),
 		.wr_act_1           (),
 		.wr_addr_a_act_1    (),
-		.rd_addr_b_a1       (rd_addr_b_a1),
-		.rd_addr_b_f1       (rd_addr_b_f1),
-		.rd_addr_b_i1       (rd_addr_b_i1),
-		.rd_addr_b_o1       (rd_addr_b_o1),
+		.rd_addr_b_a1       (o_addr_aioht_1),
+		.rd_addr_b_f1       (o_addr_fc_1),
+		.rd_addr_b_i1       (o_addr_aioht_1),
+		.rd_addr_b_o1       (o_addr_aioht_1),
 		.rst_mac_1          (rst_mac_1),
 		.wr_h2              (),
 		.wr_c2              (),
@@ -272,13 +277,13 @@ datapath #(
 		.upd_addr_b_df2     (),
 		.upd_addr_b_do2     (),
 		.wr_dx2             (wr_dx2),
-		.wr_addr_a_dx2      (wr_addr_a_dx2),
-		.rd_addr_b_dx2      (rd_addr_b_dx2),
+		.wr_addr_a_dx2      (o_addr_dx2),
+		.rd_addr_b_dx2      (o_addr_dx2),
 		.wr_dout_1          (wr_dout_1),
 		.wr_dstate_1        (wr_dstate_1),
-		.wr_addr_a_dout_1   (wr_addr_a_dout_1),
+		.wr_addr_a_dout_1   (o_addr_dout_1),
 		.wr_addr_a_dstate_1 (wr_addr_a_dstate_1),
-		.rd_addr_b_dout_1   (rd_addr_b_dout_1),
+		.rd_addr_b_dout_1   (o_addr_dout_1),
 		.rd_addr_b_dstate_1 (rd_addr_b_dstate_1),
 		.sel_in1_1          (sel_in1_1),
 		.sel_in2_1          (sel_in2_1),
@@ -296,10 +301,10 @@ datapath #(
 		.wr_di1             (wr_di1),
 		.wr_df1             (wr_df1),
 		.wr_do1             (wr_do1),
-		.wr_addr_a_da1      (wr_addr_a_da1),
-		.wr_addr_a_di1      (wr_addr_a_di1),
-		.wr_addr_a_df1      (wr_addr_a_df1),
-		.wr_addr_a_do1      (wr_addr_a_do1),
+		.wr_addr_a_da1      (o_addr_dgates_1),
+		.wr_addr_a_di1      (o_addr_dgates_1),
+		.wr_addr_a_df1      (o_addr_dgates_1),
+		.wr_addr_a_do1      (o_addr_dgates_1),
 		.rd_addr_a_da1      (),
 		.rd_addr_a_di1      (),
 		.rd_addr_a_df1      (),
@@ -331,10 +336,14 @@ fsm_bp #(
 	) inst_fsm_bp (
 		.clk          (clk),
 		.rst          (rst),
-		.en_delta     (en_delta),
+		.en_delta_2   (en_delta_2),
+		.en_delta_1   (en_delta_1),
 		.en_dx2       (en_dx2),
-		.en_dout_2    (en_dout_2),
-		.en_dout_1    (en_dout_1),
+		.en_dout2     (en_dout2),
+		.en_dout1     (en_dout1),
+		.en_rw_dout2  (en_rw_dout2),
+		.en_rw_dx2    (en_rw_dx2),
+		.en_rw_dout1  (en_rw_dout1),
 		.update       (update),
 		.bp           (bp),
 		.rd_dgate     (rd_dgate),
@@ -396,9 +405,22 @@ addr_gen_bp_aiohtd #(
 	) inst_addr_gen_bp_aiohtd2 (
 		.clk           (clk),
 		.rst           (rst),
-		.en            (en_delta),
+		.en            (en_delta_2),
 		.o_addr_aioht  (o_addr_aioht_2),
 		.o_addr_dgates (o_addr_dgates_2)
+	);
+
+addr_gen_bp_aiohtd #(
+		.ADDR_WIDTH(ADDR_WIDTH),
+		.NUM_CELL(LAYR1_CELL),
+		.TIMESTEP(TIMESTEP),
+		.DELTA_TIME(12)
+	) inst_addr_gen_bp_aiohtd1 (
+		.clk           (clk),
+		.rst           (rst),
+		.en            (en_delta_1),
+		.o_addr_aioht  (o_addr_aioht_1),
+		.o_addr_dgates (o_addr_dgates_1)
 	);
 
 addr_gen_bp_fc #(
@@ -410,45 +432,98 @@ addr_gen_bp_fc #(
 	) inst_addr_gen_bp_fc2 (
 		.clk    (clk),
 		.rst    (rst),
-		.en     (en_delta),
+		.en     (en_delta_2),
 		.o_addr (o_addr_fc_2)
+	);
+
+addr_gen_bp_fc #(
+		.ADDR_WIDTH(ADDR_WIDTH),
+		.NUM_CELL(LAYR1_CELL),
+		.TIMESTEP(TIMESTEP),
+		.DELTA_TIME(12),
+		.CHG_TIME(5)
+	) inst_addr_gen_bp_fc1 (
+		.clk    (clk),
+		.rst    (rst),
+		.en     (en_delta_1),
+		.o_addr (o_addr_fc_1)
 	);
 
 addr_gen_bp_dstate #(
 		.ADDR_WIDTH(ADDR_WIDTH),
 		.NUM_CELL(LAYR2_CELL),
-		.DELAY(30),
-		.DELTA_TIME(13)
+		.DELAY(12),
+		.DELTA_TIME(12)
 	) inst_addr_gen_bp_dstate2 (
 		.clk       (clk),
 		.rst       (rst),
-		.en        (en_delta),
+		.en        (en_delta_2),
 		.o_addr_rd (rd_addr_b_dstate_2),
 		.o_addr_wr (wr_addr_a_dstate_2)
+	);
+
+addr_gen_bp_dstate #(
+		.ADDR_WIDTH(ADDR_WIDTH),
+		.NUM_CELL(LAYR1_CELL),
+		.DELAY(12),
+		.DELTA_TIME(12)
+	) inst_addr_gen_bp_dstate1 (
+		.clk       (clk),
+		.rst       (rst),
+		.en        (en_delta_1),
+		.o_addr_rd (rd_addr_b_dstate_1),
+		.o_addr_wr (wr_addr_a_dstate_1)
 	);
 
 addr_gen_bp_dxdout #(
 		.ADDR_WIDTH(ADDR_WIDTH),
 		.NUM_CELL(LAYR2_CELL),
-		.DELAY_RD(12),
-		.DELAY_WR(30)
-	) inst_addr_gen_bp_dxdout2 (
+		.DELAY_RD(11),
+		.DELAY_WR(9),
+		.RD_FIRST(1)
+	) inst_addr_gen_rw_dout2 (
 		.clk    (clk),
 		.rst    (rst),
-		.en     (en_delta),
+		.en     (en_rw_dout2),
 		.o_addr (o_addr_dout_2)
+	);
+
+addr_gen_bp_dxdout #(
+		.ADDR_WIDTH(ADDR_WIDTH),
+		.NUM_CELL(LAYR1_CELL),
+		.DELAY_RD(11),
+		.DELAY_WR(9),
+		.RD_FIRST(0)
+	) inst_addr_gen_rw_dx2 (
+		.clk    (clk),
+		.rst    (rst),
+		.en     (en_rw_dx2),
+		.o_addr (o_addr_dx2)
+	);
+
+addr_gen_bp_dxdout #(
+		.ADDR_WIDTH(ADDR_WIDTH),
+		.NUM_CELL(LAYR1_CELL),
+		.DELAY_RD(11),
+		.DELAY_WR(54),
+		.RD_FIRST(1)
+	) inst_addr_gen_rw_dout1 (
+		.clk    (clk),
+		.rst    (rst),
+		.en     (en_rw_dout1),
+		.o_addr (o_addr_dout_1)
 	);
 
 addr_gen_bp_dwu #(
 		.ADDR_WIDTH(ADDR_WIDTH),
 		.TIMESTEP(TIMESTEP),
 		.NUM_CELL(LAYR2_CELL),
-		.NUM_INPUT(LAYR2_CELL),
-		.DELAY(3)
+		.NUM_INPUT(LAYR1_CELL),
+		.DELAY(2)
 	) inst_addr_gen_calc_dx2 (
 		.clk      (clk),
 		.rst      (rst),
-		.en       (en),
+		.en       (en_dx2),
 		.o_addr_d (o_addr_dx2_dgate),
 		.o_addr_w (o_addr_dx2_w)
 	);
@@ -457,12 +532,12 @@ addr_gen_bp_dwu #(
 		.ADDR_WIDTH(ADDR_WIDTH),
 		.TIMESTEP(TIMESTEP),
 		.NUM_CELL(LAYR2_CELL),
-		.NUM_INPUT(LAYR1_CELL),
-		.DELAY(3)
+		.NUM_INPUT(LAYR2_CELL),
+		.DELAY(2)
 	) inst_addr_gen_calc_dout2 (
 		.clk      (clk),
 		.rst      (rst),
-		.en       (en),
+		.en       (en_dout2),
 		.o_addr_d (o_addr_dout2_dgate),
 		.o_addr_w (o_addr_dout2_u)
 	);
@@ -476,7 +551,7 @@ addr_gen_bp_dwu #(
 	) inst_addr_gen_calc_dout1 (
 		.clk      (clk),
 		.rst      (rst),
-		.en       (en),
+		.en       (en_dout1),
 		.o_addr_d (o_addr_dout1_dgate),
 		.o_addr_w (o_addr_dout1_u)
 	);

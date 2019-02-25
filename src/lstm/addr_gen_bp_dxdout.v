@@ -1,4 +1,3 @@
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 // By : Joshua, Teresia Savera, Yashael Faith
@@ -18,6 +17,7 @@ parameter ADDR_WIDTH = 12;
 parameter NUM_CELL = 8;
 parameter DELAY_RD = 3;
 parameter DELAY_WR = 2;
+parameter RD_FIRST = 1;
 
 // common ports
 input clk, rst;
@@ -41,7 +41,7 @@ begin
 		o_addr   <= 0;
 		count1   <= {ADDR_WIDTH{1'b0}};
 		count2   <= {ADDR_WIDTH{1'b0}};
-		rd		 <= 1'b0;
+		rd		 <= RD_FIRST;
 	end
 	else if (en == 1)
 	begin
@@ -50,6 +50,7 @@ begin
 			rd <= !rd;
 			count1 <= 0;
 			count2 <= 0;
+			o_addr <= 0;
 		end
 		else
 		begin

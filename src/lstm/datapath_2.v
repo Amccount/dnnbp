@@ -1290,7 +1290,7 @@ memory_cell #(
         // .ADDR(9),
         .WIDTH(WIDTH),
         .NUM(LAYR1_CELL),
-        .TIMESTEP(7),
+        .TIMESTEP(2),
         .FILENAME("layer2_dX.list")
     ) inst_memory_cell_dx2 (
         .clk    (clk),        
