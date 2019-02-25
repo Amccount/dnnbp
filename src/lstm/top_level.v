@@ -1,4 +1,3 @@
-
 module top_level (clk, rst_fsm, h2);
 
 
@@ -183,7 +182,7 @@ wire signed [11:0] addr_wu_1;
 
 	addr_gen_b #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(52),
+			.STOP(53),
 			.PRESCALER(53),
 			.PAUSE_LEN(4)
 		) inst_addr_gen_b_1 (
