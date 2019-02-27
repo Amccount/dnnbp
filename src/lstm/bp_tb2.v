@@ -334,7 +334,8 @@ datapath #(
 
 fsm_bp #(
 		.WIDTH(WIDTH),
-		.FRAC(FRAC)
+		.FRAC(FRAC),
+		.TIMESTEP(TIMESTEP)
 	) inst_fsm_bp (
 		.clk          (clk),
 		.rst          (rst),
@@ -549,7 +550,7 @@ addr_gen_bp_dwu #(
 		.TIMESTEP(TIMESTEP),
 		.NUM_CELL(LAYR1_CELL),
 		.NUM_INPUT(LAYR1_CELL),
-		.DELAY(3)
+		.DELAY(2)
 	) inst_addr_gen_calc_dout1 (
 		.clk      (clk),
 		.rst      (rst),

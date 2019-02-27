@@ -41,7 +41,7 @@ begin
 			if (count2 == NUM_CELL - 1)
 			begin
 				count2 <= 0;
-				o_addr <= o_addr - (NUM_CELL * 2 - 1);
+				o_addr <= o_addr - (NUM_CELL - 1);
 			end
 			else
 			begin

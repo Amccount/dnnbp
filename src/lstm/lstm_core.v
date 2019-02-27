@@ -196,25 +196,25 @@ mac #(
 /////////////////////////////////////
 // Input activation  ///////////////
 adder_3in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_adder_3in_1 (.i_a(o_mac_1), .i_b(o_mac_2), .i_c(i_b_a), .o(o_add_1));
-tanh inst_tanh_1 (.i(o_add_1), .o(temp_a)); // Using tanh function for the Activation value
+tanh #(.WIDTH(WIDTH)) inst_tanh_1 (.i(o_add_1), .o(temp_a)); // Using tanh function for the Activation value
 
 
 /////////////////////////////////////
 // Input gate  /////////////////////
 adder_3in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_adder_3in_2 (.i_a(o_mac_3), .i_b(o_mac_4), .i_c(i_b_i), .o(o_add_2));
-sigmf sigmoid_2 (.i(o_add_2), .o(temp_i)); // Using sigmoid function for the Activation value
+sigmf #(.WIDTH(WIDTH)) sigmoid_2 (.i(o_add_2), .o(temp_i)); // Using sigmoid function for the Activation value
 
 
 /////////////////////////////////////
 // Forget gate  ////////////////////
 adder_3in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_adder_3in_3 (.i_a(o_mac_5), .i_b(o_mac_6), .i_c(i_b_f), .o(o_add_3));
-sigmf sigmoid_3 (.i(o_add_3), .o(temp_f)); // Using sigmoid function for the Activation value
+sigmf #(.WIDTH(WIDTH)) sigmoid_3 (.i(o_add_3), .o(temp_f)); // Using sigmoid function for the Activation value
 
 
 /////////////////////////////////////
 // Output gate  ////////////////////
 adder_3in #(.WIDTH(WIDTH), .FRAC(FRAC)) inst_adder_3in_4 (.i_a(o_mac_7), .i_b(o_mac_8), .i_c(i_b_o), .o(o_add_4));
-sigmf sigmoid_4 (.i(o_add_4), .o(temp_o)); // Using sigmoid function for the Activation value
+sigmf #(.WIDTH(WIDTH)) sigmoid_4 (.i(o_add_4), .o(temp_o)); // Using sigmoid function for the Activation value
 
 
 // Pipeline register after activation

@@ -362,6 +362,7 @@ wire [11:0] addr_a_da2, addr_a_di2, addr_a_df2, addr_a_do2;
 wire [11:0] bp_addr_a_da2, bp_addr_a_di2, bp_addr_a_df2, bp_addr_a_do2;
 
 wire [11:0] addr_b_da2, addr_b_di2, addr_b_df2, addr_b_do2;
+wire [11:0] addr_b_h2;
 
 wire signed [WIDTH-1:0] o_acc_cost;
 //--
@@ -946,6 +947,8 @@ assign addr_a_ui_2 = update ? upd_addr_a_ui_2 : bp_addr_a_ui_2 ;
 assign addr_a_uf_2 = update ? upd_addr_a_uf_2 : bp_addr_a_uf_2 ;
 assign addr_a_uo_2 = update ? upd_addr_a_uo_2 : bp_addr_a_uo_2 ;
 
+adder_2in #(.WIDTH(ADDR_WIDTH)) h2_addr_add_8 (.i_a(rd_addr_b_h2), .i_b(12'd8), .o(addr_b_h2));
+
 // LAYER 2 Output Memory
 memory_cell #(
 			.WIDTH(WIDTH),
@@ -956,7 +959,7 @@ memory_cell #(
 			.clk    (clk),			
 			.wr_a   (wr_h2),
 			.addr_a (wr_addr_a_h2),
-			.addr_b (rd_addr_b_h2),
+			.addr_b (addr_b_h2),
 			.i_a    (h2),
 			.o_a    (o_a_h2),
 			.o_b    (o_b_h2)
@@ -1001,19 +1004,19 @@ assign mux_bp_x4_2 = bp ? o_a_do2 : o_a_h1 ;
 assign mux_upd_x4_2 = update ? sh_x2 : mux_bp_x4_2;
 assign mux_upd_w4_2 = update ? o_b_do2 : o_a_wo_2;
 
-assign mux_bp_h1_2 = bp ? o_a_da2 : prev_h2 ;
+assign mux_bp_h1_2 = bp ? o_b_da2 : prev_h2 ;
 assign mux_upd_h1_2 = update ? sh_h2 : mux_bp_h1_2;
 assign mux_upd_u1_2 = update ? o_b_da2 : o_a_ua_2;
 
-assign mux_bp_h2_2 = bp ? o_a_di2 : prev_h2 ;
+assign mux_bp_h2_2 = bp ? o_b_di2 : prev_h2 ;
 assign mux_upd_h2_2 = update ? sh_h2 : mux_bp_h2_2;
 assign mux_upd_u2_2 = update ? o_b_di2 : o_a_ui_2;
 
-assign mux_bp_h3_2 = bp ? o_a_df2 : prev_h2 ;
+assign mux_bp_h3_2 = bp ? o_b_df2 : prev_h2 ;
 assign mux_upd_h3_2 = update ? sh_h2 : mux_bp_h3_2;
 assign mux_upd_u3_2 = update ? o_b_df2 : o_a_uf_2;
 
-assign mux_bp_h4_2 = bp ? o_a_do2 : prev_h2 ;
+assign mux_bp_h4_2 = bp ? o_b_do2 : prev_h2 ;
 assign mux_upd_h4_2 = update ? sh_h2 : mux_bp_h4_2;
 assign mux_upd_u4_2 = update ? o_b_do2 : o_a_uo_2;
 
