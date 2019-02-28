@@ -15,7 +15,7 @@ module addr_gen_c (clk, rst, en, o_addr_h, o_addr_c);
 // parameters
 parameter ADDR_WIDTH = 12;
 parameter TIMESTEP = 7;
-parameter NUM_CELL = 53;
+parameter NUM_CELL = 8;
 parameter NUM_INPUT = 53;
 parameter DELAY = 3;
 
