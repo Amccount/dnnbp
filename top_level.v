@@ -1,8 +1,8 @@
-module top_level(clk, rst_fsm, o_cost);
+module top_level(clk, rst, rst_fsm, o_cost);
 
 // parameters
 parameter WIDTH = 24;
-parameter FRAC = 20;
+parameter FRAC = 16;
 parameter ADDR_WIDTH = 12;
 parameter TIMESTEP = 7;
 parameter LAYR1_INPUT = 53;
@@ -35,7 +35,7 @@ parameter LAYR2_T = "layer2_t_bp.list";
 // States
 
 // common ports
-input clk, rst_fsm;
+input clk, rst, rst_fsm;
 
 // input ports
 
@@ -75,6 +75,7 @@ wire signed [11:0] rd_addr_h1;
 wire signed [11:0] rd_addr_c1;
 wire signed [11:0] addr_wu_1;
 
+
 // backpropagation
 wire en_delta_2;
 wire update, bp;
@@ -113,11 +114,18 @@ wire [ADDR_WIDTH-1:0] wr_addr_a_ba_1;
 wire [ADDR_WIDTH-1:0] wr_addr_a_bi_1;
 wire [ADDR_WIDTH-1:0] wr_addr_a_bf_1;
 wire [ADDR_WIDTH-1:0] wr_addr_a_bo_1;
+wire [ADDR_WIDTH-1:0] wr_addr_a_h_1;
+wire [ADDR_WIDTH-1:0] wr_addr_a_h_2;
+
 
 wire [ADDR_WIDTH-1:0] rd_addr_b_a1;
 wire [ADDR_WIDTH-1:0] rd_addr_b_f1;
 wire [ADDR_WIDTH-1:0] rd_addr_b_i1;
 wire [ADDR_WIDTH-1:0] rd_addr_b_o1;
+
+wire [ADDR_WIDTH-1:0] upd_addr_a_h_1;
+wire [ADDR_WIDTH-1:0] upd_addr_a_h_2;
+wire [ADDR_WIDTH-1:0] upd_addr_b_x1;
 
 wire [ADDR_WIDTH-1:0] wr_addr_a_wa_2;
 wire [ADDR_WIDTH-1:0] wr_addr_a_wi_2;
@@ -260,7 +268,8 @@ datapath #(
 		.wr_bf_1            (wr_b1),
 		.wr_bo_1            (wr_b1),
 		.wr_addr_a_h1       (wr_addr_a_h1),
-		.wr_addr_a_c1       (),
+		.upd_addr_a_h_1		(upd_addr_a_h_1),
+		.wr_addr_a_c1       (wr_addr_c1),
 		.upd_addr_a_wa_1    (wr_addr_a_w1),
 		.upd_addr_a_wi_1    (wr_addr_a_w1),
 		.upd_addr_a_wf_1    (wr_addr_a_w1),
@@ -281,28 +290,29 @@ datapath #(
 		.wr_addr_a_bi_1     (wr_addr_a_b1),
 		.wr_addr_a_bf_1     (wr_addr_a_b1),
 		.wr_addr_a_bo_1     (wr_addr_a_b1),
-		.rd_addr_a_x1       (addr_x1),
+		.rd_addr_a_x1       (),
+		.upd_addr_b_x1		(upd_addr_b_x1),
 		.rd_addr_b_x1       (rd_addr_b_x1),
 		.rd_addr_b_h1       (rd_addr_b_h1),
 		.rd_addr_b_c1       (o_addr_fc_1),
-		.rd_addr_b_wa_1     (wr_addr_a_w1),
-		.rd_addr_b_wi_1     (wr_addr_a_w1),
-		.rd_addr_b_wf_1     (wr_addr_a_w1),
-		.rd_addr_b_wo_1     (wr_addr_a_w1),
-		.rd_addr_b_ua_1     (wr_addr_a_u1),
-		.rd_addr_b_ui_1     (wr_addr_a_u1),
-		.rd_addr_b_uf_1     (wr_addr_a_u1),
-		.rd_addr_b_uo_1     (wr_addr_a_u1),
-		.rd_addr_b_ba_1     (wr_addr_a_b1),
-		.rd_addr_b_bi_1     (wr_addr_a_b1),
-		.rd_addr_b_bf_1     (wr_addr_a_b1),
-		.rd_addr_b_bo_1     (wr_addr_a_b1),
+		.rd_addr_b_wa_1     (addr_wu_1),
+		.rd_addr_b_wi_1     (addr_wu_1),
+		.rd_addr_b_wf_1     (addr_wu_1),
+		.rd_addr_b_wo_1     (addr_wu_1),
+		.rd_addr_b_ua_1     (addr_wu_1),
+		.rd_addr_b_ui_1     (addr_wu_1),
+		.rd_addr_b_uf_1     (addr_wu_1),
+		.rd_addr_b_uo_1     (addr_wu_1),
+		.rd_addr_b_ba_1     (rd_addr_b_1),
+		.rd_addr_b_bi_1     (rd_addr_b_1),
+		.rd_addr_b_bf_1     (rd_addr_b_1),
+		.rd_addr_b_bo_1     (rd_addr_b_1),
 		.update             (update),
 		.bp                 (bp),
 		.acc_x1             (acc_x1),
 		.acc_h1             (acc_h1),
 		.wr_act_1           (wr_act_1),
-		.wr_addr_a_act_1    (),
+		.wr_addr_a_act_1    (wr_addr_act_1),
 		.rd_addr_b_a1       (o_addr_aioht_1),
 		.rd_addr_b_f1       (o_addr_fc_1),
 		.rd_addr_b_i1       (o_addr_aioht_1),
@@ -323,11 +333,12 @@ datapath #(
 		.wr_bf_2            (wr_b2),
 		.wr_bo_2            (wr_b2),
 		.wr_addr_a_h2       (wr_addr_a_h2),
-		.wr_addr_a_c2       (),
+		.wr_addr_a_c2       (wr_addr_c2),
 		.upd_addr_a_wa_2    (wr_addr_a_w2),
 		.upd_addr_a_wi_2    (wr_addr_a_w2),
 		.upd_addr_a_wf_2    (wr_addr_a_w2),
 		.upd_addr_a_wo_2    (wr_addr_a_w2),
+		.upd_addr_a_h_2		(upd_addr_a_h_2),
 		.bp_addr_a_wa_2     (o_addr_dx2_w),
 		.bp_addr_a_wi_2     (o_addr_dx2_w),
 		.bp_addr_a_wf_2     (o_addr_dx2_w),
@@ -354,14 +365,14 @@ datapath #(
 		.rd_addr_b_ui_2     (wr_addr_a_u2),
 		.rd_addr_b_uf_2     (wr_addr_a_u2),
 		.rd_addr_b_uo_2     (wr_addr_a_u2),
-		.rd_addr_b_ba_2     (wr_addr_a_b2),
-		.rd_addr_b_bi_2     (wr_addr_a_b2),
-		.rd_addr_b_bf_2     (wr_addr_a_b2),
-		.rd_addr_b_bo_2     (wr_addr_a_b2),
+		.rd_addr_b_ba_2     (rd_addr_b_2),
+		.rd_addr_b_bi_2     (rd_addr_b_2),
+		.rd_addr_b_bf_2     (rd_addr_b_2),
+		.rd_addr_b_bo_2     (rd_addr_b_2),
 		.acc_x2             (acc_x2),
 		.acc_h2             (acc_h2),
 		.wr_act_2           (wr_act_2),
-		.wr_addr_a_act_2    (),
+		.wr_addr_a_act_2    (wr_addr_act_2),
 		.rd_addr_b_a2       (o_addr_aioht_2),
 		.rd_addr_b_f2       (o_addr_fc_2),
 		.rd_addr_b_i2       (o_addr_aioht_2),
@@ -498,9 +509,14 @@ datapath #(
 			.LAYR2_T(LAYR2_T)
 		) inst_fsm (
 			.clk          (clk),
-			.rst          (rst),
+			.rst_fsm      (rst_fsm),
+			.rst 		  (rst),
 			.en_1         (en_1),
 			.en_2         (en_2),
+			.acc_x1       (acc_x1),
+			.acc_h1       (acc_h1),
+			.acc_x2       (acc_x2),
+			.acc_h2       (acc_h2),
 			.wr_h1        (wr_h1),
 			.wr_h2        (wr_h2),
 			.wr_c1        (wr_c1),
@@ -518,10 +534,6 @@ datapath #(
 			.update       (update),
 			.bp           (bp),
 			.rd_dgate     (rd_dgate),
-			.acc_x1       (acc_x1),
-			.acc_h1       (acc_h1),
-			.acc_x2       (acc_x2),
-			.acc_h2       (acc_h2),
 			.wr_dout_2    (wr_dout_2),
 			.wr_dstate_2  (wr_dstate_2),
 			.sel_in1_2    (sel_in1_2),
@@ -561,6 +573,9 @@ datapath #(
 			.wr_do1       (wr_do1),
 			.rst_cost     (rst_cost),
 			.acc_cost     (acc_cost),
+			.rst_mac_1    (rst_mac_1),
+			.rst_mac_2    (rst_mac_2),
+			.rst_2        (rst_2),
 			.wr_w1        (wr_w1),
 			.wr_u1        (wr_u1),
 			.wr_b1        (wr_b1),
@@ -580,9 +595,7 @@ datapath #(
 			.acc_dgate1   (acc_dgate1),
 			.acc_dgate2   (acc_dgate2),
 			.rst_acc_1    (rst_acc_1),
-			.rst_acc_2    (rst_acc_2),
-			.rst_mac_1    (rst_mac_1),
-			.rst_mac_2    (rst_mac_2)
+			.rst_acc_2    (rst_acc_2)
 		);
 
 
@@ -598,7 +611,7 @@ datapath #(
 			.clk    (clk),
 			.rst    (rst_fsm),
 			.en     (en_1),
-			.o_addr (addr_x1)
+			.o_addr (rd_addr_b_x1)
 		);
 
 	addr_gen_c #(
@@ -606,12 +619,12 @@ datapath #(
 			.TIMESTEP(7),
 			.NUM_CELL(53),
 			.NUM_INPUT(53),
-			.DELAY(4)
+			.DELAY(3)
 		) inst_addr_gen_c1h1 (
 			.clk      (clk),
 			.rst      (rst_fsm),
 			.en       (en_1),
-			.o_addr_h (wr_addr_h1),
+			.o_addr_h (wr_addr_a_h1),
 			.o_addr_c (wr_addr_c1)
 		);
 
@@ -632,7 +645,7 @@ datapath #(
 
 	addr_gen_b #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(52),
+			.STOP(53),
 			.PRESCALER(53),
 			.PAUSE_LEN(4)
 		) inst_addr_gen_b_1 (
@@ -645,7 +658,7 @@ datapath #(
 
 	addr_gen_wu #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(2808),
+			.STOP(2809),
 			.PAUSE_STR(53),
 			.PAUSE_LEN(4)
 		) inst_addr_gen_wu_1 (
@@ -662,12 +675,12 @@ datapath #(
 			.TIMESTEP(7),
 			.NUM_CELL(8),
 			.NUM_INPUT(53),
-			.DELAY(49)
+			.DELAY(48)
 		) inst_addr_gen_c2h2 (
 			.clk      (clk),
 			.rst      (rst_fsm),
 			.en       (en_2),
-			.o_addr_h (wr_addr_h2),
+			.o_addr_h (wr_addr_a_h2),
 			.o_addr_c (wr_addr_c2)
 		);
 	
@@ -900,7 +913,7 @@ addr_gen_upd_xhd #(
 		.rst      (rst),
 		.en       (en_x1),
 		.o_addr_d (wr_addr_a_d1),
-		.o_addr_x (rd_addr_b_x1)
+		.o_addr_x (upd_addr_b_x1)
 	);
 // Layer 2
 addr_gen_upd_xhd #(
@@ -930,7 +943,7 @@ addr_gen_upd_xhd #(
 		.rst      (rst),
 		.en       (en_h1),
 		.o_addr_d (rd_addr_b_d1),
-		.o_addr_x (wr_addr_a_h1)
+		.o_addr_x (upd_addr_a_h_1)
 	);
 // Layer 2
 addr_gen_upd_xhd #(
@@ -944,7 +957,7 @@ addr_gen_upd_xhd #(
 		.rst      (rst),
 		.en       (en_h2),
 		.o_addr_d (rd_addr_b_d2),
-		.o_addr_x (wr_addr_a_h2)
+		.o_addr_x (upd_addr_a_h_2)
 	);
 
 // Address generator write update W

@@ -40,10 +40,20 @@ begin
 				end
 				else 
 				begin
-					o_addr <= o_addr + 1;
-					count1 <= count1 + 1;
-					count1 <= 0;
-					count2 <= 0;
+					if (o_addr+1 == STOP)
+					begin
+						o_addr <= {ADDR_WIDTH{1'b0}};
+						count1 <= count1 + 1;
+						count1 <= 0;
+						count2 <= 0;
+					end
+					else
+					begin
+						o_addr <= o_addr+1;
+						count1 <= count1 + 1;
+						count1 <= 0;
+						count2 <= 0;
+					end
 				end
 			end
 			else
@@ -52,10 +62,11 @@ begin
 				count1 <= count1 + 1;
 			end
 		end
-		else 
-		begin
-			o_addr <= {ADDR_WIDTH{1'b0}};	
-		end
+		// else 
+		// begin
+		// 	o_addr <= {ADDR_WIDTH{1'b0}};	
+		// 	count2 <= count2+1;
+		// end
 	end
 end
 endmodule

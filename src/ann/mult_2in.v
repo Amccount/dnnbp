@@ -12,8 +12,8 @@
 module mult_2in (i_a, i_b, o);
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24
+parameter FRAC = 16
 
 // input ports
 input signed [WIDTH-1:0] i_a, i_b;
@@ -28,6 +28,6 @@ wire signed [2*WIDTH-1:0] mult;
 // and taking only 32 bits, with 24 bit FRAC
 assign mult = i_a * i_b;
 
-assign o = mult[(FRAC+31):FRAC] + {31'd0, mult[23]};
+assign o = mult[(FRAC+WIDTH-1):FRAC] + {{(WIDTH-1){1'b0}}, mult[FRAC-1]};
 
 endmodule

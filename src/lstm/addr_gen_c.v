@@ -17,7 +17,7 @@ parameter ADDR_WIDTH = 12;
 parameter TIMESTEP = 7;
 parameter NUM_CELL = 53;
 parameter NUM_INPUT = 53;
-parameter DELAY = 5;
+parameter DELAY = 3;
 
 
 // common ports
@@ -65,7 +65,7 @@ begin
 		if (o_addr_c != NUM_CELL*(TIMESTEP+1)-1 || o_addr_h != NUM_CELL*(TIMESTEP+1)-1)
 		begin
 			// Addressing through each input then cell then over timestep
-			if (count1 == NUM_CELL-1 && count2 != DELAY)
+			if (count1 == NUM_CELL && count2 != DELAY)
 			begin
 				count2 <= count2 + 1;
 				o_addr_h <= offset_c + NUM_CELL;
@@ -98,4 +98,5 @@ begin
 		end
 	end
 end
+
 endmodule
