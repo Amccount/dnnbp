@@ -44,7 +44,7 @@ assign half_input = i[WIDTH-1] ? {1'b1, i[WIDTH-1:1]} : {1'b0,
 multiplexer #(.WIDTH(WIDTH)) mux_coef_1 (.i_a( quarter_input), .i_b(half_input), .sel(sel_0), .o(out_mux_coef_1));
 multiplexer #(.WIDTH(WIDTH)) mux_const_1 (.i_a(24'h008000), .i_b(24'h004000), .sel(sel_0), .o(out_mux_const_1));
 multiplexer #(.WIDTH(WIDTH)) mux_coef_2 (.i_a(out_mux_coef_1), .i_b(i), .sel(sel_1), .o(out_mux_coef_2));
-multiplexer #(.WIDTH(WIDTH)) mux_const_2 (.i_a(out_mux_const_1), .i_b(0), .sel(sel_1), .o(out_mux_const_2));
+multiplexer #(.WIDTH(WIDTH)) mux_const_2 (.i_a(out_mux_const_1), .i_b(24'h000000), .sel(sel_1), .o(out_mux_const_2));
 addsub #(.WIDTH(WIDTH)) inst_addsub (.i_a(out_mux_coef_2), .i_b(out_mux_const_2), .sel(sel_sign), .o(out_add_sub));
 multiplexer #(.WIDTH(WIDTH)) mux_region (.i_a(24'hFF0000), .i_b(24'h010000), .sel(sel_sign), .o(out_mux_region));
 multiplexer #(.WIDTH(WIDTH)) mux_result (.i_a(out_mux_region), .i_b(out_add_sub), .sel(sel_result), .o(o));

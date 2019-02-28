@@ -12,8 +12,8 @@
 module mult_2in (i_a, i_b, o);
 
 // parameters
-parameter WIDTH = 32;
-parameter FRAC = 24;
+parameter WIDTH = 24;
+parameter FRAC = 16;
 
 // input ports
 input signed [WIDTH-1:0] i_a, i_b;

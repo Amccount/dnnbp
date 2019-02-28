@@ -7,11 +7,12 @@ module datapath(
 
 	wr_addr_a_h1, wr_addr_a_c1,
 	upd_addr_a_wa_1, upd_addr_a_wi_1, upd_addr_a_wf_1, upd_addr_a_wo_1,
+	upd_addr_a_h_1,upd_addr_b_x1,
 	bp_addr_a_wa_1, bp_addr_a_wi_1, bp_addr_a_wf_1, bp_addr_a_wo_1,
 	upd_addr_a_ua_1, upd_addr_a_ui_1, upd_addr_a_uf_1, upd_addr_a_uo_1,
 	bp_addr_a_ua_1, bp_addr_a_ui_1, bp_addr_a_uf_1, bp_addr_a_uo_1,
 	wr_addr_a_ba_1, wr_addr_a_bi_1, wr_addr_a_bf_1, wr_addr_a_bo_1,
-
+	rd_addr_a_x1,
 	rd_addr_b_x1, rd_addr_b_h1, rd_addr_b_c1,
 	rd_addr_b_wa_1, rd_addr_b_wi_1, rd_addr_b_wf_1, rd_addr_b_wo_1,
 	rd_addr_b_ua_1, rd_addr_b_ui_1, rd_addr_b_uf_1, rd_addr_b_uo_1,
@@ -34,6 +35,7 @@ module datapath(
 	upd_addr_a_wa_2, upd_addr_a_wi_2, upd_addr_a_wf_2, upd_addr_a_wo_2,
 	bp_addr_a_wa_2, bp_addr_a_wi_2, bp_addr_a_wf_2, bp_addr_a_wo_2,
 	upd_addr_a_ua_2, upd_addr_a_ui_2, upd_addr_a_uf_2, upd_addr_a_uo_2,
+	upd_addr_a_h_2,
 	bp_addr_a_ua_2, bp_addr_a_ui_2, bp_addr_a_uf_2, bp_addr_a_uo_2,
 	wr_addr_a_ba_2, wr_addr_a_bi_2, wr_addr_a_bf_2, wr_addr_a_bo_2,
 
@@ -76,7 +78,6 @@ module datapath(
 	bp_addr_b_da2, bp_addr_b_di2, bp_addr_b_df2, bp_addr_b_do2, 
 	upd_addr_b_da2, upd_addr_b_di2, upd_addr_b_df2, upd_addr_b_do2,
 	acc_dgate2,
-
 	wr_dx2,
 	wr_addr_a_dx2, rd_addr_b_dx2,
 
@@ -148,10 +149,9 @@ input wr_wa_1, wr_wi_1, wr_wf_1, wr_wo_1;
 input wr_ua_1, wr_ui_1, wr_uf_1, wr_uo_1;
 input wr_ba_1, wr_bi_1, wr_bf_1, wr_bo_1;
 
-input [11:0] wr_addr_a_h1, wr_addr_a_c1;
-input [11:0] upd_addr_a_wa_1, upd_addr_a_wi_1, upd_addr_a_wf_1, upd_addr_a_wo_1;
+input [11:0] rd_addr_a_x1, wr_addr_a_h1, wr_addr_a_c1;
+input [11:0] upd_addr_a_wa_1, upd_addr_a_wi_1, upd_addr_a_wf_1, upd_addr_a_wo_1, upd_addr_b_x1;
 input [11:0] bp_addr_a_wa_1, bp_addr_a_wi_1, bp_addr_a_wf_1, bp_addr_a_wo_1;
-input [11:0] upd_addr_a_ua_1, upd_addr_a_ui_1, upd_addr_a_uf_1, upd_addr_a_uo_1;
 input [11:0] bp_addr_a_ua_1, bp_addr_a_ui_1, bp_addr_a_uf_1, bp_addr_a_uo_1;
 input [11:0] wr_addr_a_ba_1, wr_addr_a_bi_1, wr_addr_a_bf_1, wr_addr_a_bo_1;
 
@@ -176,7 +176,7 @@ input wr_ua_2, wr_ui_2, wr_uf_2, wr_uo_2;
 input wr_ba_2, wr_bi_2, wr_bf_2, wr_bo_2;
 
 input [11:0] wr_addr_a_h2, wr_addr_a_c2;
-input [11:0] upd_addr_a_wa_2, upd_addr_a_wi_2, upd_addr_a_wf_2, upd_addr_a_wo_2;
+input [11:0] upd_addr_a_wa_2, upd_addr_a_wi_2, upd_addr_a_wf_2, upd_addr_a_wo_2, upd_addr_a_ua_1, upd_addr_a_ui_1, upd_addr_a_uf_1, upd_addr_a_uo_1;
 input [11:0] bp_addr_a_wa_2, bp_addr_a_wi_2, bp_addr_a_wf_2, bp_addr_a_wo_2;
 input [11:0] upd_addr_a_ua_2, upd_addr_a_ui_2, upd_addr_a_uf_2, upd_addr_a_uo_2;
 input [11:0] bp_addr_a_ua_2, bp_addr_a_ui_2, bp_addr_a_uf_2, bp_addr_a_uo_2;
@@ -219,7 +219,7 @@ input [1:0] sel_temp_2;
 input wr_da2, wr_di2, wr_df2, wr_do2;
 input [11:0] wr_addr_a_da2, wr_addr_a_di2, wr_addr_a_df2, wr_addr_a_do2;
 input [11:0] rd_addr_a_da2, rd_addr_a_di2, rd_addr_a_df2, rd_addr_a_do2;
-input [11:0] upd_addr_a_da2, upd_addr_a_di2, upd_addr_a_df2, upd_addr_a_do2;
+input [11:0] upd_addr_a_da2, upd_addr_a_di2, upd_addr_a_df2, upd_addr_a_do2, upd_addr_a_h_1, upd_addr_a_h_2;
 input [11:0] upd_addr_b_da2, upd_addr_b_di2, upd_addr_b_df2, upd_addr_b_do2;
 input [11:0] bp_addr_b_da2, bp_addr_b_di2, bp_addr_b_df2, bp_addr_b_do2;
 input acc_dgate2;
@@ -266,8 +266,8 @@ output signed [WIDTH-1:0] o_cost;
 // registers
 
 // wires
-wire [ADDR_WIDTH-1:0] addr_a_wa_1, addr_a_wi_1, addr_a_wf_1, addr_a_wo_1;
-wire [ADDR_WIDTH-1:0] addr_a_ua_1, addr_a_ui_1, addr_a_uf_1, addr_a_uo_1;
+wire [ADDR_WIDTH-1:0] addr_a_wa_1, addr_a_wi_1, addr_a_wf_1, addr_a_wo_1, addr_w_1, addr_w_2, addr_u_1, addr_u_2, addr_x1;
+wire [ADDR_WIDTH-1:0] addr_a_ua_1, addr_a_ui_1, addr_a_uf_1, addr_a_uo_1, addr_a_h1, addr_a_h2;
 
 wire signed [WIDTH-1:0] new_wa_1, new_wi_1, new_wf_1, new_wo_1;
 wire signed [WIDTH-1:0] new_ua_1, new_ui_1, new_uf_1, new_uo_1;
@@ -405,7 +405,7 @@ memory_cell #(
 			.clk    (clk),			
 			.wr_a   (),
 			.addr_a (),
-			.addr_b (rd_addr_b_x1),
+			.addr_b (addr_x1),
 			.i_a    (),
 			.o_a    (),
 			.o_b    (o_b_x1)
@@ -420,8 +420,8 @@ memory_cell #(
 	) inst_memory_cell_wa_1 (
 		.clk    (clk),		
 		.wr_a   (wr_wa_1),
-		.addr_a (addr_a_wa_1),
-		.addr_b (rd_addr_b_wa_1),
+		.addr_a (addr_w_1),
+		.addr_b (addr_w_1),
 		.i_a    (new_wa_1),
 		.o_a    (o_a_wa_1),
 		.o_b    (o_b_wa_1)
@@ -434,8 +434,8 @@ memory_cell #(
 	) inst_memory_cell_wi_1 (
 		.clk    (clk),		
 		.wr_a   (wr_wi_1),
-		.addr_a (addr_a_wi_1),
-		.addr_b (rd_addr_b_wi_1),
+		.addr_a (addr_w_1),
+		.addr_b (addr_w_1),
 		.i_a    (new_wi_1),
 		.o_a    (o_a_wi_1),
 		.o_b    (o_b_wi_1)
@@ -448,8 +448,8 @@ memory_cell #(
 	) inst_memory_cell_wf_1 (
 		.clk    (clk),		
 		.wr_a   (wr_wf_1),
-		.addr_a (addr_a_wf_1),
-		.addr_b (rd_addr_b_wf_1),
+		.addr_a (addr_w_1),
+		.addr_b (addr_w_1),
 		.i_a    (new_wf_1),
 		.o_a    (o_a_wf_1),
 		.o_b    (o_b_wf_1)
@@ -462,8 +462,8 @@ memory_cell #(
 	) inst_memory_cell_wo_1 (
 		.clk    (clk),		
 		.wr_a   (wr_wo_1),
-		.addr_a (addr_a_wo_1),
-		.addr_b (rd_addr_b_wo_1),
+		.addr_a (addr_w_1),
+		.addr_b (addr_w_1),
 		.i_a    (new_wo_1),
 		.o_a    (o_a_wo_1),
 		.o_b    (o_b_wo_1)
@@ -476,8 +476,8 @@ memory_cell #(
 	) inst_memory_cell_ua_1 (
 		.clk    (clk),		
 		.wr_a   (wr_ua_1),
-		.addr_a (addr_a_ua_1),
-		.addr_b (rd_addr_b_ua_1),
+		.addr_a (addr_u_1),
+		.addr_b (addr_u_1),
 		.i_a    (new_ua_1),
 		.o_a    (o_a_ua_1),
 		.o_b    (o_b_ua_1)
@@ -490,8 +490,8 @@ memory_cell #(
 	) inst_memory_cell_ui_1 (
 		.clk    (clk),		
 		.wr_a   (wr_ui_1),
-		.addr_a (addr_a_ui_1),
-		.addr_b (rd_addr_b_ui_1),
+		.addr_a (addr_u_1),
+		.addr_b (addr_u_1),
 		.i_a    (new_ui_1),
 		.o_a    (o_a_ui_1),
 		.o_b    (o_b_ui_1)
@@ -504,8 +504,8 @@ memory_cell #(
 	) inst_memory_cell_uf_1 (
 		.clk    (clk),		
 		.wr_a   (wr_uf_1),
-		.addr_a (addr_a_uf_1),
-		.addr_b (rd_addr_b_uf_1),
+		.addr_a (addr_u_1),
+		.addr_b (addr_u_1),
 		.i_a    (new_uf_1),
 		.o_a    (o_a_uf_1),
 		.o_b    (o_b_uf_1)
@@ -518,8 +518,8 @@ memory_cell #(
 	) inst_memory_cell_uo_1 (
 		.clk    (clk),		
 		.wr_a   (wr_uo_1),
-		.addr_a (addr_a_uo_1),
-		.addr_b (rd_addr_b_uo_1),
+		.addr_a (addr_u_1),
+		.addr_b (addr_u_1),
 		.i_a    (new_uo_1),
 		.o_a    (o_a_uo_1),
 		.o_b    (o_b_uo_1)
@@ -598,7 +598,7 @@ memory_cell #(
 		) inst_memory_cell_h1 (
 			.clk    (clk),			
 			.wr_a   (wr_h1),
-			.addr_a (wr_addr_a_h1),
+			.addr_a (addr_a_h1),
 			.addr_b (rd_addr_b_h1),
 			.i_a    (h1),
 			.o_a    (o_a_h1),
@@ -628,6 +628,7 @@ assign sh_x1 = o_b_x1[WIDTH-1] ? {3'b111,o_b_x1[WIDTH-1:3]} : {3'b000,o_b_x1[WID
 assign sh_h1 = o_a_h1[WIDTH-1] ? {3'b111,o_a_h1[WIDTH-1:3]} : {3'b000,o_a_h1[WIDTH-1:3]};
 
 // LAYER 1 Multiplexers
+assign addr_x1 = update ? upd_addr_b_x1 : rd_addr_b_x1;
 assign mux_bp_x1_1 = bp ? o_a_da1 : o_b_x1 ;
 assign mux_upd_x1_1 = update ? sh_x1 : mux_bp_x1_1;
 assign mux_upd_w1_1 = update ? o_a_da1 : o_a_wa_1;
@@ -776,8 +777,8 @@ memory_cell #(
 	) inst_memory_cell_wa_2 (
 		.clk    (clk),		
 		.wr_a   (wr_wa_2),
-		.addr_a (addr_a_wa_2),
-		.addr_b (rd_addr_b_wa_2),
+		.addr_a (addr_w_2),
+		.addr_b (addr_w_2),
 		.i_a    (new_wa_2),
 		.o_a    (o_a_wa_2),
 		.o_b    (o_b_wa_2)
@@ -790,8 +791,8 @@ memory_cell #(
 	) inst_memory_cell_wi_2 (
 		.clk    (clk),		
 		.wr_a   (wr_wi_2),
-		.addr_a (addr_a_wi_2),
-		.addr_b (rd_addr_b_wi_2),
+		.addr_a (addr_w_2),
+		.addr_b (addr_w_2),
 		.i_a    (new_wi_2),
 		.o_a    (o_a_wi_2),
 		.o_b    (o_b_wi_2)
@@ -804,8 +805,8 @@ memory_cell #(
 	) inst_memory_cell_wf_2 (
 		.clk    (clk),		
 		.wr_a   (wr_wf_2),
-		.addr_a (addr_a_wf_2),
-		.addr_b (rd_addr_b_wf_2),
+		.addr_a (addr_w_2),
+		.addr_b (addr_w_2),
 		.i_a    (new_wf_2),
 		.o_a    (o_a_wf_2),
 		.o_b    (o_b_wf_2)
@@ -818,8 +819,8 @@ memory_cell #(
 	) inst_memory_cell_wo_2 (
 		.clk    (clk),		
 		.wr_a   (wr_wo_2),
-		.addr_a (addr_a_wo_2),
-		.addr_b (rd_addr_b_wo_2),
+		.addr_a (addr_w_2),
+		.addr_b (addr_w_2),
 		.i_a    (new_wo_2),
 		.o_a    (o_a_wo_2),
 		.o_b    (o_b_wo_2)
@@ -832,8 +833,8 @@ memory_cell #(
 	) inst_memory_cell_ua_2 (
 		.clk    (clk),		
 		.wr_a   (wr_ua_2),
-		.addr_a (addr_a_ua_2),
-		.addr_b (rd_addr_b_ua_2),
+		.addr_a (addr_u_2),
+		.addr_b (addr_u_2),
 		.i_a    (new_ua_2),
 		.o_a    (o_a_ua_2),
 		.o_b    (o_b_ua_2)
@@ -846,8 +847,8 @@ memory_cell #(
 	) inst_memory_cell_ui_2 (
 		.clk    (clk),		
 		.wr_a   (wr_ui_2),
-		.addr_a (addr_a_ui_2),
-		.addr_b (rd_addr_b_ui_2),
+		.addr_a (addr_u_2),
+		.addr_b (addr_u_2),
 		.i_a    (new_ui_2),
 		.o_a    (o_a_ui_2),
 		.o_b    (o_b_ui_2)
@@ -860,8 +861,8 @@ memory_cell #(
 	) inst_memory_cell_uf_2 (
 		.clk    (clk),		
 		.wr_a   (wr_uf_2),
-		.addr_a (addr_a_uf_2),
-		.addr_b (rd_addr_b_uf_2),
+		.addr_a (addr_u_2),
+		.addr_b (addr_u_2),
 		.i_a    (new_uf_2),
 		.o_a    (o_a_uf_2),
 		.o_b    (o_b_uf_2)
@@ -874,8 +875,8 @@ memory_cell #(
 	) inst_memory_cell_uo_2 (
 		.clk    (clk),		
 		.wr_a   (wr_uo_2),
-		.addr_a (addr_a_uo_2),
-		.addr_b (rd_addr_b_uo_2),
+		.addr_a (addr_u_2),
+		.addr_b (addr_u_2),
 		.i_a    (new_uo_2),
 		.o_a    (o_a_uo_2),
 		.o_b    (o_b_uo_2)
@@ -937,14 +938,21 @@ memory_cell #(
 		.o_b    (o_b_bo_2)
 	);
 
-assign addr_a_wa_2 = update ? upd_addr_a_wa_2 : bp_addr_a_wa_2 ;
-assign addr_a_wi_2 = update ? upd_addr_a_wi_2 : bp_addr_a_wi_2 ;
-assign addr_a_wf_2 = update ? upd_addr_a_wf_2 : bp_addr_a_wf_2 ;
-assign addr_a_wo_2 = update ? upd_addr_a_wo_2 : bp_addr_a_wo_2 ;
-assign addr_a_ua_2 = update ? upd_addr_a_ua_2 : bp_addr_a_ua_2 ;
-assign addr_a_ui_2 = update ? upd_addr_a_ui_2 : bp_addr_a_ui_2 ;
-assign addr_a_uf_2 = update ? upd_addr_a_uf_2 : bp_addr_a_uf_2 ;
-assign addr_a_uo_2 = update ? upd_addr_a_uo_2 : bp_addr_a_uo_2 ;
+assign addr_a_wa_2 = update ? upd_addr_a_wa_2 : bp_addr_a_wa_2;
+assign addr_a_wi_2 = update ? upd_addr_a_wi_2 : bp_addr_a_wi_2;
+assign addr_a_wf_2 = update ? upd_addr_a_wf_2 : bp_addr_a_wf_2;
+assign addr_a_wo_2 = update ? upd_addr_a_wo_2 : bp_addr_a_wo_2;
+assign addr_a_ua_2 = update ? upd_addr_a_ua_2 : bp_addr_a_ua_2;
+assign addr_a_ui_2 = update ? upd_addr_a_ui_2 : bp_addr_a_ui_2;
+assign addr_a_uf_2 = update ? upd_addr_a_uf_2 : bp_addr_a_uf_2;
+assign addr_a_uo_2 = update ? upd_addr_a_uo_2 : bp_addr_a_uo_2;
+
+assign addr_w_1 = update ? upd_addr_a_wa_1 : rd_addr_b_wa_1;
+assign addr_u_1 = update ? upd_addr_a_ua_1 : rd_addr_b_ua_1;
+assign addr_w_2 = update ? upd_addr_a_wa_2 : rd_addr_b_wa_2;
+assign addr_u_2 = update ? upd_addr_a_ua_2 : rd_addr_b_ua_2;
+assign addr_a_h1 = update ? upd_addr_a_h_1 : wr_addr_a_h1;
+assign addr_a_h2 = update ? upd_addr_a_h_2 : wr_addr_a_h2;
 
 // LAYER 2 Output Memory
 memory_cell #(
@@ -955,7 +963,7 @@ memory_cell #(
 		) inst_memory_cell_h2 (
 			.clk    (clk),			
 			.wr_a   (wr_h2),
-			.addr_a (wr_addr_a_h2),
+			.addr_a (addr_a_h2),
 			.addr_b (rd_addr_b_h2),
 			.i_a    (h2),
 			.o_a    (o_a_h2),
@@ -1215,6 +1223,8 @@ delta #(
 assign bp_addr_a_da2 = rd_dgate ? rd_addr_a_da2 : wr_addr_a_da2;
 assign addr_a_da2 = update ? upd_addr_a_da2 : bp_addr_a_da2;
 assign addr_b_da2 = update ? upd_addr_b_da2 : bp_addr_b_da2;
+assign addr_w_1 = update ? upd_addr_a_wa_1 : rd_addr_b_wa_1;
+assign addr_u_1 = update ? upd_addr_a_ua_1 : rd_addr_b_ua_1;
 memory_cell #(
         // .ADDR(9),
         .WIDTH(WIDTH),

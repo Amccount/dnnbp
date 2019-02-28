@@ -33,7 +33,7 @@ assign result = outmux2 + outmux1; //mx + c
 
 //Saturation
 //mux3 : Saturation selector (0 or 1)
-assign outmux3 = slc0 ? 24'h0 : 24'h01000000;
+assign outmux3 = slc0 ? 24'h0 : 24'h010000;
 //mux4 : Output selector
 assign o = slc4 ? outmux3 : result;
 

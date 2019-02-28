@@ -12,6 +12,7 @@ def cell(w, x, prev_h, prev_c):
 
 	a = np.tanh(np.dot(w[0], X))
 	i = sigmf(np.dot(w[1], X))
+	print("z for i",np.dot(w[1], X ))
 	f = sigmf(np.dot(w[2], X))
 	o = sigmf(np.dot(w[3], X))
 
@@ -28,6 +29,12 @@ def cell(w, x, prev_h, prev_c):
 	print(f)
 	print("tes o :")
 	print(o)
+	print("tes c : ")
+	print(c)
+	print ("prev c :")
+	print(prev_c)
+	print("tes h : ")
+	print(h)
 
 	return h, c
 
@@ -413,8 +420,8 @@ if __name__ == "__main__":
 
 	from numpy import genfromtxt
 	
-	W_a = genfromtxt('wa_1', delimiter=',')
 	W_i = genfromtxt('wi_1', delimiter=',')
+	W_a = genfromtxt('wa_1', delimiter=',')
 	W_f = genfromtxt('wf_1', delimiter=',')
 	W_o = genfromtxt('wo_1', delimiter=',')
 	U_a = genfromtxt('ua_1', delimiter=',')
@@ -425,6 +432,7 @@ if __name__ == "__main__":
 	B_i = genfromtxt('bi_1', delimiter=',')
 	B_f = genfromtxt('bf_1', delimiter=',')
 	B_o = genfromtxt('bo_1', delimiter=',')
+
 
 	WA = []
 	WI = []
@@ -575,21 +583,28 @@ if __name__ == "__main__":
 	 ])
 
 	# print(X.shape)
+	# print ("W0 ", W[:,0])
+	# print ("W1 ", W[:,1])
+	# print ("W2 ", W[:,2])
+
+
 
 	for j,item in enumerate(X):
 		H = []
 		C = []
 		for i in range(0,53):
-			h, c = cell(W[:,i], item, prev_h, prev_c[i])
+			h, c = cell(W[:,i], item, np.flip(prev_h), prev_c[i])
 			H.append(h)
 			C.append(c)
 		prev_h = H
 		prev_c = C
+		print(prev_h)
 
 		print("input:",j)
-		for i in range(0,46,5):
-			print(H[i],H[i+1],H[i+2],H[i+3],H[i+4])
-		print(H[50],H[51],H[52])
+		# for i in range(0,46,5):
+		# 	print(H[i],H[i+1],H[i+2],H[i+3],H[i+4])
+		# print(H[50],H[51],H[52])
 
 	print("tes")
-	print(C)
+	print("size c", len(C))
+
