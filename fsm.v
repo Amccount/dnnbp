@@ -11,7 +11,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 module fsm (
 clk, rst, en_1, en_2,
-update, 
+
 acc_x1, acc_x2, acc_h1, acc_h2, 
 wr_h1, wr_h2, wr_c1, wr_c2, wr_act_1, wr_act_2,
 
@@ -41,7 +41,13 @@ wr_da1, wr_di1, wr_df1, wr_do1,
 
 rst_cost, acc_cost,
 
-rst_mac_1, rst_mac_2
+rst_mac_1, rst_mac_2,
+//--
+rst_2, wr_w1, wr_u1, wr_b1, wr_w2, wr_u2, wr_b2, 
+en_x1, en_x2, en_h1, en_h2, en_w1, en_w2, 
+en_u1, en_u2, en_b1, en_b2, 
+acc_dgate1, acc_dgate2, rst_acc_1, rst_acc_2,
+rst_bp, rst_upd
 );
 
 // parameters
@@ -52,8 +58,6 @@ parameter LAYR1_CELL = 53;
 parameter ADDR_WIDTH = 12;
 parameter TIMESTEP = 7;
 parameter LAYR1_INPUT = 53;
-parameter LAYR1_CELL = 53;
-parameter LAYR2_CELL = 8;
 
 parameter LAYR1_X = "layer1_x.list";
 parameter LAYR1_H = "layer1_h.list";
@@ -95,15 +99,14 @@ output reg wr_act_1;
 output reg wr_act_2;
 output reg wr_h2;
 output reg wr_c2;
-output reg en_1, en_2, rst, rst_2;
-output reg update;
+output reg en_1, en_2, rst_2;
+
 ////
 // Backpropagation Section
+output reg rst_bp;
 output reg en_delta_2, en_delta_1, en_dx2, en_dout2, en_dout1;
 output reg en_rw_dout2, en_rw_dout1, en_rw_dx2;
 output reg update, bp, rd_dgate;
-output reg acc_x1, acc_h1;
-output reg acc_x2, acc_h2;
 
 output reg wr_dout_2, wr_dstate_2;
 
@@ -129,6 +132,7 @@ output reg rst_cost, acc_cost;
 output reg rst_mac_1, rst_mac_2;
 ////
 // update weight
+output reg rst_upd;
 output reg wr_w1;
 output reg wr_u1;
 output reg wr_b1;
@@ -145,14 +149,8 @@ output reg en_u1;
 output reg en_u2;
 output reg en_b1;
 output reg en_b2;
-output reg acc_x1;
-output reg acc_h1;
 output reg acc_dgate1;
-output reg acc_x2;
-output reg acc_h2;
 output reg acc_dgate2;
-output reg rst_mac_1;
-output reg rst_mac_2;
 output reg rst_acc_1;
 output reg rst_acc_2;
 
@@ -195,10 +193,10 @@ parameter 	BP0=15, 	BP1=16, 	BP2=17, 	BP3=18, 	BP4=19,
 			BP70=85, 	BP71=86, 	BP72=87, 	BP73=88, 	BP74=89,
 			BP75=90, 	BP76=91, 	BP77=92;
 // State for Update Weight
-parameter 	UPD0 = 93,  UPD1 = 94,  UPD2 = 95,  UPD3 = 96,  UPD4 = 97,
-			UPD5 = 98,  UPD6 = 99,  UPD7 = 100, UPD8 = 101, UPD9 = 102,
+parameter 	UPD0  = 93,  UPD1  = 94,  UPD2  = 95,  UPD3  = 96,  UPD4  = 97,
+			UPD5  = 98,  UPD6  = 99,  UPD7  = 100, UPD8  = 101, UPD9  = 102,
 			UPD10 = 103, UPD11 = 104, UPD12 = 105, UPD13 = 106, UPD14 = 107,
-			UPD1B = 108, UPD5B = 109, UPD9B = 110; UPD1C = 111, UPD5C = 112, 
+			UPD1B = 108, UPD5B = 109, UPD9B = 110, UPD1C = 111, UPD5C = 112, 
 			UPD9C = 113;
 
 /////////////////////////////////////////////
@@ -373,13 +371,9 @@ begin
 				end
 				else
 	        	begin
-	        		state <= S15;
+	        		state <= BP0;
 	        	end
 	        end
-			S15:
-			begin
-				state <= BP0;
-			end
 
 			BP0:
 			begin
@@ -837,150 +831,170 @@ begin
 				state <= UPD0;
 			end
 
-			UPD0: begin
+			UPD0: 
+			begin
+				state <= UPD1;
+			end
+			UPD1: 
+			begin
+				if (count != TIMESTEP-2)
+				begin
+					count <= count + 1;
+				end
+				else
+				begin
+					count <= 0;
+					if (count3 == 53)
+					begin
+						count3 <= 0;
+						state <= UPD1B;
+					end
+					else
+					begin
+						count3 <= count3 + 1;
+						state <= UPD1C;
+					end
+				end
+			end
+			UPD1B:
+			begin
+				state <= UPD2;
+			end
+			UPD1C:
+			begin
+				state <= UPD2;
+			end
+			UPD2: 
+			begin
+				count5 <= count5 + 1;
+				state <= UPD3;
+			end
+			UPD3: 
+			begin
+				state <= UPD4;
+			end
+			UPD4:	
+			begin
+				if (count5 == 8)
+				begin
+					count5 <= 0;
+					state <= UPD5;
+				end
+				else
+				begin
 					state <= UPD1;
-			UPD1: begin
-					if (count != TIMESTEP-2)
+				end
+			end
+			UPD5: 
+			begin
+				if(count != TIMESTEP-2)
+				begin
+					count <= count + 1;
+				end
+				else
+				begin
+					count <= 0;
+					if (count3 == 53)
 					begin
-						count <= count + 1;
+						count3 <= 0;
+						state <= UPD5B;
 					end
 					else
 					begin
-						count <= 0;
-						if (count3 == 53)
-						begin
-							count3 <= 0;
-							state <= UPD1B;
-						end
-						else
-						begin
-							count3 <= count3 + 1;
-							state <= UPD1C;
-						end
+						count3 <= count3 + 1;
+						state <= UPD5C;
 					end
 				end
-			UPD1B: begin
-					state <= UPD2;
-				end
-			UPD1C:begin
-					state <= UPD2;
-				end
-			UPD2: begin
-					count5 <= count5 + 1;
-					state <= UPD3;
-				end
-			UPD3: begin
-					state <= UPD4;
-				end
-			UPD4:	begin
-					if (count5 == 8)
+			end
+			UPD5B:
+			begin
+				state <= UPD6;
+			end
+			UPD5C:
+			begin
+				state <= UPD6;
+			end
+			UPD6: 
+			begin
+				count5 <= count5 + 1;
+				state <= UPD7;
+			end
+			UPD7: 
+			begin
+				state <= UPD8;
+			end
+			UPD8:	
+			begin
+				if (count5 == 45)
+				begin
+					count5 <= 0;
+					if (count4 == 8)
 					begin
-						count5 <= 0;
-						state <= UPD5;
+						count4 <= 0;
+						state  <= S9;
 					end
-					else
-					begin
+					else begin
+						count4 <= count4 +1 ;
 						state <= UPD1;
 					end
 				end
-			UPD5: begin
-					if(count != TIMESTEP-2)
+				else
+				begin
+					state <= UPD5;
+				end
+			end
+			UPD9:
+			begin
+				if(count != TIMESTEP-2)
+				begin
+					count <= count + 1;
+				end
+				else
+				begin
+					count <= 0;
+					if (count3 == 53)
 					begin
-						count <= count + 1;
+						count3 <= 0;
+						state <= UPD9B;
 					end
 					else
 					begin
-						count <= 0;
-						if (count3 == 53)
-						begin
-							count3 <= 0;
-							state <= UPD5B;
-						end
-						else
-						begin
-							count3 <= count3 + 1;
-							state <= UPD5C;
-						end
+						count3 <= count3 + 1;
+						state <= UPD9C;
 					end
 				end
-			UPD5B:begin
-					state <= UPD6;
+			end
+			UPD9B:
+			begin
+				state <= UPD10;
+			end
+			UPD9C:
+			begin
+				state <= UPD10;
+			end
+			UPD10:
+			begin
+				count5 <= count5 + 1;
+				state <= UPD11;
+			end
+			UPD11:
+			begin
+				state <= UPD12;
+			end
+			UPD12:
+			begin
+				if(count5 == 53*45+10)
+				begin
+					state <= UPD13;
 				end
-			UPD5C:begin
-					state <= UPD6;
+				else
+				begin
+					state <= UPD9;
 				end
-			UPD6: begin
-					count5 <= count5 + 1;
-					state <= UPD7;
-				end
-			UPD7: begin
-					state <= UPD8;
-				end
-			UPD8:	begin
-					if (count5 == 45)
-					begin
-						count5 <= 0;
-						if (count4 == 8)
-						begin
-							count4 <= 0;
-							state  <= S9;
-						end
-						else begin
-							count4 <= count4 +1 ;
-							state <= UPD1;
-						end
-					end
-					else
-					begin
-						state <= UPD5;
-					end
-				end
-			UPD9: begin
-					if(count != TIMESTEP-2)
-					begin
-						count <= count + 1;
-					end
-					else
-					begin
-						count <= 0;
-						if (count3 == 53)
-						begin
-							count3 <= 0;
-							state <= UPD9B;
-						end
-						else
-						begin
-							count3 <= count3 + 1;
-							state <= UPD9C;
-						end
-					end
-				end
-			UPD9B:begin
-					state <= UPD10;
-				end
-			UPD9C:begin
-					state <= UPD10;
-				end
-			UPD10:begin
-					count5 <= count5 + 1;
-					state <= UPD11;
-				end
-			UPD11:begin
-					state <= UPD12;
-				end
-			UPD12:begin
-					if(count5 == 53*45+10)
-					begin
-						state <= UPD13;
-					end
-					else
-					begin
-						state <= UPD9;
-					end
-				end
-
-			UPD13:begin
-				end
+			end
+			UPD13:
+			begin
+			end
 			default:
 			begin
 				rst_mac_1 <= 1;
@@ -1001,6 +1015,8 @@ begin
  		// Forward Propagation Section
 	    S0:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			rst_mac_1 <= 1;
 			rst_mac_2 <= 1;
 			acc_x1 <=0;
@@ -1012,10 +1028,13 @@ begin
 			wr_c1 <=0;
 			wr_c2 <=0;
 			update <=0;
+			bp <=0;
 			en_1 <=0;
 		end
 		S1:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=1;
 			acc_x1 <=0;
@@ -1031,6 +1050,8 @@ begin
 		// start computing for fir_macst layer -- repeat 53x -------------//
 		S2:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=1;
 			en_1<=1;
@@ -1044,12 +1065,16 @@ begin
 		end
 		S3:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			en_1 <=1;
 			acc_x1 <= 0;
 			acc_h1 <= 0;		
 		end
 		S4:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			//enable write h
 			en_1 <=1;
 			en_2 <=0;
@@ -1061,6 +1086,8 @@ begin
 		end
 		S5:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			en_1 <=1;
 			en_2 <=0;
 			wr_h1 <=0;
@@ -1071,6 +1098,8 @@ begin
 		end
 		S6:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			rst_mac_1 <= 0;
 			rst_mac_2 <=1;
 			en_1 <=1;
@@ -1079,6 +1108,8 @@ begin
 		// ----------------------------------------------------------//
 		S7:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			rst_mac_1 <= 0;
 			rst_mac_2 <=0;
 			en_2 <=1;	
@@ -1086,6 +1117,8 @@ begin
 		// start computing for the 2nd and 1st layer - repeat 8x ----//
 		S8: // repeat 8x
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			en_2 <= 1;
 			acc_x2 <=1;
 			acc_h2 <=1;
@@ -1096,6 +1129,8 @@ begin
 		end
 		S9: //repeat 45x
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			en_2 <= 1;
 			acc_x2 <=1;
 			acc_h2 <=0;
@@ -1104,6 +1139,8 @@ begin
 		end
 		S10: 
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			en_2 <= 1;
 			acc_x2 <=0;
 			acc_h2 <=0;
@@ -1112,6 +1149,8 @@ begin
 		end
 		S11:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			en_2 <= 1;
 			wr_h2 <=1;
 			wr_c2 <=1;
@@ -1123,6 +1162,8 @@ begin
 		end
 		S12:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			en_2 <= 1;
 			en_1 <=1;
 			wr_h1 <=0;
@@ -1139,6 +1180,8 @@ begin
 		end
 		S13:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			en_2 <= 1;
 			en_1 <=1;
 			wr_h2 <=0;
@@ -1153,6 +1196,8 @@ begin
 		// ---------------------TRANSITION STATE------------------------//
 		S14:
 		begin
+			rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
 			acc_h1 <=0;
 			acc_h2 <=0;
 			acc_x1 <=0;
@@ -1172,6 +1217,7 @@ begin
 		// Backpropagation Section
 		BP0:
 		begin
+			rst_bp 		 <= 1'b1;
 			rd_dgate     <= 1'b0;
 			rst_mac_2    <= 1'b1;  acc_h2       <= 1'b0;
 			rst_mac_1    <= 1'b1;  acc_x2       <= 1'b0;
@@ -1204,6 +1250,7 @@ begin
 		// S1 - S12 repeaeted 8 times, and calculating only for delta 2
 		BP1:
 		begin
+			rst_bp 		 <= 1'b0;
 			rst_mac_2    <= 1'b0;  en_delta_2   <= 1'b1;
 			rst_mac_1    <= 1'b0;  en_delta_1   <= 1'b0;
 			rst_cost     <= 1'b0;  en_dout2     <= 1'b0;
@@ -1229,6 +1276,7 @@ begin
 		end
 		BP2:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 
@@ -1252,6 +1300,7 @@ begin
 		end
 		BP3:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1275,6 +1324,7 @@ begin
 		end
 		BP4:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b1;
 					
@@ -1298,6 +1348,7 @@ begin
 		end
 		BP5:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1321,6 +1372,7 @@ begin
 		end
 		BP6:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1344,6 +1396,7 @@ begin
 		end
 		BP7:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1367,6 +1420,7 @@ begin
 		end
 		BP8:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1390,6 +1444,7 @@ begin
 		end
 		BP9:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1413,6 +1468,7 @@ begin
 		end
 		BP10:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1436,6 +1492,7 @@ begin
 		end
 		BP11:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1459,6 +1516,7 @@ begin
 		end
 		BP12:
 		begin
+			rst_bp 		 <= 1'b0;
 			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
 			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
 			
@@ -1486,6 +1544,7 @@ begin
 		// pre calc
 		BP13:
 		begin
+			rst_bp 		 <= 1'b0;
 		    rd_dgate       <= 1'b1;
 			en_delta_2     <= 1'b0;
 			en_delta_1     <= 1'b0;
@@ -1514,6 +1573,7 @@ begin
 		end 
 		BP14: // Loop dout2 & dx2
 		begin
+			rst_bp 		 <= 1'b0;
 			rd_dgate     <= 1'b1;
 			
 			en_dx2       <= 1'b1;
@@ -1536,6 +1596,7 @@ begin
 		end
 		BP15: // not acc & write
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;
 			acc_h2       <= 1'b0;
 			// acc_h1    <= 1'b1;
@@ -1547,6 +1608,7 @@ begin
 		end
 		BP16: // reset
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;
 			acc_h2       <= 1'b0;
 			// acc_h1    <= 1'b1;
@@ -1560,6 +1622,7 @@ begin
 		end
 		BP17:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2         <= 1'b0;
 			acc_h2         <= 1'b0;
 			// acc_h1      <= 1'b1;
@@ -1581,6 +1644,7 @@ begin
 		end
 		BP18: // Loop dout2 & dx2
 		begin
+			rst_bp 		 <= 1'b0;
 			rd_dgate       <= 1'b1;
 			
 			en_dx2         <= 1'b1;
@@ -1604,6 +1668,7 @@ begin
 		end
 		BP19: // not acc & write
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;
 			acc_h2       <= 1'b0;
 			// acc_h1    <= 1'b1;
@@ -1615,6 +1680,7 @@ begin
 		end
 		BP20: // reset
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;
 			acc_h2       <= 1'b0;
 			// acc_h1    <= 1'b1;
@@ -1629,6 +1695,7 @@ begin
 		// end of 1st dx dout, prep for repeating delta
 		BP21:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1663,6 +1730,7 @@ begin
 		end
 		BP22: // start of delta calculation
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1697,6 +1765,7 @@ begin
 		end
 		BP23:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1731,6 +1800,7 @@ begin
 		end
 		BP24:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1765,6 +1835,7 @@ begin
 		end
 		BP25:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1799,6 +1870,7 @@ begin
 		end
 		BP26:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1833,6 +1905,7 @@ begin
 		end
 		BP27:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1867,6 +1940,7 @@ begin
 		end
 		BP28:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1901,6 +1975,7 @@ begin
 		end
 		BP29:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1935,6 +2010,7 @@ begin
 		end
 		BP30:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -1969,6 +2045,7 @@ begin
 		end
 		BP31:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2003,6 +2080,7 @@ begin
 		end
 		BP32:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2037,6 +2115,7 @@ begin
 		end
 		BP33:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2072,6 +2151,7 @@ begin
 		// switch to delta 1 only //////////////////////
 		BP34:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2106,6 +2186,7 @@ begin
 		end
 		BP35:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2140,6 +2221,7 @@ begin
 		end
 		BP36:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2174,6 +2256,7 @@ begin
 		end
 		BP37:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2208,6 +2291,7 @@ begin
 		end
 		BP38:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2242,6 +2326,7 @@ begin
 		end
 		BP39:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2276,6 +2361,7 @@ begin
 		end
 		BP40:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2310,6 +2396,7 @@ begin
 		end
 		BP41:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2344,6 +2431,7 @@ begin
 		end
 		BP42:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2378,6 +2466,7 @@ begin
 		end
 		BP43:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2412,6 +2501,7 @@ begin
 		end
 		BP44:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2446,6 +2536,7 @@ begin
 		end
 		BP45:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2480,6 +2571,7 @@ begin
 		end
 		BP46:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2514,6 +2606,7 @@ begin
 		end
 		BP47:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2548,6 +2641,7 @@ begin
 		end
 		BP48: // loop dout2, dx2, dout1
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b1;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b1;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b1;  wr_dout_1    <= 1'b0;
@@ -2582,6 +2676,7 @@ begin
 		end
 		BP49: // not acc & write layer 2
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b1;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b1;
 			acc_h1       <= 1'b1;  wr_dout_1    <= 1'b0;
@@ -2616,6 +2711,7 @@ begin
 		end
 		BP50: // reset
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b1;  wr_dout_1    <= 1'b0;
@@ -2650,6 +2746,7 @@ begin
 		end
 		BP51: // loop for dout1
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b1;  wr_dout_1    <= 1'b0;
@@ -2684,6 +2781,7 @@ begin
 		end
 		BP52: // not acc & write layer 1
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b1;
@@ -2718,6 +2816,7 @@ begin
 		end
 		BP53: // reset
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2752,6 +2851,7 @@ begin
 		end
 		BP54: // prep for next loop
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2787,6 +2887,7 @@ begin
 		/// rest of dout1 and dx2
 		BP55: // loop dx2, dout1
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b1;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b1;  wr_dout_1    <= 1'b0;
@@ -2821,6 +2922,7 @@ begin
 		end
 		BP56: // not acc & write layer 2
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b1;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b1;  wr_dout_1    <= 1'b0;
@@ -2855,6 +2957,7 @@ begin
 		end
 		BP57: // reset
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b1;  wr_dout_1    <= 1'b0;
@@ -2889,6 +2992,7 @@ begin
 		end
 		BP58: // loop for dout1
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b1;  wr_dout_1    <= 1'b0;
@@ -2923,6 +3027,7 @@ begin
 		end
 		BP59: // not acc & write layer 1
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b1;
@@ -2957,6 +3062,7 @@ begin
 		end
 		BP60: // reset
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -2991,6 +3097,7 @@ begin
 		end
 		BP61: // prep for finish
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3025,6 +3132,7 @@ begin
 		end
 		BP62: // prep for NEXT TIMESTEP
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3059,6 +3167,7 @@ begin
 		end
 		BP63: // identical to S62 but w/o en_delta_2
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3093,6 +3202,7 @@ begin
 		end
 		BP64: // start of delta calculation
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3127,6 +3237,7 @@ begin
 		end
 		BP65:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3161,6 +3272,7 @@ begin
 		end
 		BP66:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3195,6 +3307,7 @@ begin
 		end
 		BP67:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3229,6 +3342,7 @@ begin
 		end
 		BP68:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3263,6 +3377,7 @@ begin
 		end
 		BP69:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3297,6 +3412,7 @@ begin
 		end
 		BP70:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3331,6 +3447,7 @@ begin
 		end
 		BP71:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3365,6 +3482,7 @@ begin
 		end
 		BP72:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3399,6 +3517,7 @@ begin
 		end
 		BP73:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3433,6 +3552,7 @@ begin
 		end
 		BP74:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3467,6 +3587,7 @@ begin
 		end
 		BP75:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3502,6 +3623,7 @@ begin
 		// switch to delta 1 only //////////////////////
 		BP76:
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3536,6 +3658,7 @@ begin
 		end
 		BP77: // last idle state
 		begin
+			rst_bp 		 <= 1'b0;
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
 			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
@@ -3572,7 +3695,7 @@ begin
 		// Update Weight Section
 		UPD0:
 		begin
-			rst    	  <= 1;
+			rst_upd	  <= 1;
 			rst_mac_1 <= 1;			rst_mac_2 <= 1;
 			en_x1     <= 0; 		en_x2     <= 0;
 			en_h1     <= 0;			en_h2     <= 0;
@@ -3590,7 +3713,7 @@ begin
 		end
 		UPD1: 
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3608,7 +3731,7 @@ begin
 		end
 		UPD1B: 
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3626,7 +3749,7 @@ begin
 		end
 		UPD1C:
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3645,7 +3768,7 @@ begin
 		// Write mac result
 		UPD2: 
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3664,7 +3787,7 @@ begin
 		// Turn WR off, transition state
 		UPD3: 
 		begin
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3683,7 +3806,7 @@ begin
 		// Reset MAC result
 		UPD4: 
 		begin
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 1;		rst_mac_2 <= 1;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3701,7 +3824,7 @@ begin
 		end
 		UPD5: 
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3719,7 +3842,7 @@ begin
 		end
 		UPD5B: 
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3737,7 +3860,7 @@ begin
 		end
 		UPD5C:
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3756,7 +3879,7 @@ begin
 		// Write mac result
 		UPD6: 
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3775,7 +3898,7 @@ begin
 		// Turn WR off, transition state
 		UPD7: 
 		begin
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3794,7 +3917,7 @@ begin
 		// Reset MAC result
 		UPD8: 
 		begin
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 1;		rst_mac_2 <= 1;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3812,7 +3935,7 @@ begin
 		end
 		UPD9: 
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3830,7 +3953,7 @@ begin
 		end
 		UPD9B:
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3848,7 +3971,7 @@ begin
 		end
 		UPD9C:
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3867,7 +3990,7 @@ begin
 		// Write mac result
 		UPD10: 
 		begin 
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3886,7 +4009,7 @@ begin
 		// Turn WR off, transition state
 		UPD11: 
 		begin
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3905,7 +4028,7 @@ begin
 		// Reset MAC result
 		UPD12: 
 		begin
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 1;		rst_mac_2 <= 1;
 				en_x1     <= 1;		en_x2     <= 1;
 				en_h1     <= 1;		en_h2     <= 1;
@@ -3923,7 +4046,7 @@ begin
 		end
 		UPD13: 
 		begin
-				rst       <= 0;
+				rst_upd	  <= 0;
 				rst_mac_1 <= 0;		rst_mac_2 <= 0;
 				en_x1     <= 0;		en_x2     <= 0;
 				en_h1     <= 0;		en_h2     <= 0;
