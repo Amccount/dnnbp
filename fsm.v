@@ -995,11 +995,6 @@ begin
 			UPD13:
 			begin
 			end
-			default:
-			begin
-				rst_mac_1 <= 1;
-				rst_mac_2 <=1;
-			end
     	endcase
     end
 end
