@@ -10,9 +10,11 @@ def cell(w, x, prev_h, prev_c):
 	X = np.append(prev_h, x)
 	X = np.append(X, np.array([1])) # 1 ini buat dikali sama bias
 
+	# print("alalalalalalalalalllllllllllllllllllllllllll")
+	# print(X)
+
 	a = np.tanh(np.dot(w[0], X))
 	i = sigmf(np.dot(w[1], X))
-	# print("z for i",np.dot(w[1], X ))
 	f = sigmf(np.dot(w[2], X))
 	o = sigmf(np.dot(w[3], X))
 
@@ -21,20 +23,20 @@ def cell(w, x, prev_h, prev_c):
 	c = a * i + f * prev_c
 	h = np.tanh(c) * o
 
-	# print("tes a :")
-	# print(a)
-	# print("tes i :")
-	# print(i)
-	# print("tes f :")
-	# print(f)
-	# print("tes o :")
-	# print(o)
-	# print("tes c : ")
-	# print(c)
-	# print ("prev c :")
-	# print(prev_c)
-	# print("tes h : ")
-	# print(h)
+	print("tes a :")
+	print(a)
+	print("tes i :")
+	print(i)
+	print("tes f :")
+	print(f)
+	print("tes o :")
+	print(o)
+	print("tes c : ")
+	print(c)
+	print ("prev c :")
+	print(prev_c)
+	print("tes h : ")
+	print(h)
 
 	return h, c
 
@@ -420,8 +422,8 @@ if __name__ == "__main__":
 
 	from numpy import genfromtxt
 	
-	W_i = genfromtxt('wi_1', delimiter=',')
 	W_a = genfromtxt('wa_1', delimiter=',')
+	W_i = genfromtxt('wi_1', delimiter=',')
 	W_f = genfromtxt('wf_1', delimiter=',')
 	W_o = genfromtxt('wo_1', delimiter=',')
 	U_a = genfromtxt('ua_1', delimiter=',')
@@ -432,7 +434,6 @@ if __name__ == "__main__":
 	B_i = genfromtxt('bi_1', delimiter=',')
 	B_f = genfromtxt('bf_1', delimiter=',')
 	B_o = genfromtxt('bo_1', delimiter=',')
-
 
 	WA = []
 	WI = []
@@ -583,29 +584,91 @@ if __name__ == "__main__":
 	 ])
 
 	# print(X.shape)
-	# print ("W0 ", W[:,0])
-	# print ("W1 ", W[:,1])
-	# print ("W2 ", W[:,2])
 
-
-
+	H1 = []
 	for j,item in enumerate(X):
 		H = []
 		C = []
 		for i in range(0,53):
-			h, c = cell(W[:,i], item, np.flip(prev_h), prev_c[i])
+			h, c = cell(W[:,i], item, prev_h, prev_c[i])
 			H.append(h)
 			C.append(c)
 		prev_h = H
 		prev_c = C
-		print(prev_h)
+		H1.append(np.flip(H))
 
-		print("input:",j)
-		# for i in range(0,46,5):
-		# 	print(H[i],H[i+1],H[i+2],H[i+3],H[i+4])
-		# print(H[50],H[51],H[52])
+	H1 = np.array(H1)
+	# H1 = np.flip(H1)
+	print ("hasil H1 :")
+	print(H1)
+	print ("weight :")
+	print(W[:,0])
 
-	# print(H)
+	# 	print("input:",j)
+	# 	for i in range(0,46,5):
+	# 		print(H[i],H[i+1],H[i+2],H[i+3],H[i+4])
+	# 	print(H[50],H[51],H[52])
+
 	# print("tes")
-	# print("size c", len(C))
+	# print(C)
 
+	## layer 2 ##
+	W_a = genfromtxt('wa_2', delimiter=',')
+	W_i = genfromtxt('wi_2', delimiter=',')
+	W_f = genfromtxt('wf_2', delimiter=',')
+	W_o = genfromtxt('wo_2', delimiter=',')
+	U_a = genfromtxt('ua_2', delimiter=',')
+	U_i = genfromtxt('ui_2', delimiter=',')
+	U_f = genfromtxt('uf_2', delimiter=',')
+	U_o = genfromtxt('uo_2', delimiter=',')
+	B_a = genfromtxt('ba_2', delimiter=',')
+	B_i = genfromtxt('bi_2', delimiter=',')
+	B_f = genfromtxt('bf_2', delimiter=',')
+	B_o = genfromtxt('bo_2', delimiter=',')
+
+	WA = []
+	WI = []
+	WF = []
+	WO = []
+
+	for i in range(0,8):
+		Temp_A = np.array([])
+		Temp_A = np.append(U_a[:,i],W_a[:,i])
+		Temp_A = np.append(Temp_A, B_a[i])
+		WA.append(Temp_A)
+
+		Temp_I = np.array([])
+		Temp_I = np.append(U_i[:,i],W_i[:,i])
+		Temp_I = np.append(Temp_I, B_i[i])
+		WI.append(Temp_I)
+
+		Temp_F = np.array([])
+		Temp_F = np.append(U_f[:,i],W_f[:,i])
+		Temp_F = np.append(Temp_F, B_f[i])
+		WF.append(Temp_F)
+
+		Temp_O = np.array([])
+		Temp_O = np.append(U_o[:,i],W_o[:,i])
+		Temp_O = np.append(Temp_O, B_o[i])
+		WO.append(Temp_O)
+
+
+	
+	W = np.array([WA, WI, WF, WO])
+	prev_h = np.zeros(8)
+	prev_c = np.zeros(8)
+
+
+	H2 = []
+	for j,item in enumerate(H1):
+		H = []
+		C = []
+		for i in range(0,8):
+			h, c = cell(W[:,i], item, prev_h, prev_c[i])
+			H.append(h)
+			C.append(c)
+		prev_h = H
+		prev_c = C
+		H2.append(H)
+		print("ini adalah hasil H2 untuk timestep", j)
+		print(prev_h)
