@@ -15,7 +15,7 @@ module addr_gen_c (clk, rst, en, o_addr_h, o_addr_c);
 // parameters
 parameter ADDR_WIDTH = 12;
 parameter TIMESTEP = 7;
-parameter NUM_CELL = 53;
+parameter NUM_CELL = 8;
 parameter NUM_INPUT = 53;
 parameter DELAY = 3;
 
@@ -71,7 +71,7 @@ begin
 				o_addr_h <= offset_c + NUM_CELL;
 				o_addr_c <= offset_c + NUM_CELL;
 
-				if (count3 ==  NUM_INPUT - 1)
+				if (count3 ==  NUM_CELL - 1)
 				begin
 					count3 <= 0;
 					offset_h <= offset_h + NUM_CELL;
