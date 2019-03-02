@@ -14,29 +14,33 @@ def cell(w, x, prev_h, prev_c):
 	# print(X)
 
 	a = np.tanh(np.dot(w[0], X))
+	# print ("z for a : ",  np.dot(w[0], X))
 	i = sigmf(np.dot(w[1], X))
+	# print ("z for i : ",  np.dot(w[1], X))
 	f = sigmf(np.dot(w[2], X))
+	# print ("z for f : ",  np.dot(w[2], X))
 	o = sigmf(np.dot(w[3], X))
+	# print ("z for o : ",  np.dot(w[3], X))
 
 	# print(a,i,f, prev_c)
 
 	c = a * i + f * prev_c
 	h = np.tanh(c) * o
 
-	print("tes a :")
-	print(a)
-	print("tes i :")
-	print(i)
-	print("tes f :")
-	print(f)
-	print("tes o :")
-	print(o)
-	print("tes c : ")
-	print(c)
-	print ("prev c :")
-	print(prev_c)
-	print("tes h : ")
-	print(h)
+	# print("tes a :")
+	# print(a)
+	# print("tes i :")
+	# print(i)
+	# print("tes f :")
+	# print(f)
+	# print("tes o :")
+	# print(o)
+	# print("tes c : ")
+	# print(c)
+	# print ("prev c :")
+	# print(prev_c)
+	# print("tes h : ")
+	# print(h)
 
 	return h, c
 
@@ -599,10 +603,7 @@ if __name__ == "__main__":
 
 	H1 = np.array(H1)
 	# H1 = np.flip(H1)
-	print ("hasil H1 :")
-	print(H1)
-	print ("weight :")
-	print(W[:,0])
+	
 
 	# 	print("input:",j)
 	# 	for i in range(0,46,5):
@@ -658,13 +659,18 @@ if __name__ == "__main__":
 	prev_h = np.zeros(8)
 	prev_c = np.zeros(8)
 
+	print ("weight :")
+	print(W[:,0])
 
+	print ("hasil H1 :")
+	print(H1)
+	
 	H2 = []
 	for j,item in enumerate(H1):
 		H = []
 		C = []
 		for i in range(0,8):
-			h, c = cell(W[:,i], item, prev_h, prev_c[i])
+			h, c = cell(W[:,i], item, np.flip(prev_h), prev_c[i])
 			H.append(h)
 			C.append(c)
 		prev_h = H

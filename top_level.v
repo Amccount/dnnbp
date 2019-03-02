@@ -713,7 +713,7 @@ datapath #(
 
 	addr_gen_wu #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(423),
+			.STOP(424),
 			.PAUSE_STR(53),
 			.PAUSE_LEN(4)
 		) inst_addr_gen_w_2 (
@@ -727,7 +727,7 @@ datapath #(
 
 	addr_gen_wu #(
 			.ADDR_WIDTH(ADDR_WIDTH),
-			.STOP(63),
+			.STOP(64),
 			.PAUSE_STR(8),
 			.PAUSE_LEN(49)
 		) inst_addr_gen_u_2 (

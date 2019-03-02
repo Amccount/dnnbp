@@ -2684,3 +2684,9 @@ configure wave -timeline 0
 configure wave -timelineunits ns
 update
 WaveRestoreZoom {0 ns} {1681 ns}
+force -freeze sim:/top_level/clk 1 0, 0 {50 ns} -r 100
+force -freeze sim:/top_level/rst 1 0
+force -freeze sim:/top_level/rst_fsm 1 0
+run 100
+force -freeze sim:/top_level/rst 0 0
+force -freeze sim:/top_level/rst_fsm 0 0

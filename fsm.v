@@ -156,7 +156,7 @@ reg [7:0] state;
 
 // Counter for Forward Section
 // reg [7:0] count, counter_cell, counter_layer, counter_timestep;
-reg [7:0] counter_cell, counter_layer, counter_timestep;
+reg [7:0] counter_cell, counter_layer, counter_timestep, counter_timestep_all;
 
 // Counter for Backpropagation Section
 reg [7:0] count1, count2;
@@ -168,7 +168,7 @@ reg [11:0] count, count3, count4, count5, count6;
 // State for Forward Propagation
 parameter 	S0=0, 		S1=1, 		S2=2, 		S3=3, 		S4=4,
 			S5=5, 		S6=6, 		S7=7, 		S8=8, 		S9=9,  
-		 	S10=10, 	S11=11, 	S12=12, 	S13=13, 	S14=14, S15=15;
+		 	S10=10, 	S11=11, 	S12=12, 	S13=13, 	S14=14, S15=99;
 // State for Backward Propagation
 parameter 	BP0=15, 	BP1=16, 	BP2=17, 	BP3=18, 	BP4=19,
 			BP5=20, 	BP6=21, 	BP7=22, 	BP8=23, 	BP9=24,
@@ -209,6 +209,7 @@ begin
 	            counter_cell <= 8'd0;
 	          	counter_layer <= 8'd0;
 	            counter_timestep <= 8'd0;
+	            counter_timestep_all <= 8'd0;
 	            state <= S1;
 	        end
 	       	S1:
@@ -219,7 +220,7 @@ begin
 	        end
 	        S2:
 	        begin
-	           if (counter_cell != 8'd52)
+	           if (counter_cell != 8'd52) //repeat 53x for each cell
 	           begin
 	                state <= S2;
 	        		counter_cell <= counter_cell+1; 
@@ -242,59 +243,94 @@ begin
 	        end 
 	        S5:
 	        begin
-	        	if (counter_layer!=8'd52)
-	        	begin
-	            	counter_cell <=8'd0;
-	            	state <= S6;
-	            end
-	            else 
-	            begin
-	            	counter_cell <=8'd0;
-	            	state <=S7;
-	            end
-	        end
-	        S6:
-	        begin
+
 	        	if (flag==1'd0)
 	        	begin
-	            	if (counter_layer != 8'd52)
+	            	if (counter_layer != 8'd52)   // repeat 53x for 1 layer (53 unit cell) in the first attempt
 	            	begin
 	            		counter_layer <= counter_layer +1; 
-	                	state <= S2;
+	                	state <= S6;
 	                end
 	                else if(counter_layer== 8'd52)
 	                begin
-	                	flag <= 1'd1;
 	                	counter_layer <= 8'd0;
 	                	counter_cell <= 8'd0;
 	                	state <= S7;
 	                end
 	            end
-	            else  // flag 1
+	            else  // flag 1 // repeat 44x for 1 layer in the next attempt
 	            begin
 	            	if (counter_layer != 8'd44)
 	            	begin
 	            		counter_layer <= counter_layer +1; 
-	                	state <= S2;
+	                	state <= S6;
 	                end
 	                else if (counter_layer ==8'd44)
 	                begin
 	                	counter_layer <= 8'd0;
 	                	counter_cell <= 8'd0;
-	                	state <= S2;
+	                	state <= S7;
 	                end
 	            end
+	        	// if (counter_layer!=8'd52) // repeat 53x for 1 layer (53 unit cell)
+	        	// begin
+	         //    	counter_cell <=8'd0;
+	         //    	state <= S6;
+	         //    end
+	         //    else 
+	         //    begin
+	         //    	counter_cell <=8'd0;
+	         //    	state <=S7;
+	         //    end
+	        end
+	        S6:
+	        begin
+	        		state <= S2;
+	        	// if (flag==1'd0)
+	        	// begin
+	         //    	if (counter_layer != 8'd52)   // repeat 53x for 1 layer (53 unit cell) in the first attempt
+	         //    	begin
+	         //    		counter_layer <= counter_layer +1; 
+	         //        	state <= S2;
+	         //        end
+	         //        else if(counter_layer== 8'd52)
+	         //        begin
+	         //        	flag <= 1'd1;
+	         //        	counter_layer <= 8'd0;
+	         //        	counter_cell <= 8'd0;
+	         //        	state <= S7;
+	         //        end
+	         //    end
+	         //    else  // flag 1 // repeat 44x for 1 layer in the next attempt
+	         //    begin
+	         //    	if (counter_layer != 8'd44)
+	         //    	begin
+	         //    		counter_layer <= counter_layer +1; 
+	         //        	state <= S2;
+	         //        end
+	         //        else if (counter_layer ==8'd44)
+	         //        begin
+	         //        	counter_layer <= 8'd0;
+	         //        	counter_cell <= 8'd0;
+	         //        	state <= S7;
+	         //        end
+	         //    end
+
+	            
 	        end
 	        S7:
 	        begin
+	        	flag <=1'd1;
 	        	counter_cell <= 8'd0;
-	        	state <=S8;
 	        	counter_layer <= 8'd0;
+	        	state <=S8;
+	        	
+	        	
 	        end
 	        // forward second and first cell
 	        S8:
 	        begin
-	           if (counter_cell != 8'd7)
+	           if (counter_cell != 8'd7) //repeat 8x for counting H2, X2, X1, H1
 	           begin
 	        		counter_cell <= counter_cell+1; 
 	            	state <= S8;
@@ -306,7 +342,7 @@ begin
 	        end
 	        S9:
 	        begin
-	           if (counter_cell != 8'd44)
+	           if (counter_cell != 8'd44) // repeat 44x for counting the rest of X2, X1,  H1
 	           begin
 	        		counter_cell <= counter_cell+1; 
 	            	state <= S9;
@@ -341,7 +377,7 @@ begin
 	        end
 	        S13:
 	        begin
-	        	if (counter_layer != 8'd7)
+	        	if (counter_layer != 8'd7) // end calculating for both layer 1 and layer 2
 	        	begin
 	            	state <= S8;
 	            	counter_layer <= counter_layer+1;
@@ -951,6 +987,7 @@ begin
 			rst_mac_1 <=0;
 			rst_mac_2 <=1;
 			en_1<=1;
+			en_2 <=0;
 			update <=0;
 			acc_x1 <=1;
 			acc_h1 <=1;			
@@ -964,6 +1001,7 @@ begin
 			bp <=0;
 			update <=0;
 			en_1 <=1;
+			en_2 <=0;
 						//enable write state and activation
 			wr_c1 <= 1; 
 			wr_h1 <= 1;
@@ -1111,6 +1149,26 @@ begin
 			acc_x2 <=0;
 			en_2 <=0;
 			en_1 <=1;
+			wr_h2 <=0;
+			wr_c2 <=0;
+			wr_c1 <= 0; 
+			wr_act_2 <=0;
+			wr_act_2 <=0;
+			wr_act_1 <=0;
+			rst_mac_1 <=0;
+			rst_mac_2 <=1;
+		end
+
+		S15:
+		begin
+			bp <=0;
+			update <=0;
+			acc_h1 <=0;
+			acc_h2 <=0;
+			acc_x1 <=0;
+			acc_x2 <=0;
+			en_2 <=0;
+			en_1 <=0;
 			wr_h2 <=0;
 			wr_c2 <=0;
 			wr_c1 <= 0; 
