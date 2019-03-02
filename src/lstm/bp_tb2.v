@@ -3,7 +3,7 @@ module bp_tb2();
 // parameters
 parameter ADDR_WIDTH = 12;
 parameter WIDTH = 24;
-parameter FRAC = 20;
+parameter FRAC = 16;
 parameter TIMESTEP = 7;
 parameter LAYR1_INPUT = 53;
 parameter LAYR1_CELL = 53;
@@ -325,6 +325,8 @@ datapath #(
 		.acc_cost           (acc_cost),
 		.rst_acc_2          (),
 		.rst_acc_1          (),
+		.acc_dgate1			(),
+		.acc_dgate2			(),
 		.o_cost             (o_cost)
 	);
 
@@ -332,7 +334,8 @@ datapath #(
 
 fsm_bp #(
 		.WIDTH(WIDTH),
-		.FRAC(FRAC)
+		.FRAC(FRAC),
+		.TIMESTEP(TIMESTEP)
 	) inst_fsm_bp (
 		.clk          (clk),
 		.rst          (rst),
@@ -547,7 +550,7 @@ addr_gen_bp_dwu #(
 		.TIMESTEP(TIMESTEP),
 		.NUM_CELL(LAYR1_CELL),
 		.NUM_INPUT(LAYR1_CELL),
-		.DELAY(3)
+		.DELAY(2)
 	) inst_addr_gen_calc_dout1 (
 		.clk      (clk),
 		.rst      (rst),

@@ -10,6 +10,9 @@ def cell(w, x, prev_h, prev_c):
 	X = np.append(prev_h, x)
 	X = np.append(X, np.array([1])) # 1 ini buat dikali sama bias
 
+	# print("alalalalalalalalalllllllllllllllllllllllllll")
+	# print(X)
+
 	a = np.tanh(np.dot(w[0], X))
 	i = sigmf(np.dot(w[1], X))
 	# print("z for i",np.dot(w[1], X ))
@@ -589,6 +592,7 @@ if __name__ == "__main__":
 
 
 
+	H1 = []
 	for j,item in enumerate(X):
 		H = []
 		C = []
@@ -598,14 +602,79 @@ if __name__ == "__main__":
 			C.append(c)
 		prev_h = H
 		prev_c = C
-		print(prev_h)
+		H1.append(H)
 
-		print("input:",j)
-		# for i in range(0,46,5):
-		# 	print(H[i],H[i+1],H[i+2],H[i+3],H[i+4])
-		# print(H[50],H[51],H[52])
+	H1 = np.array(H1)
+
+	# 	print("input:",j)
+	# 	for i in range(0,46,5):
+	# 		print(H[i],H[i+1],H[i+2],H[i+3],H[i+4])
+	# 	print(H[50],H[51],H[52])
+
+	# print("tes")
+	# print(C)
+
+	## layer 2 ##
+	W_a = genfromtxt('wa_2', delimiter=',')
+	W_i = genfromtxt('wi_2', delimiter=',')
+	W_f = genfromtxt('wf_2', delimiter=',')
+	W_o = genfromtxt('wo_2', delimiter=',')
+	U_a = genfromtxt('ua_2', delimiter=',')
+	U_i = genfromtxt('ui_2', delimiter=',')
+	U_f = genfromtxt('uf_2', delimiter=',')
+	U_o = genfromtxt('uo_2', delimiter=',')
+	B_a = genfromtxt('ba_2', delimiter=',')
+	B_i = genfromtxt('bi_2', delimiter=',')
+	B_f = genfromtxt('bf_2', delimiter=',')
+	B_o = genfromtxt('bo_2', delimiter=',')
+
+	WA = []
+	WI = []
+	WF = []
+	WO = []
+
+	for i in range(0,8):
+		Temp_A = np.array([])
+		Temp_A = np.append(U_a[:,i],W_a[:,i])
+		Temp_A = np.append(Temp_A, B_a[i])
+		WA.append(Temp_A)
+
+		Temp_I = np.array([])
+		Temp_I = np.append(U_i[:,i],W_i[:,i])
+		Temp_I = np.append(Temp_I, B_i[i])
+		WI.append(Temp_I)
+
+		Temp_F = np.array([])
+		Temp_F = np.append(U_f[:,i],W_f[:,i])
+		Temp_F = np.append(Temp_F, B_f[i])
+		WF.append(Temp_F)
+
+		Temp_O = np.array([])
+		Temp_O = np.append(U_o[:,i],W_o[:,i])
+		Temp_O = np.append(Temp_O, B_o[i])
+		WO.append(Temp_O)
+
+
+	
+	W = np.array([WA, WI, WF, WO])
+	prev_h = np.zeros(8)
+	prev_c = np.zeros(8)
+
+
+	H2 = []
+	for j,item in enumerate(X):
+		H = []
+		C = []
+		for i in range(0,8):
+			h, c = cell(W[:,i], item, prev_h, prev_c[i])
+			H.append(h)
+			C.append(c)
+		prev_h = H
+		prev_c = C
+		H2.append(H)
 
 	# print(H)
 	# print("tes")
 	# print("size c", len(C))
 
+	print(H2)

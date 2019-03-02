@@ -37,6 +37,7 @@ parameter WIDTH = 24;
 parameter FRAC = 20;
 parameter LAYR2_CELL = 8;
 parameter LAYR1_CELL = 53;
+parameter TIMESTEP = 7;
 
 // common ports
 input clk, rst;
@@ -71,18 +72,17 @@ output reg wr_da1, wr_di1, wr_df1, wr_do1;
 output reg rst_cost, acc_cost;
 output reg rst_mac_1, rst_mac_2;
 
-reg [7:0] state, count1, count2;
+reg [7:0] state, count1, count2, count_bp2, count_bp1;
 
-parameter S0=0, S1=1, S2=2, S3=3, S4=4, S5=5, S6=6, S7=7, S8=8, S9=9,  
-S10=10, S11=11, S12=12, S13=13, S14=14, S15=15, S16=16, S17=17, S18=18, 
-S19=19, S20=20, S21=21, S22=22, S23=23, S24=24, S25=25, S26=26, S27=27, 
-S28=28, S29=29, S30=30, S31=31, S32=32, S33=33, S34=34, S35=35, S36=36, 
-S37=37, S38=38, S39=39, S40=40, S41=41, S42=42, S43=43, S44=44, S45=45, 
-S46=46, S47=47, S48=48, S49=49, S50=50, S51=51, S52=52, S53=53, S54=54, 
-S55=55, S56=56, S57=57, S58=58, S59=59, S60=60, S61=61, S62=62, S63=63, 
-S64=64, S65=65, S66=66, S67=67, S68=68, S69=69, S70=70, S71=71, S72=72, 
-S73=73, S74=74, S75=75, S76=76, S77=77, S78=78, S79=79, S80=80, S81=81, 
-S82=82, S83=83, S84=84, S85=85, S86=86;
+parameter BP0=0, BP1=1, BP2=2, BP3=3, BP4=4, BP5=5, BP6=6, BP7=7, BP8=8, BP9=9,  
+BP10=10, BP11=11, BP12=12, BP13=13, BP14=14, BP15=15, BP16=16, BP17=17, BP18=18, 
+BP19=19, BP20=20, BP21=21, BP22=22, BP23=23, BP24=24, BP25=25, BP26=26, BP27=27, 
+BP28=28, BP29=29, BP30=30, BP31=31, BP32=32, BP33=33, BP34=34, BP35=35, BP36=36, 
+BP37=37, BP38=38, BP39=39, BP40=40, BP41=41, BP42=42, BP43=43, BP44=44, BP45=45, 
+BP46=46, BP47=47, BP48=48, BP49=49, BP50=50, BP51=51, BP52=52, BP53=53, BP54=54, 
+BP55=55, BP56=56, BP57=57, BP58=58, BP59=59, BP60=60, BP61=61, BP62=62, BP63=63, 
+BP64=64, BP65=65, BP66=66, BP67=67, BP68=68, BP69=69, BP70=70, BP71=71, BP72=72, 
+BP73=73, BP74=74, BP75=75, BP76=76, BP77=77;
 
 
 
@@ -90,703 +90,464 @@ always @(state)
 begin
 	case (state)
 		// prep state for delta, can be merged into forward last state
-		S0:
+		BP0:
 		begin
-			rd_dgate <= 1'b0;
-			rst_mac_2 <= 1'b1;
-			rst_mac_1 <= 1'b1;
-			acc_h2  <= 1'b0;
-			acc_x2  <= 1'b0;
-			acc_h1  <= 1'b0;
-			acc_x1  <= 1'b0;
-			update  <= 1'b0;
-			bp		<= 1'b1;
-			en_delta_2 <= 1'b0;
-			en_delta_1 <= 1'b0;
-			en_rw_dout2 <= 1'b1;
-			en_rw_dout1 <= 1'b0;
-			en_rw_dx2 <= 1'b0;
-			rst_cost <= 1'b1;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h0;	
-			sel_in5_2 <= 3'h0;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h0;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h0;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h0;
-			sel_in5_1 <= 3'h0;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h0;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h0;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			rd_dgate     <= 1'b0;
+			rst_mac_2    <= 1'b1;  acc_h2       <= 1'b0;
+			rst_mac_1    <= 1'b1;  acc_x2       <= 1'b0;
+			update       <= 1'b0;  acc_h1       <= 1'b0;
+			bp           <= 1'b1;  acc_x1       <= 1'b0;
+			
+			en_delta_2   <= 1'b0;  en_rw_dout2  <= 1'b1;
+			en_delta_1   <= 1'b0;  en_rw_dout1  <= 1'b0;
+			rst_cost     <= 1'b1;  en_rw_dx2    <= 1'b0;
+			acc_cost     <= 1'b0;
+
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h0;  
+			sel_in4_2    <= 2'h0;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h0;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h0;
+			sel_in4_1    <= 2'h0;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h0;  sel_as_2_1   <= 2'h0;
 		end
 		// S1 - S12 repeaeted 8 times, and calculating only for delta 2
-		S1:
+		BP1:
 		begin
-			rst_mac_2 <= 1'b0;
-			rst_mac_1 <= 1'b0;
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			en_dout2 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h1;	
-			sel_in5_2 <= 3'h0;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h0;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h0;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h1;
-			sel_in5_1 <= 3'h0;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h0;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h0;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_delta_2   <= 1'b1;
+			rst_mac_1    <= 1'b0;  en_delta_1   <= 1'b0;
+			rst_cost     <= 1'b0;  en_dout2     <= 1'b0;
+			acc_cost     <= 1'b0;
+
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h0;  
+			sel_in4_2    <= 2'h1;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h0;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h0;
+			sel_in4_1    <= 2'h1;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h0;  sel_as_2_1   <= 2'h0;
 		end
-		S2:
+		BP2:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h0;	
-			sel_in5_2 <= 3'h0;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h0;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h0;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h0;
-			sel_in5_1 <= 3'h0;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h0;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h0;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h0;  
+			sel_in4_2    <= 2'h0;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h0;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h0;
+			sel_in4_1    <= 2'h0;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h0;  sel_as_2_1   <= 2'h0;
 		end
-		S3:
+		BP3:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h2;
-			sel_in2_2 <= 2'h3;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h2;	
-			sel_in5_2 <= 3'h1;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h3;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h3;
-			sel_addsub_2 <= 1'h1;
-			sel_temp_2 <= 2'h0;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h2;
-			sel_in2_1 <= 2'h3;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h2;
-			sel_in5_1 <= 3'h1;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h3;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h3;
-			sel_addsub_1 <= 1'h1;
-			sel_temp_1 <= 2'h0;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h2;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h3;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h3;  
+			sel_in4_2    <= 2'h2;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h1;  sel_as_2_2   <= 2'h3;  
+			sel_addsub_2 <= 1'h1;  sel_addsub_1 <= 1'h1;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h2;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h3;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h3;
+			sel_in4_1    <= 2'h2;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h1;  sel_as_2_1   <= 2'h3;
 		end
-		S4:
+		BP4:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b1;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h2;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h2;	
-			sel_in5_2 <= 3'h4;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h0;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h0;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h2;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h2;
-			sel_in5_1 <= 3'h4;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h0;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h0;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b1;
+					
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h2;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h0;  
+			sel_in4_2    <= 2'h2;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h4;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h2;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h0;
+			sel_in4_1    <= 2'h2;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h4;  sel_as_2_1   <= 2'h0;
 		end
-		S5:
+		BP5:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h0;	
-			sel_in5_2 <= 3'h0;	
-			sel_x1_1_2 <= 2'h1;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h2;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h2;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h0;
-			sel_in5_1 <= 3'h0;
-			sel_x1_1_1 <= 2'h1;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h2;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h2;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h1;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h2;  
+			sel_in4_2    <= 2'h0;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h0;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h1;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h2;
+			sel_in4_1    <= 2'h0;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h0;  sel_as_2_1   <= 2'h0;
 		end
-		S6:
+		BP6:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h1;	
-			sel_in4_2 <= 2'h2;	
-			sel_in5_2 <= 3'h0;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h1;
-			sel_as_1_2 <= 1'h1;
-			sel_as_2_2 <= 2'h2;
-			sel_addsub_2 <= 1'h1;
-			sel_temp_2 <= 2'h1;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h1;
-			sel_in4_1 <= 2'h2;
-			sel_in5_1 <= 3'h0;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h1;
-			sel_as_1_1 <= 1'h1;
-			sel_as_2_1 <= 2'h2;
-			sel_addsub_1 <= 1'h1;
-			sel_temp_1 <= 2'h1;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h1;  sel_x2_2_2   <= 2'h1;  
+			sel_in4_2    <= 2'h2;  sel_as_1_2   <= 1'h1;  
+			sel_in5_2    <= 3'h0;  sel_as_2_2   <= 2'h2;  
+			sel_addsub_2 <= 1'h1;  sel_addsub_1 <= 1'h1;
+			sel_temp_2   <= 2'h1;  sel_temp_1   <= 2'h1;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h1;  sel_x2_2_1   <= 2'h1;
+			sel_in4_1    <= 2'h2;  sel_as_1_1   <= 1'h1;
+			sel_in5_1    <= 3'h0;  sel_as_2_1   <= 2'h2;
 		end
-		S7:
+		BP7:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h1;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h2;	
-			sel_in5_2 <= 3'h2;	
-			sel_x1_1_2 <= 2'h2;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h0;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h1;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h2;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b1;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h1;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h2;
-			sel_in5_1 <= 3'h2;
-			sel_x1_1_1 <= 2'h2;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h0;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h1;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h2;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h1;  sel_x1_1_2   <= 2'h2;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h0;  
+			sel_in4_2    <= 2'h2;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h2;  sel_as_2_2   <= 2'h1;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b1;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h1;  sel_x1_1_1   <= 2'h2;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h0;
+			sel_in4_1    <= 2'h2;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h2;  sel_as_2_1   <= 2'h1;
 		end
-		S8:
+		BP8:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h1;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h2;	
-			sel_in5_2 <= 3'h3;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h1;
-			sel_x2_2_2 <= 2'h2;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h2;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h1;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h2;
-			sel_in5_1 <= 3'h3;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h1;
-			sel_x2_2_1 <= 2'h2;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h2;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h1;  sel_x1_2_2   <= 1'h1;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h2;  
+			sel_in4_2    <= 2'h2;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h3;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h1;  sel_x1_2_1   <= 1'h1;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h2;
+			sel_in4_1    <= 2'h2;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h3;  sel_as_2_1   <= 2'h0;
 		end
-		S9:
+		BP9:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h3;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h2;	
-			sel_in5_2 <= 3'h3;	
-			sel_x1_1_2 <= 2'h2;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h1;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h2;
-			wr_da2 <= 1'b1;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h3;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h2;
-			sel_in5_1 <= 3'h3;
-			sel_x1_1_1 <= 2'h2;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h1;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h2;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h3;  sel_x1_1_2   <= 2'h2;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h1;  
+			sel_in4_2    <= 2'h2;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h3;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			wr_da2       <= 1'b1;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h3;  sel_x1_1_1   <= 2'h2;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h1;
+			sel_in4_1    <= 2'h2;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h3;  sel_as_2_1   <= 2'h0;
 		end
-		S10:
+		BP10:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h0;	
-			sel_in5_2 <= 3'h0;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h1;
-			sel_x2_2_2 <= 2'h0;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h2;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b1;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h0;
-			sel_in5_1 <= 3'h0;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h1;
-			sel_x2_2_1 <= 2'h0;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h2;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h1;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h0;  
+			sel_in4_2    <= 2'h0;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h0;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b1;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h1;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h0;
+			sel_in4_1    <= 2'h0;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h0;  sel_as_2_1   <= 2'h0;
 		end
-		S11:
+		BP11:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h0;	
-			sel_in5_2 <= 3'h0;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h1;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h2;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b0;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h0;
-			sel_in5_1 <= 3'h0;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h1;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h2;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h1;  
+			sel_in4_2    <= 2'h0;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h0;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h1;
+			sel_in4_1    <= 2'h0;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h0;  sel_as_2_1   <= 2'h0;
 		end
-		S12:
+		BP12:
 		begin
-			en_delta_2 <= 1'b1;
-			en_delta_1 <= 1'b0;
-			rst_cost <= 1'b0;
-			acc_cost <= 1'b0;
-			sel_in1_2 <= 2'h0;
-			sel_in2_2 <= 2'h0;	
-			sel_in3_2 <= 1'h0;	
-			sel_in4_2 <= 2'h0;	
-			sel_in5_2 <= 3'h0;	
-			sel_x1_1_2 <= 2'h0;
-			sel_x1_2_2 <= 1'h0;
-			sel_x2_2_2 <= 2'h0;
-			sel_as_1_2 <= 1'h0;
-			sel_as_2_2 <= 2'h0;
-			sel_addsub_2 <= 1'h0;
-			sel_temp_2 <= 2'h0;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b1;
-			wr_do2 <= 1'b0;
-			wr_dstate_2 <= 1'b1;
-			sel_in1_1 <= 2'h0;
-			sel_in2_1 <= 2'h0;
-			sel_in3_1 <= 1'h0;
-			sel_in4_1 <= 2'h0;
-			sel_in5_1 <= 3'h0;
-			sel_x1_1_1 <= 2'h0;
-			sel_x1_2_1 <= 1'h0;
-			sel_x2_2_1 <= 2'h0;
-			sel_as_1_1 <= 1'h0;
-			sel_as_2_1 <= 2'h0;
-			sel_addsub_1 <= 1'h0;
-			sel_temp_1 <= 2'h0;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_dstate_1 <= 1'b0;
+			en_delta_2   <= 1'b1;  rst_cost     <= 1'b0;
+			en_delta_1   <= 1'b0;  acc_cost     <= 1'b0;
+			
+			sel_in1_2    <= 2'h0;  sel_x1_1_2   <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_x1_2_2   <= 1'h0;  
+			sel_in3_2    <= 1'h0;  sel_x2_2_2   <= 2'h0;  
+			sel_in4_2    <= 2'h0;  sel_as_1_2   <= 1'h0;  
+			sel_in5_2    <= 3'h0;  sel_as_2_2   <= 2'h0;  
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b1;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b1;  wr_dstate_1  <= 1'b0;
+			sel_in1_1    <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_in2_1    <= 2'h0;  sel_x1_2_1   <= 1'h0;
+			sel_in3_1    <= 1'h0;  sel_x2_2_1   <= 2'h0;
+			sel_in4_1    <= 2'h0;  sel_as_1_1   <= 1'h0;
+			sel_in5_1    <= 3'h0;  sel_as_2_1   <= 2'h0;
 		end
 		// DELTA 2 calculation ends here ////////
-		
+
 		// Start Calculating for dX2 and dOut2 ///////
 		// pre calc
-		S13:
+		BP13:
 		begin
-		 	rd_dgate <= 1'b1;
-			en_delta_2 <= 1'b0;
-			en_delta_1 <= 1'b0;
-			wr_da1 <= 1'b0;
-			wr_di1 <= 1'b0;
-			wr_df1 <= 1'b0;
-			wr_do1 <= 1'b0;
-			wr_da2 <= 1'b0;
-			wr_di2 <= 1'b0;
-			wr_df2 <= 1'b0;
-			wr_do2 <= 1'b0;
+		    rd_dgate       <= 1'b1;
+			en_delta_2     <= 1'b0;
+			en_delta_1     <= 1'b0;
+			wr_da1         <= 1'b0;
+			wr_di1         <= 1'b0;
+			wr_df1         <= 1'b0;
+			wr_do1         <= 1'b0;
+			wr_da2         <= 1'b0;
+			wr_di2         <= 1'b0;
+			wr_df2         <= 1'b0;
+			wr_do2         <= 1'b0;
 
-			wr_dstate_2 <= 1'b0;
+			wr_dstate_2    <= 1'b0;
 
-			en_dx2 <= 1'b1;
-			en_dout2 <= 1'b1;
-			// en_dout1 <= 1'b1;
+			en_dx2         <= 1'b1;
+			en_dout2       <= 1'b1;
+			// en_dout1    <= 1'b1;
 
-			acc_x2 <= 1'b0;
-			acc_h2 <= 1'b0;
-			// acc_h1 <= 1'b0;
+			acc_x2         <= 1'b0;
+			acc_h2         <= 1'b0;
+			// acc_h1      <= 1'b0;
 
-			en_rw_dout2 <= 1'b0;
-			en_rw_dx2 <= 1'b0;
+			en_rw_dout2    <= 1'b0;
+			en_rw_dx2      <= 1'b1;
 			// en_rw_dout1 <= 1'b0;
 		end 
-		S14: // Loop dout2 & dx2
+		BP14: // Loop dout2 & dx2
 		begin
-			rd_dgate <= 1'b1;
+			rd_dgate     <= 1'b1;
 			
-			en_dx2 <= 1'b1;
-			en_dout2 <= 1'b1;
-			// en_dout1 <= 1'b1;
+			en_dx2       <= 1'b1;
+			en_dout2     <= 1'b1;
+			// en_dout1  <= 1'b1;
 			
-			en_rw_dout2 <= 1'b1;
-			en_rw_dx2 <= 1'b1;
+			en_rw_dout2  <= 1'b1;
+			en_rw_dx2    <= 1'b1;
 			
-			acc_x2 <= 1'b1;
-			acc_h2 <= 1'b1;
-			// acc_h1 <= 1'b1;
+			acc_x2       <= 1'b1;
+			acc_h2       <= 1'b1;
+			// acc_h1    <= 1'b1;
 
-			wr_dx2 <= 1'b0;
-			wr_dout_2 <= 1'b0;
+			wr_dx2       <= 1'b0;
+			wr_dout_2    <= 1'b0;
 			// wr_dout_1 <= 1'b0;
 
 			// rst_mac_1 <= 1'b0;
-			rst_mac_2 <= 1'b0;
+			rst_mac_2    <= 1'b0;
 		end
-		S15: // not acc & write
+		BP15: // not acc & write
 		begin
-			acc_x2 <= 1'b0;
-			acc_h2 <= 1'b0;
-			// acc_h1 <= 1'b1;
+			acc_x2       <= 1'b0;
+			acc_h2       <= 1'b0;
+			// acc_h1    <= 1'b1;
 
-			wr_dx2 <= 1'b1;
-			wr_dout_2 <= 1'b1;
+			wr_dx2       <= 1'b1;
+			wr_dout_2    <= 1'b1;
 			// wr_dout_1 <= 1'b0;
-			en_dout2 <= 1'b1;
+			en_dout2     <= 1'b1;
 		end
-		S16: // reset
+		BP16: // reset
 		begin
-			acc_x2 <= 1'b0;
-			acc_h2 <= 1'b0;
-			// acc_h1 <= 1'b1;
+			acc_x2       <= 1'b0;
+			acc_h2       <= 1'b0;
+			// acc_h1    <= 1'b1;
 
-			wr_dx2 <= 1'b0;
-			wr_dout_2 <= 1'b0;
+			wr_dx2       <= 1'b0;
+			wr_dout_2    <= 1'b0;
 			// wr_dout_1 <= 1'b0;
 
 			// rst_mac_1 <= 1'b0;
-			rst_mac_2 <= 1'b1;
+			rst_mac_2    <= 1'b1;
 		end
-		S17:
+		BP17:
 		begin
-			acc_x2 <= 1'b0;
-			acc_h2 <= 1'b0;
-			// acc_h1 <= 1'b1;
+			acc_x2         <= 1'b0;
+			acc_h2         <= 1'b0;
+			// acc_h1      <= 1'b1;
 
-			en_dx2 <= 1'b1;
-			en_dout2 <= 1'b0;
-			// en_dout1 <= 1'b1;
+			en_dx2         <= 1'b1;
+			en_dout2       <= 1'b0;
+			// en_dout1    <= 1'b1;
 			
-			en_rw_dout2 <= 1'b0;
-			en_rw_dx2 <= 1'b1;
+			en_rw_dout2    <= 1'b0;
+			en_rw_dx2      <= 1'b1;
 			// en_rw_dout1 <= 1'b0;
 
-			wr_dx2 <= 1'b0;
-			wr_dout_2 <= 1'b0;
-			// wr_dout_1 <= 1'b0;
+			wr_dx2         <= 1'b0;
+			wr_dout_2      <= 1'b0;
+			// wr_dout_1   <= 1'b0;
 
-			// rst_mac_1 <= 1'b0;
-			rst_mac_2 <= 1'b1;
+			// rst_mac_1   <= 1'b0;
+			rst_mac_2      <= 1'b1;
 		end
-		S18: // Loop dout2 & dx2
+		BP18: // Loop dout2 & dx2
 		begin
-			rd_dgate <= 1'b1;
+			rd_dgate       <= 1'b1;
 			
-			en_dx2 <= 1'b1;
-			en_dout2 <= 1'b0;
-			// en_dout1 <= 1'b1;
+			en_dx2         <= 1'b1;
+			en_dout2       <= 1'b0;
+			// en_dout1    <= 1'b1;
 			
-			en_rw_dout2 <= 1'b0;
-			en_rw_dx2 <= 1'b1;
+			en_rw_dout2    <= 1'b0;
+			en_rw_dx2      <= 1'b1;
 			// en_rw_dout1 <= 1'b0;
 
-			acc_x2 <= 1'b1;
-			acc_h2 <= 1'b0;
-			// acc_h1 <= 1'b1;
+			acc_x2         <= 1'b1;
+			acc_h2         <= 1'b0;
+			// acc_h1      <= 1'b1;
 
-			wr_dx2 <= 1'b0;
-			wr_dout_2 <= 1'b0;
+			wr_dx2         <= 1'b0;
+			wr_dout_2      <= 1'b0;
+			// wr_dout_1   <= 1'b0;
+
+			// rst_mac_1   <= 1'b0;
+			rst_mac_2      <= 1'b0;
+		end
+		BP19: // not acc & write
+		begin
+			acc_x2       <= 1'b0;
+			acc_h2       <= 1'b0;
+			// acc_h1    <= 1'b1;
+
+			wr_dx2       <= 1'b1;
+			wr_dout_2    <= 1'b0;
+			// wr_dout_1 <= 1'b0;
+			en_dout2     <= 1'b0;
+		end
+		BP20: // reset
+		begin
+			acc_x2       <= 1'b0;
+			acc_h2       <= 1'b0;
+			// acc_h1    <= 1'b1;
+
+			wr_dx2       <= 1'b0;
+			wr_dout_2    <= 1'b0;
 			// wr_dout_1 <= 1'b0;
 
 			// rst_mac_1 <= 1'b0;
-			rst_mac_2 <= 1'b0;
-		end
-		S19: // not acc & write
-		begin
-			acc_x2 <= 1'b0;
-			acc_h2 <= 1'b0;
-			// acc_h1 <= 1'b1;
-
-			wr_dx2 <= 1'b1;
-			wr_dout_2 <= 1'b0;
-			// wr_dout_1 <= 1'b0;
-			en_dout2 <= 1'b0;
-		end
-		S20: // reset
-		begin
-			acc_x2 <= 1'b0;
-			acc_h2 <= 1'b0;
-			// acc_h1 <= 1'b1;
-
-			wr_dx2 <= 1'b0;
-			wr_dout_2 <= 1'b0;
-			// wr_dout_1 <= 1'b0;
-
-			// rst_mac_1 <= 1'b0;
-			rst_mac_2 <= 1'b1;
+			rst_mac_2    <= 1'b1;
 		end
 		// end of 1st dx dout, prep for repeating delta
-		S21:
+		BP21:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -820,7 +581,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S22: // start of delta calculation
+		BP22: // start of delta calculation
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -854,7 +615,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S23:
+		BP23:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -888,7 +649,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S24:
+		BP24:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -922,7 +683,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S25:
+		BP25:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -956,7 +717,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S26:
+		BP26:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -990,7 +751,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S27:
+		BP27:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1024,7 +785,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S28:
+		BP28:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1058,7 +819,7 @@ begin
 			wr_do2       <= 1'b1;  wr_do1       <= 1'b1;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S29:
+		BP29:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1092,7 +853,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S30:
+		BP30:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1126,7 +887,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S31:
+		BP31:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1160,7 +921,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S32:
+		BP32:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1194,7 +955,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S33:
+		BP33:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1229,7 +990,7 @@ begin
 			wr_dstate_2  <= 1'b1;  wr_dstate_1  <= 1'b1;
 		end
 		// switch to delta 1 only //////////////////////
-		S34:
+		BP34:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1263,7 +1024,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b1;  wr_dstate_1  <= 1'b1;
 		end
-		S35:
+		BP35:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1297,7 +1058,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S36:
+		BP36:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1331,7 +1092,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S37:
+		BP37:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1365,7 +1126,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S38:
+		BP38:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1399,7 +1160,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S39:
+		BP39:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1433,7 +1194,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S40:
+		BP40:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1467,7 +1228,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S41:
+		BP41:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1501,7 +1262,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b1;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S42:
+		BP42:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1535,7 +1296,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S43:
+		BP43:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1569,7 +1330,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S44:
+		BP44:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1603,7 +1364,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S45:
+		BP45:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1637,7 +1398,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S46:
+		BP46:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1671,7 +1432,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b1;
 		end
-		S47:
+		BP47:
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1705,7 +1466,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S48: // loop dout2, dx2, dout1
+		BP48: // loop dout2, dx2, dout1
 		begin
 			acc_x2       <= 1'b1;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b1;  wr_dout_2    <= 1'b0;
@@ -1739,7 +1500,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S49: // not acc & write layer 2
+		BP49: // not acc & write layer 2
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b1;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b1;
@@ -1773,7 +1534,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S50: // reset
+		BP50: // reset
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1807,7 +1568,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;	
 		end
-		S51: // loop for dout1
+		BP51: // loop for dout1
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1841,7 +1602,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S52: // not acc & write layer 1
+		BP52: // not acc & write layer 1
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1875,7 +1636,41 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S53: // reset
+		BP53: // reset
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+			                       en_dout1     <= 1'b1;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b1;
+			rst_mac_1    <= 1'b1;  en_dx2       <= 1'b1;
+			//
+			rd_dgate     <= 1'b1;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b0;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b0;
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b0;
+
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP54: // prep for next loop
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1909,42 +1704,8 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S54: // prep for next loop
-		begin
-			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
-			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
-			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
-			                       en_dout1     <= 1'b1;
-			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
-			rst_mac_1    <= 1'b1;  en_dx2       <= 1'b1;
-			//
-			rd_dgate     <= 1'b1;  en_delta_2   <= 1'b0;
-			update       <= 1'b0;  en_delta_1   <= 1'b0;
-			bp           <= 1'b1;  en_rw_dout2  <= 1'b0;
-			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
-			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
-
-			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
-			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;
-			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;
-			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;
-			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;
-			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
-			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
-			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
-			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
-			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
-			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
-			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
-
-			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
-			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
-			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
-			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
-			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
-		end
 		/// rest of dout1 and dx2
-		S55: // loop dx2, dout1
+		BP55: // loop dx2, dout1
 		begin
 			acc_x2       <= 1'b1;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -1978,7 +1739,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S56: // not acc & write layer 2
+		BP56: // not acc & write layer 2
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b1;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -2012,7 +1773,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S57: // reset
+		BP57: // reset
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -2046,7 +1807,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;	
 		end
-		S58: // loop for dout1
+		BP58: // loop for dout1
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -2080,7 +1841,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S59: // not acc & write layer 1
+		BP59: // not acc & write layer 1
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -2114,7 +1875,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S60: // reset
+		BP60: // reset
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -2148,7 +1909,7 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S61: // prep for finish
+		BP61: // prep for finish
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -2182,7 +1943,518 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-		S62: // prep for NEXT TIMESTEP
+		BP62: // prep for NEXT TIMESTEP
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+			                       en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b1;
+			update       <= 1'b0;  en_delta_1   <= 1'b0;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1;
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b0;
+
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP63: // identical to S62 but w/o en_delta_2
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+			                       en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b0;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1;
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b0;
+
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP64: // start of delta calculation
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h1;  sel_in4_1    <= 2'h1;  
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP65:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;  
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP66:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h2;  sel_in1_1    <= 2'h2;
+			sel_in2_2    <= 2'h3;  sel_in2_1    <= 2'h3;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h2;  sel_in4_1    <= 2'h2;  
+			sel_in5_2    <= 3'h1;  sel_in5_1    <= 3'h1;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h3;  sel_x2_2_1   <= 2'h3;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h3;  sel_as_2_1   <= 2'h3;
+			sel_addsub_2 <= 1'h1;  sel_addsub_1 <= 1'h1;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP67:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b1;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h2;  sel_in2_1    <= 2'h2;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h2;  sel_in4_1    <= 2'h2;  
+			sel_in5_2    <= 3'h4;  sel_in5_1    <= 3'h4;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP68:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;  
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;  
+			sel_x1_1_2   <= 2'h1;  sel_x1_1_1   <= 2'h1;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h2;  sel_x2_2_1   <= 2'h2;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP69:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h1;  sel_in3_1    <= 1'h1;  
+			sel_in4_2    <= 2'h2;  sel_in4_1    <= 2'h2;  
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h1;  sel_x2_2_1   <= 2'h1;
+			sel_as_1_2   <= 1'h1;  sel_as_1_1   <= 1'h1;
+			sel_as_2_2   <= 2'h2;  sel_as_2_1   <= 2'h2;
+			sel_addsub_2 <= 1'h1;  sel_addsub_1 <= 1'h1;
+			sel_temp_2   <= 2'h1;  sel_temp_1   <= 2'h1;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP70:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h1;  sel_in1_1    <= 2'h1;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h2;  sel_in4_1    <= 2'h2;  
+			sel_in5_2    <= 3'h2;  sel_in5_1    <= 3'h2;  
+			sel_x1_1_2   <= 2'h2;  sel_x1_1_1   <= 2'h2;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h1;  sel_as_2_1   <= 2'h1;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b1;  wr_do1       <= 1'b1;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP71:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h1;  sel_in2_1    <= 2'h1;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h2;  sel_in4_1    <= 2'h2;  
+			sel_in5_2    <= 3'h3;  sel_in5_1    <= 3'h3;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h1;  sel_x1_2_1   <= 1'h1;
+			sel_x2_2_2   <= 2'h2;  sel_x2_2_1   <= 2'h2;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP72:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h3;  sel_in1_1    <= 2'h3;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h2;  sel_in4_1    <= 2'h2;  
+			sel_in5_2    <= 3'h3;  sel_in5_1    <= 3'h3;  
+			sel_x1_1_2   <= 2'h2;  sel_x1_1_1   <= 2'h2;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h1;  sel_x2_2_1   <= 2'h1;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			
+			wr_da2       <= 1'b1;  wr_da1       <= 1'b1;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP73:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;  
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h1;  sel_x1_2_1   <= 1'h1;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b1;  wr_di1       <= 1'b1;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP74:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;  
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h1;  sel_x2_2_1   <= 2'h1;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h2;  sel_temp_1   <= 2'h2;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b0;  wr_df1       <= 1'b0;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
+		end
+		BP75:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;  
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b1;  wr_df1       <= 1'b1;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b1;  wr_dstate_1  <= 1'b1;
+		end
+		// switch to delta 1 only //////////////////////
+		BP76:
+		begin
+			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
+			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
+			acc_h1       <= 1'b0;  wr_dout_1    <= 1'b0;
+								   en_dout1     <= 1'b0;
+			rst_mac_2    <= 1'b0;  en_dout2     <= 1'b0;
+			rst_mac_1    <= 1'b0;  en_dx2       <= 1'b0;
+			//
+			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
+			update       <= 1'b0;  en_delta_1   <= 1'b1;
+			bp           <= 1'b1;  en_rw_dout2  <= 1'b0; 
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
+			
+			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
+			sel_in2_2    <= 2'h0;  sel_in2_1    <= 2'h0;  
+			sel_in3_2    <= 1'h0;  sel_in3_1    <= 1'h0;  
+			sel_in4_2    <= 2'h0;  sel_in4_1    <= 2'h0;  
+			sel_in5_2    <= 3'h0;  sel_in5_1    <= 3'h0;  
+			sel_x1_1_2   <= 2'h0;  sel_x1_1_1   <= 2'h0;
+			sel_x1_2_2   <= 1'h0;  sel_x1_2_1   <= 1'h0;
+			sel_x2_2_2   <= 2'h0;  sel_x2_2_1   <= 2'h0;
+			sel_as_1_2   <= 1'h0;  sel_as_1_1   <= 1'h0;
+			sel_as_2_2   <= 2'h0;  sel_as_2_1   <= 2'h0;
+			sel_addsub_2 <= 1'h0;  sel_addsub_1 <= 1'h0;
+			sel_temp_2   <= 2'h0;  sel_temp_1   <= 2'h0;
+			
+			wr_da2       <= 1'b0;  wr_da1       <= 1'b0;
+			wr_di2       <= 1'b0;  wr_di1       <= 1'b0;
+			wr_df2       <= 1'b1;  wr_df1       <= 1'b1;
+			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
+			wr_dstate_2  <= 1'b1;  wr_dstate_1  <= 1'b1;
+		end
+		BP77: // last idle state
 		begin
 			acc_x2       <= 1'b0;  wr_dx2       <= 1'b0;
 			acc_h2       <= 1'b0;  wr_dout_2    <= 1'b0;
@@ -2216,7 +2488,6 @@ begin
 			wr_do2       <= 1'b0;  wr_do1       <= 1'b0;
 			wr_dstate_2  <= 1'b0;  wr_dstate_1  <= 1'b0;
 		end
-
 	endcase
 end
 
@@ -2226,381 +2497,469 @@ always @(posedge clk or posedge rst)
 begin
 	if (rst)
 	begin
-		state <= S0;
+		state <= BP0;
 		count1 <= 8'd0;
 		count2 <= 8'd0;
+		count_bp2 <= 3'd0;
+		count_bp1 <= 3'd0;
 	end
 	else
 	begin
 		case (state)
-			S0:
+			BP0:
 			begin
-				state <= S1;
+				state <= BP1;
 			end
-			S1:
+			BP1:
 			begin
-				state <= S2;
+				state <= BP2;
 			end
-			S2:
+			BP2:
 			begin
-				state <= S3;
+				state <= BP3;
 			end
-			S3:
+			BP3:
 			begin
-				state <= S4;
+				state <= BP4;
 			end
-			S4:
+			BP4:
 			begin
-				state <= S5;
+				state <= BP5;
 			end
-			S5:
+			BP5:
 			begin
-				state <= S6;
+				state <= BP6;
 			end
-			S6:
+			BP6:
 			begin
-				state <= S7;
+				state <= BP7;
 			end
-			S7:
+			BP7:
 			begin
-				state <= S8;
+				state <= BP8;
 			end
-			S8:
+			BP8:
 			begin
-				state <= S9;
+				state <= BP9;
 			end
-			S9:
+			BP9:
 			begin
-				state <= S10;
+				state <= BP10;
 			end
-			S10:
+			BP10:
 			begin
-				state <= S11;
+				state <= BP11;
 			end
-			S11:
+			BP11:
 			begin
-				state <= S12;
+				state <= BP12;
 			end
-			S12:
-			begin
-				if (count1 < LAYR2_CELL-1)
-				begin
-					count1 <= count1 + 1;
-					state <= S1;
-				end
-				else
-				begin
-					count1 <= 8'd0;
-					state <= S13;
-				end
-			end
-			S13: // prep
-			begin
-				state <= S14;
-			end
-			S14: // repeat for dout2 & dx2
+			BP12:
 			begin
 				if (count1 < LAYR2_CELL-1)
 				begin
 					count1 <= count1 + 1;
-					state <= S14;
+					state <= BP1;
 				end
 				else
 				begin
 					count1 <= 8'd0;
-					state <= S15;
+					state <= BP13;
 				end
 			end
-			S15: // not acc & wr
+			BP13: // prep
+			begin
+				count_bp2 <= count_bp2 + 1;
+				state <= BP14;
+			end
+			BP14: // repeat for dout2 & dx2
+			begin
+				if (count1 < LAYR2_CELL-1)
+				begin
+					count1 <= count1 + 1;
+					state <= BP14;
+				end
+				else
+				begin
+					count1 <= 8'd0;
+					state <= BP15;
+				end
+			end
+			BP15: // not acc & wr
 			begin
 				if (count2 < LAYR2_CELL-1)
 				begin
 					count2 <= count2 + 1;
-					state <= S16;
+					state <= BP16;
 				end
 				else
 				begin
 					count2 <= 8'd0;
-					state <= S17;
+					state <= BP17;
 				end
 			end
-			S16: // reset
+			BP16: // reset
 			begin
-				state <= S14;
+				state <= BP14;
 			end
-			S17:
+			BP17:
 			begin
-				state <= S18;
+				state <= BP18;
 			end
-			S18: // repeat for dx2
+			BP18: // repeat for dx2
 			begin
 				if (count1 < LAYR2_CELL-1)
 				begin
 					count1 <= count1 + 1;
-					state <= S18;
+					state <= BP18;
 				end
 				else
 				begin
 					count1 <= 8'd0;
-					state <= S19;
+					state <= BP19;
 				end
 			end
-			S19: // not acc & wr
+			BP19: // not acc & wr
 			begin
 				if (count2 < LAYR1_CELL-LAYR2_CELL-1)
 				begin
 					count2 <= count2 + 1;
-					state <= S20;
+					state <= BP20;
 				end
 				else
 				begin
 					count2 <= 8'd0;
-					state <= S21;
+					state <= BP21;
 				end
 			end
-			S20:
+			BP20:
 			begin
-				state <= S18;
+				state <= BP18;
 			end
-			S21:
+			BP21:
 			begin
-				state <= S22;
+				state <= BP22;
 			end
-			S22:
+			BP22:
 			begin
-				state <= S23;
+				state <= BP23;
 			end
-			S23:
+			BP23:
 			begin
-				state <= S24;
+				state <= BP24;
 			end
-			S24:
+			BP24:
 			begin
-				state <= S25;
+				state <= BP25;
 			end
-			S25:
+			BP25:
 			begin
-				state <= S26;
+				state <= BP26;
 			end
-			S26:
+			BP26:
 			begin
-				state <= S27;
+				state <= BP27;
 			end
-			S27:
+			BP27:
 			begin
-				state <= S28;
+				state <= BP28;
 			end
-			S28:
+			BP28:
 			begin
-				state <= S29;
+				state <= BP29;
 			end
-			S29:
+			BP29:
 			begin
-				state <= S30;
+				state <= BP30;
 			end
-			S30:
+			BP30:
 			begin
-				state <= S31;
+				state <= BP31;
 			end
-			S31:
+			BP31:
 			begin
-				state <= S32;
+				state <= BP32;
 			end
-			S32:
+			BP32:
 			begin
 				if (count1 < LAYR2_CELL-1)
 				begin
 					count1 <= count1 + 1;
-					state <= S33;
+					state <= BP33;
 				end
 				else
 				begin
 					count1 <= 8'd0;
-					state <= S34;
+					state <= BP34;
 				end
 			end
-			S33:
+			BP33:
 			begin
-				state <= S22;
+				state <= BP22;
 			end
-			S34:
+			BP34:
 			begin
-				state <= S35;
+				count_bp2 <= count_bp2 + 1;
+				state <= BP35;
 			end
-			S35:
+			BP35:
 			begin
-				state <= S36;
+				state <= BP36;
 			end
-			S36:
+			BP36:
 			begin
-				state <= S37;
+				state <= BP37;
 			end
-			S37:
+			BP37:
 			begin
-				state <= S38;
+				state <= BP38;
 			end
-			S38:
+			BP38:
 			begin
-				state <= S39;
+				state <= BP39;
 			end
-			S39:
+			BP39:
 			begin
-				state <= S40;
+				state <= BP40;
 			end
-			S40:
+			BP40:
 			begin
-				state <= S41;
+				state <= BP41;
 			end
-			S41:
+			BP41:
 			begin
-				state <= S42;
+				state <= BP42;
 			end
-			S42:
+			BP42:
 			begin
-				state <= S43;
+				state <= BP43;
 			end
-			S43:
+			BP43:
 			begin
-				state <= S44;
+				state <= BP44;
 			end
-			S44:
+			BP44:
 			begin
-				state <= S45;
+				state <= BP45;
 			end
-			S45:
+			BP45:
 			begin
-				state <= S46;
+				state <= BP46;
 			end
-			S46:
+			BP46:
 			begin
 				if (count1 < LAYR1_CELL-LAYR2_CELL-1)
 				begin
 					count1 <= count1 + 1;	
-					state <= S35;
+					state <= BP35;
 				end
 				else
 				begin
 					count1 <= 8'd0;
-					state <= S47;
+					state <= BP47;
 				end
 			end
-			S47:
+			BP47:
 			begin
-				state <= S48;
+				count_bp1 <= count_bp1 + 1;
+				state <= BP48;
 			end
-			S48:
+			BP48:
 			begin
 				if (count1 < LAYR2_CELL-1)
 				begin
 					count1 <= count1 + 1;
-					state <= S48;
+					state <= BP48;
 				end
 				else
 				begin
 					count1 <= 8'd0;
-					state <= S49;
+					state <= BP49;
 				end
 			end
-			S49:
+			BP49:
 			begin
-				state <= S50;
+				state <= BP50;
 			end
-			S50:
+			BP50:
 			begin
-				state <= S51;
+				state <= BP51;
 			end
-			S51:
+			BP51:
 			begin
 				if (count1 < LAYR1_CELL-LAYR2_CELL-3)
 				begin
 					count1 <= count1 + 1;
-					state <= S51;
+					state <= BP51;
 				end
 				else
 				begin
 					count1 <= 8'd0;
-					state <= S52;
+					state <= BP52;
 				end
 			end
-			S52:
+			BP52:
 			begin
 				if (count2 < LAYR2_CELL-1)
 				begin
 					count2 <= count2 + 1;
-					state <= S53;	
+					state <= BP53;	
 				end
 				else
 				begin
 					count2 <= 8'd0;
-					state <= S54;
+					state <= BP54;
 				end
 			end
-			S53:
+			BP53:
 			begin
-				state <= S48;
+				state <= BP48;
 			end
-			S54:
+			BP54:
 			begin
-				state <= S55;
+				state <= BP55;
 			end
-			S55:
+			BP55:
 			begin
 				if (count1 < LAYR2_CELL-1)
 				begin
 					count1 <= count1 + 1;
-					state <= S55;
+					state <= BP55;
 				end
 				else
 				begin
 					count1 <= 8'd0;
-					state <= S56;
+					state <= BP56;
 				end
 			end
-			S56:
+			BP56:
 			begin
-				state <= S57;
+				state <= BP57;
 			end
-			S57:
+			BP57:
 			begin
-				state <= S58;
+				state <= BP58;
 			end
-			S58:
+			BP58:
 			begin
 				if (count1 < LAYR1_CELL-LAYR2_CELL-3)
 				begin
 					count1 <= count1 + 1;
-					state <= S58;
+					state <= BP58;
 				end
 				else
 				begin
 					count1 <= 8'd0;
-					state <= S59;
+					state <= BP59;
 				end
 			end
-			S59:
+			BP59:
 			begin
 				if (count2 < LAYR1_CELL-LAYR2_CELL-1)
 				begin
 					count2 <= count2 + 1;
-					state <= S60;
+					state <= BP60;
 				end
 				else
 				begin
 					count2 <= 8'd0;
-					state <= S61;
+					state <= BP61;
 				end
 			end
-			S60:
+			BP60:
 			begin
-				state <= S55;
+				state <= BP55;
 			end
-			S61:
+			BP61:
 			begin
-				state <= S62;
+				if (count_bp2 < TIMESTEP)
+				begin
+					state <= BP62;
+				end
+				else
+				begin
+					state <= BP63;
+				end
 			end
-			S62:
+			BP62:
 			begin
-				state <= S22;
+				state <= BP22;
+			end
+			BP63: // identical to 62 but w/0 en_delta2
+			begin
+				if (count_bp1 < TIMESTEP)
+				begin
+					state <= BP64;
+				end
+				else
+				begin
+					state <= BP77;
+				end
+			end
+			BP64: // identical to 22 but w/0 en_delta2
+			begin
+				state <= BP65;
+			end
+			BP65:
+			begin
+				state <= BP66;
+			end
+			BP66:
+			begin
+				state <= BP67;
+			end
+			BP67:
+			begin
+				state <= BP68;
+			end
+			BP68:
+			begin
+				state <= BP69;
+			end
+			BP69:
+			begin
+				state <= BP70;
+			end
+			BP70:
+			begin
+				state <= BP71;
+			end
+			BP71:
+			begin
+				state <= BP72;
+			end
+			BP72:
+			begin
+				state <= BP73;
+			end
+			BP73:
+			begin
+				state <= BP74;
+			end
+			BP74:
+			begin
+				if (count1 < LAYR2_CELL-1)
+				begin
+					count1 <= count1 + 1;
+					state <= BP75;
+				end
+				else
+				begin
+					count1 <= 8'd0;
+					state <= BP76;
+				end
+			end
+			BP75:
+			begin
+				state <= BP64;
+			end
+			BP76: // identical to 34 but w/0 en_delta2
+			begin
+				state <= BP35;
+			end
+			BP77: // last idle state
+			begin
+				state <= BP77;
 			end
 		endcase
 	end

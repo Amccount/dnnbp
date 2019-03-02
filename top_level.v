@@ -1,4 +1,4 @@
-module top_level(clk, rst, rst_fsm, o_cost);
+module top_level(clk, /*rst, */rst_fsm, o_cost);
 
 // parameters
 parameter WIDTH = 24;
@@ -35,14 +35,14 @@ parameter LAYR2_T = "layer2_t_bp.list";
 // States
 
 // common ports
-input clk, rst, rst_fsm;
+input clk, /*rst,*/ rst_fsm;
 
 // input ports
 
 // control ports
 
 // output ports
-output o_cost;
+output signed [WIDTH-1:0] o_cost;
 
 // registers
 
@@ -202,7 +202,7 @@ wire en_x1, en_x2, en_h1, en_h2;
 wire en_w1, en_w2, en_u1, en_u2;
 wire en_b1, en_b2;
 
-wire rst;
+// wire rst;
 wire wr_h1;
 wire wr_c1;
 wire wr_wa_1;
@@ -232,6 +232,9 @@ wire en_delta_1;
 wire en_rw_dout1;
 wire en_rw_dx2;
 
+wire rst_bp;
+wire rst_upd;
+
 datapath #(
 		.ADDR_WIDTH(ADDR_WIDTH),
 		.WIDTH(WIDTH),
@@ -252,7 +255,7 @@ datapath #(
 		.LAYR2_dState(LAYR2_dState)
 	) inst_datapath (
 		.clk                (clk),
-		.rst                (rst),
+		.rst                (rst_bp),
 		.wr_h1              (wr_h1),
 		.wr_c1              (wr_c1),
 		.wr_wa_1            (wr_w1),
@@ -509,8 +512,7 @@ datapath #(
 			.LAYR2_T(LAYR2_T)
 		) inst_fsm (
 			.clk          (clk),
-			.rst_fsm      (rst_fsm),
-			.rst 		  (rst),
+			.rst 		  (rst_fsm),
 			.en_1         (en_1),
 			.en_2         (en_2),
 			.acc_x1       (acc_x1),
@@ -595,7 +597,9 @@ datapath #(
 			.acc_dgate1   (acc_dgate1),
 			.acc_dgate2   (acc_dgate2),
 			.rst_acc_1    (rst_acc_1),
-			.rst_acc_2    (rst_acc_2)
+			.rst_acc_2    (rst_acc_2),
+			.rst_bp		  (rst_bp),
+			.rst_upd	  (rst_upd)
 		);
 
 
@@ -747,7 +751,7 @@ addr_gen_bp_aiohtd #(
 		.DELTA_TIME(12)
 	) inst_addr_gen_bp_aiohtd2 (
 		.clk           (clk),
-		.rst           (rst),
+		.rst           (rst_bp),
 		.en            (en_delta_2),
 		.o_addr_aioht  (o_addr_aioht_2),
 		.o_addr_dgates (o_addr_dgates_2)
@@ -760,7 +764,7 @@ addr_gen_bp_aiohtd #(
 		.DELTA_TIME(12)
 	) inst_addr_gen_bp_aiohtd1 (
 		.clk           (clk),
-		.rst           (rst),
+		.rst           (rst_bp),
 		.en            (en_delta_1),
 		.o_addr_aioht  (o_addr_aioht_1),
 		.o_addr_dgates (o_addr_dgates_1)
@@ -774,7 +778,7 @@ addr_gen_bp_fc #(
 		.CHG_TIME(5)
 	) inst_addr_gen_bp_fc2 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_bp),
 		.en     (en_delta_2),
 		.o_addr (o_addr_fc_2)
 	);
@@ -787,7 +791,7 @@ addr_gen_bp_fc #(
 		.CHG_TIME(5)
 	) inst_addr_gen_bp_fc1 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_bp),
 		.en     (en_delta_1),
 		.o_addr (o_addr_fc_1)
 	);
@@ -799,7 +803,7 @@ addr_gen_bp_dstate #(
 		.DELTA_TIME(12)
 	) inst_addr_gen_bp_dstate2 (
 		.clk       (clk),
-		.rst       (rst),
+		.rst       (rst_bp),
 		.en        (en_delta_2),
 		.o_addr_rd (rd_addr_b_dstate_2),
 		.o_addr_wr (wr_addr_a_dstate_2)
@@ -812,7 +816,7 @@ addr_gen_bp_dstate #(
 		.DELTA_TIME(12)
 	) inst_addr_gen_bp_dstate1 (
 		.clk       (clk),
-		.rst       (rst),
+		.rst       (rst_bp),
 		.en        (en_delta_1),
 		.o_addr_rd (rd_addr_b_dstate_1),
 		.o_addr_wr (wr_addr_a_dstate_1)
@@ -826,7 +830,7 @@ addr_gen_bp_dxdout #(
 		.RD_FIRST(1)
 	) inst_addr_gen_rw_dout2 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_bp),
 		.en     (en_rw_dout2),
 		.o_addr (o_addr_dout_2)
 	);
@@ -839,7 +843,7 @@ addr_gen_bp_dxdout #(
 		.RD_FIRST(0)
 	) inst_addr_gen_rw_dx2 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_bp),
 		.en     (en_rw_dx2),
 		.o_addr (o_addr_dx2)
 	);
@@ -852,7 +856,7 @@ addr_gen_bp_dxdout #(
 		.RD_FIRST(1)
 	) inst_addr_gen_rw_dout1 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_bp),
 		.en     (en_rw_dout1),
 		.o_addr (o_addr_dout_1)
 	);
@@ -865,7 +869,7 @@ addr_gen_bp_dwu #(
 		.DELAY(2)
 	) inst_addr_gen_calc_dx2 (
 		.clk      (clk),
-		.rst      (rst),
+		.rst      (rst_bp),
 		.en       (en_dx2),
 		.o_addr_d (o_addr_dx2_dgate),
 		.o_addr_w (o_addr_dx2_w)
@@ -879,7 +883,7 @@ addr_gen_bp_dwu #(
 		.DELAY(2)
 	) inst_addr_gen_calc_dout2 (
 		.clk      (clk),
-		.rst      (rst),
+		.rst      (rst_bp),
 		.en       (en_dout2),
 		.o_addr_d (o_addr_dout2_dgate),
 		.o_addr_w (o_addr_dout2_u)
@@ -893,7 +897,7 @@ addr_gen_bp_dwu #(
 		.DELAY(3)
 	) inst_addr_gen_calc_dout1 (
 		.clk      (clk),
-		.rst      (rst),
+		.rst      (rst_bp),
 		.en       (en_dout1),
 		.o_addr_d (o_addr_dout1_dgate),
 		.o_addr_w (o_addr_dout1_u)
@@ -910,7 +914,7 @@ addr_gen_upd_xhd #(
 		.DELAY(3)
 	) inst_upd_xhd_x1 (
 		.clk      (clk),
-		.rst      (rst),
+		.rst      (rst_upd),
 		.en       (en_x1),
 		.o_addr_d (wr_addr_a_d1),
 		.o_addr_x (upd_addr_b_x1)
@@ -924,7 +928,7 @@ addr_gen_upd_xhd #(
 		.DELAY(3)
 	) inst_upd_xhd_x2 (
 		.clk      (clk),
-		.rst      (rst),
+		.rst      (rst_upd),
 		.en       (en_x2),
 		.o_addr_d (wr_addr_a_d2),
 		.o_addr_x (rd_addr_b_h1)
@@ -940,7 +944,7 @@ addr_gen_upd_xhd #(
 		.DELAY(3)
 	) inst_upd_xhd_h1 (
 		.clk      (clk),
-		.rst      (rst),
+		.rst      (rst_upd),
 		.en       (en_h1),
 		.o_addr_d (rd_addr_b_d1),
 		.o_addr_x (upd_addr_a_h_1)
@@ -954,7 +958,7 @@ addr_gen_upd_xhd #(
 		.DELAY(3)
 	) inst_upd_xhd_h2 (
 		.clk      (clk),
-		.rst      (rst),
+		.rst      (rst_upd),
 		.en       (en_h2),
 		.o_addr_d (rd_addr_b_d2),
 		.o_addr_x (upd_addr_a_h_2)
@@ -970,7 +974,7 @@ addr_gen_upd_wub #(
 		.DELAY(10)
 	) inst_upd_wub_w1 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_upd),
 		.en     (en_w1),
 		.o_addr (wr_addr_a_w1)
 	);
@@ -984,7 +988,7 @@ addr_gen_upd_wub #(
 		.DELAY(10)
 	) inst_upd_wub_w2 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_upd),
 		.en     (en_w2),
 		.o_addr (wr_addr_a_w2)
 	);
@@ -999,7 +1003,7 @@ addr_gen_upd_wub #(
 		.DELAY(10)
 	) inst_upd_wub_u1 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_upd),
 		.en     (en_u1),
 		.o_addr (wr_addr_a_u1)
 	);
@@ -1015,7 +1019,7 @@ addr_gen_upd_wub #(
 		.DELAY(10)
 	) inst_upd_wub_u2 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_upd),
 		.en     (en_u2),
 		.o_addr (wr_addr_a_u2)
 	);
@@ -1030,7 +1034,7 @@ addr_gen_upd_wub #(
 		.DELAY(540)
 	) inst_upd_wub_b1 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_upd),
 		.en     (en_b1),
 		.o_addr (wr_addr_a_b1)
 	);
@@ -1044,7 +1048,7 @@ addr_gen_upd_wub #(
 		.DELAY(540)
 	) inst_upd_wub_b2 (
 		.clk    (clk),
-		.rst    (rst),
+		.rst    (rst_upd),
 		.en     (en_b2),
 		.o_addr (wr_addr_a_b2)
 	);
