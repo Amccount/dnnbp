@@ -169,3 +169,30 @@ Exception c0000005 has occurred at address 0059afd9. Traceback:
 # Platform = win32pe
 
 Exception c0000005 has occurred at address 6bde4651. Traceback:
+# Current time Sun Mar 03 18:51:53 2019
+# ModelSim PE Student Edition Stack Trace
+# Program = vish
+# Id = "10.4a"
+# Version = "2015.03"
+# Date = "Apr  7 2015"
+# Platform = win32pe
+
+Exception c0000005 has occurred at address 6bf1ae7a. Traceback:
+# Current time Sun Mar 03 20:18:20 2019
+# ModelSim PE Student Edition Stack Trace
+# Program = vish
+# Id = "10.4a"
+# Version = "2015.03"
+# Date = "Apr  7 2015"
+# Platform = win32pe
+
+Exception c0000005 has occurred at address 10042a2e. Traceback:
+# Current time Sun Mar 03 20:41:06 2019
+# ModelSim PE Student Edition Stack Trace
+# Program = vish
+# Id = "10.4a"
+# Version = "2015.03"
+# Date = "Apr  7 2015"
+# Platform = win32pe
+
+Exception c0000005 has occurred at address 10042a2e. Traceback:

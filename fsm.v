@@ -1061,6 +1061,7 @@ begin
 					state <= S0;
 					count_epoch <=count_epoch+1;
 				end
+				else
 				begin
 					state <= UPD9;
 				end
@@ -3872,7 +3873,7 @@ begin
 			en_w1     <= 0;			en_w2     <= 0;
 			en_u1     <= 0;			en_u2     <= 0;
 			en_b1     <= 0;			en_b2     <= 0;
-			bp	      <= 0;			update    <= 1;
+			bp	      <= 1;			update    <= 1;
 			wr_w1     <= 0;			wr_w2     <= 0;
 			wr_u1     <= 0;			wr_u2     <= 0;
 			wr_b1     <= 0;			wr_b2     <= 0;
@@ -3890,7 +3891,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -3908,7 +3909,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -3926,7 +3927,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -3945,7 +3946,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 1;		wr_w2     <= 1;
 				wr_u1     <= 1;		wr_u2     <= 1;
 				wr_b1     <= 1;		wr_b2     <= 1;
@@ -3964,7 +3965,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -3983,7 +3984,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4001,7 +4002,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 0;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4019,7 +4020,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 0;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4037,7 +4038,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 0;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4056,7 +4057,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 0;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 1;		wr_w2     <= 1;
 				wr_u1     <= 1;		wr_u2     <= 0;
 				wr_b1     <= 1;		wr_b2     <= 1;
@@ -4075,7 +4076,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 0;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4094,7 +4095,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 0;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4112,7 +4113,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4130,7 +4131,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4148,7 +4149,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4167,7 +4168,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 1;		wr_w2     <= 0;
 				wr_u1     <= 1;		wr_u2     <= 0;
 				wr_b1     <= 1;		wr_b2     <= 0;
@@ -4186,7 +4187,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4205,7 +4206,7 @@ begin
 				en_w1     <= 1;		en_w2     <= 1;
 				en_u1     <= 1;		en_u2     <= 1;
 				en_b1     <= 1;		en_b2     <= 1;
-				bp	      <= 0;		update    <= 1;
+				bp	      <= 1;		update    <= 1;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
@@ -4223,7 +4224,7 @@ begin
 				en_w1     <= 0;		en_w2     <= 0;
 				en_u1     <= 0;		en_u2     <= 0;
 				en_b1     <= 0;		en_b2     <= 0;
-				bp	      <= 0;		update    <= 0;
+				bp	      <= 1;		update    <= 0;
 				wr_w1     <= 0;		wr_w2     <= 0;
 				wr_u1     <= 0;		wr_u2     <= 0;
 				wr_b1     <= 0;		wr_b2     <= 0;
