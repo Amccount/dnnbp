@@ -97,10 +97,10 @@ begin
 			end
 		end
 	end
-	else if(en==0)
-	begin
-		count3 <=0;
-	end
+	// else if(en==0)
+	// begin
+	// 	count3 <=0;
+	// end
 end
 
 endmodule

@@ -9,7 +9,7 @@
 //            
 ///////////////////////////////////////////////////////////////////////////////
 module fsm (
-clk, rst, en_1, en_2, update,
+clk, rst, rst_fwd, start, stop, en_1, en_2, update,
 acc_x1, acc_x2, acc_h1, acc_h2, 
 wr_h1, wr_h2, wr_c1, wr_c2, wr_act_1, wr_act_2,
 
@@ -47,7 +47,7 @@ rst_bp, rst_upd
 
 // parameters
 parameter WIDTH = 24;
-parameter FRAC = 20;
+parameter FRAC = 16;
 parameter LAYR2_CELL = 8;
 parameter LAYR1_CELL = 53;
 parameter ADDR_WIDTH = 12;
@@ -79,14 +79,20 @@ parameter LAYR2_T = "layer2_t_bp.list";
 
 
 //common ports
-input clk, rst;
+input clk, rst, start;
 
+//inputreg
+// input [11:0] reg_epoch;
+//to processor
+output reg stop;
 
+ 
 /////////////////////////////////////////////
 //      Output Port & Reg Declaration      //
 /////////////////////////////////////////////
 
 // Forward Section
+output reg rst_fwd;
 output reg acc_x1, acc_h1, acc_x2, acc_h2;
 output reg wr_h1;
 output reg wr_c1;
@@ -165,7 +171,7 @@ reg [7:0] counter_cell, counter_layer, counter_timestep;
 reg [7:0] count1, count2, count_bp1, count_bp2;
 
 // Counter for Update Weight Section
-reg [11:0] count, count3, count4, count5, count6;
+reg [11:0] count, count3, count4, count5, count6, count_epoch;
 
 // STATES
 // State for Forward Propagation
@@ -194,7 +200,7 @@ parameter 	UPD0  = 93,  UPD1  = 94,  UPD2  = 95,  UPD3  = 96,  UPD4  = 97,
 			UPD5  = 98,  UPD6  = 99,  UPD7  = 100, UPD8  = 101, UPD9  = 102,
 			UPD10 = 103, UPD11 = 104, UPD12 = 105, UPD13 = 106, UPD14 = 107,
 			UPD1B = 108, UPD5B = 109, UPD9B = 110, UPD1C = 111, UPD5C = 112, 
-			UPD9C = 113;
+			UPD9C = 113, SIDLE = 115;
 
 /////////////////////////////////////////////
 //            FSM State Handler            //
@@ -203,20 +209,41 @@ always @(posedge clk or posedge rst)
 begin  
 	if (rst)
 	begin
-	   state <= S0;
+	   state <= SIDLE;
 	   flag <=1'd0;
+	   count1 <= 8'd0;
+	   count2 <= 8'd0;
+	   count3 <= 12'd0;
+	   count4 <= 12'd0;
+	   count5 <= 12'd0;
+	   count6 <= 12'd0;
+	   count_epoch <= 12'd0;
+	   count_bp2 <=8'd0;
+	   count_bp1 <=8'd0;
 	end
 	else
 	begin
 	 	case (state)
 			//INITIAL START //
-		 	S0:
+
+		 	SIDLE:
 	        begin
+				if (start==1)
+				begin
+					state <= S0; 
+				end
+				else 
+				begin
+					state <=SIDLE;	
+				end
+	        end
+	        S0:
+	        begin
+	        	count_epoch <= 12'd0;
 	            counter_cell <= 8'd0;
 	          	counter_layer <= 8'd0;
 	            counter_timestep <= 8'd0;
-	            counter_timestep_all <= 8'd0;
-	            state <= S1;
+	            state <= S1;	        	
 	        end
 	       	S1:
 	        begin
@@ -898,7 +925,7 @@ begin
 					end
 				end
 			end
-			UPD1B:
+			UPD1B: //108
 			begin
 				state <= UPD2;
 			end
@@ -973,7 +1000,7 @@ begin
 					if (count4 == 8)
 					begin
 						count4 <= 0;
-						state  <= S9;
+						state  <= UPD9; //ini napa S9 yak
 					end
 					else begin
 						count4 <= count4 +1 ;
@@ -1025,19 +1052,20 @@ begin
 			end
 			UPD12:
 			begin
-				if(count5 == 53*45+10)
+				if(count5 == 53*45+10 && count_epoch== 4'd10)
 				begin
-					state <= UPD13;
+					state <= SIDLE;
 				end
-				else
+				else if (count5 == 53*45+10) 
+				begin
+					state <= S0;
+					count_epoch <=count_epoch+1;
+				end
 				begin
 					state <= UPD9;
 				end
 			end
-			UPD13:
-			begin
-				state <= UPD13;
-			end
+
     	endcase
     end
 end
@@ -1051,8 +1079,30 @@ begin
  	case (state)
  		// Start of FSM
  		// Forward Propagation Section
+	    SIDLE:
+	    begin
+	    	stop <=1;
+	    	rst_fwd <=0;
+	    	rst_bp <= 1'b0;
+			rst_upd <= 1'b0;
+			bp <=0;
+			update <=0;
+			rst_mac_1 <= 1;
+			rst_mac_2 <= 1;
+			acc_x1 <=0;
+			acc_h1 <=0;
+			acc_x2 <=0;
+			acc_h2 <=0;
+			wr_h1 <=0;
+			wr_h2 <=0;
+			wr_c1 <=0;
+			wr_c2 <=0;
+			en_1 <=0;
+	    end
 	    S0:
 		begin
+			stop <=0;
+			rst_fwd <=1;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1071,7 +1121,10 @@ begin
 		end
 		S1:
 		begin
+			stop <=0;
+			rst_fwd <=0;
 			rst_bp <= 1'b0;
+			rst_fwd <=0;
 			rst_upd <= 1'b0;
 			bp <=0;
 			update <=0;
@@ -1090,6 +1143,8 @@ begin
 		// start computing for fir_macst layer -- repeat 53x -------------//
 		S2:
 		begin
+			stop <=0;
+			rst_fwd <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1108,6 +1163,7 @@ begin
 		end
 		S3:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1122,6 +1178,7 @@ begin
 		end
 		S4:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1136,6 +1193,7 @@ begin
 		end
 		S5:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1150,6 +1208,7 @@ begin
 		end
 		S6:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1162,6 +1221,7 @@ begin
 		// ----------------------------------------------------------//
 		S7:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1173,6 +1233,7 @@ begin
 		// start computing for the 2nd and 1st layer - repeat 8x ----//
 		S8: // repeat 8x
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1187,6 +1248,7 @@ begin
 		end
 		S9: //repeat 45x
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1199,6 +1261,7 @@ begin
 		end
 		S10: 
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1218,6 +1281,7 @@ begin
 		end
 		S11:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1235,6 +1299,7 @@ begin
 		end
 		S12:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1255,6 +1320,7 @@ begin
 		end
 		S13:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1273,6 +1339,7 @@ begin
 		// ---------------------TRANSITION STATE------------------------//
 		S14:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1295,6 +1362,7 @@ begin
 
 		S15:
 		begin
+			stop <=0;
 			rst_bp <= 1'b0;
 			rst_upd <= 1'b0;
 			bp <=0;
@@ -1311,7 +1379,7 @@ begin
 			wr_act_2 <=0;
 			wr_act_2 <=0;
 			wr_act_1 <=0;
-			rst_mac_1 <=0;
+			rst_mac_1 <=1;
 			rst_mac_2 <=1;
 		end
 
@@ -2405,7 +2473,7 @@ begin
 			update       <= 1'b0;  en_delta_1   <= 1'b1;
 			bp           <= 1'b1;  en_rw_dout2  <= 1'b0; 
 			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
-			acc_cost     <= 1'b1;  en_rw_dx2    <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
 			
 			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
 			sel_in2_2    <= 2'h2;  sel_in2_1    <= 2'h2;  
@@ -3421,7 +3489,7 @@ begin
 			update       <= 1'b0;  en_delta_1   <= 1'b1;
 			bp           <= 1'b1;  en_rw_dout2  <= 1'b1; 
 			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b1;
-			acc_cost     <= 1'b1;  en_rw_dx2    <= 1'b1;
+			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
 			
 			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
 			sel_in2_2    <= 2'h2;  sel_in2_1    <= 2'h2;  

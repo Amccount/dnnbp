@@ -1,5 +1,4 @@
-module top_level(clk, /*rst, */rst_fsm, o_cost);
-
+module top_level(clk, /*rst, */rst_fsm, i_start, o_stop, o_cost);
 // parameters
 parameter WIDTH = 24;
 parameter FRAC = 16;
@@ -38,16 +37,24 @@ parameter LAYR2_T = "layer2_t_bp.list";
 input clk, /*rst,*/ rst_fsm;
 
 // input ports
+input i_start;
 
 // control ports
 
 // output ports
 output signed [WIDTH-1:0] o_cost;
+output o_stop;
+
+// wire [2:0] temp_ctrl_reg;
+// assign temp_ctrl_reg = {i_train, i_start, i_stop};
 
 // registers
 
 // wires
 // forwards
+
+wire rst_fwd;
+
 wire signed [11:0] wr_addr_h1;
 wire signed [11:0] wr_addr_c1;
 wire signed [11:0] rd_addr_w_1;
@@ -513,6 +520,9 @@ datapath #(
 		) inst_fsm (
 			.clk          (clk),
 			.rst 		  (rst_fsm),
+			.rst_fwd	  (rst_fwd),
+			.start 		  (i_start),
+			.stop 		  (o_stop),
 			.en_1         (en_1),
 			.en_2         (en_2),
 			.acc_x1       (acc_x1),
@@ -602,6 +612,8 @@ datapath #(
 			.rst_upd	  (rst_upd)
 		);
 
+	// control_register inst_control_register (.clk(clk), .i(temp_ctrl_reg), .o(o_ctrl_reg));
+
 
 // FORWARD
 	// ADDR GENERATOR LAYER 1
@@ -613,7 +625,7 @@ datapath #(
 			.DELAY(4)
 		) inst_addr_gen_fwd_x (
 			.clk    (clk),
-			.rst    (rst_fsm),
+			.rst    (rst_fwd),
 			.en     (en_1),
 			.o_addr (rd_addr_b_x1)
 		);
@@ -626,7 +638,7 @@ datapath #(
 			.DELAY(3)
 		) inst_addr_gen_c1h1 (
 			.clk      (clk),
-			.rst      (rst_fsm),
+			.rst      (rst_fwd),
 			.en       (en_1),
 			.o_addr_h (wr_addr_a_h1),
 			.o_addr_c (wr_addr_c1)
@@ -641,7 +653,7 @@ datapath #(
 			.DELAY(4)
 		) inst_addr_gen_fwd_aifo (
 			.clk    (clk),
-			.rst    (rst_fsm),
+			.rst    (rst_fwd),
 			.en     (en_1),
 			.o_addr (wr_addr_act_1)
 	);
@@ -654,7 +666,7 @@ datapath #(
 			.PAUSE_LEN(4)
 		) inst_addr_gen_b_1 (
 			.clk    (clk),
-			.rst    (rst_fsm),
+			.rst    (rst_fwd),
 			.en     (en_1),
 			.o_addr (rd_addr_b_1)
 	);
@@ -667,7 +679,7 @@ datapath #(
 			.PAUSE_LEN(4)
 		) inst_addr_gen_wu_1 (
 			.clk    (clk),
-			.rst    (rst_fsm),
+			.rst    (rst_fwd),
 			.en     (en_1),
 			.o_addr (addr_wu_1)
 	);
@@ -682,7 +694,7 @@ datapath #(
 			.DELAY(48)
 		) inst_addr_gen_c2h2 (
 			.clk      (clk),
-			.rst      (rst_fsm),
+			.rst      (rst_fwd),
 			.en       (en_2),
 			.o_addr_h (wr_addr_a_h2),
 			.o_addr_c (wr_addr_c2)
@@ -696,7 +708,7 @@ datapath #(
 			.DELAY(4)
 		) inst_addr_gen_fwd_aifo_2 (
 			.clk    (clk),
-			.rst    (rst_fsm),
+			.rst    (rst_fwd),
 			.en     (en_2),
 			.o_addr (wr_addr_act_2)
 	);
@@ -709,7 +721,7 @@ datapath #(
 			.PAUSE_LEN(3)
 		) inst_addr_gen_b_2 (
 			.clk    (clk),
-			.rst    (rst_fsm),
+			.rst    (rst_fwd),
 			.en     (en_2),
 			.o_addr (rd_addr_b_2)
 	);
@@ -722,7 +734,7 @@ datapath #(
 			.PAUSE_LEN(4)
 		) inst_addr_gen_w_2 (
 			.clk    (clk),
-			.rst    (rst_fsm),
+			.rst    (rst_fwd),
 			.en     (en_2),
 			.o_addr (rd_addr_w_2)
 	);
@@ -736,7 +748,7 @@ datapath #(
 			.PAUSE_LEN(49)
 		) inst_addr_gen_u_2 (
 			.clk    (clk),
-			.rst    (rst_fsm),
+			.rst    (rst_fwd),
 			.en     (en_2),
 			.o_addr (rd_addr_u_2)
 	);
