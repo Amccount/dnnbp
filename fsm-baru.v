@@ -177,9 +177,9 @@ reg [11:0] count, count3, count4, count5, count6, count_epoch;
 // State for Forward Propagation
 parameter 	S0=0, 		S1=1, 		S2=2, 		S3=3, 		S4=4,
 			S5=5, 		S6=6, 		S7=7, 		S8=8, 		S9=9,  
-		 	S10=10, 	S11=11, 	S12=12, 	S13=13, 	S14=14, S15=114,
-		 	S8B=208, S9B=209,
-		 	S10B=210, 	S11B=211, 	S12B=212, 	S13B=213, 	S14B=214;
+		 	S10=10, 	S11=11, 	S12=12, 	S13=13, 	S14=14, S15=114;
+		 	S8=208, S9=209,
+		 	S10B=210, 	S11B=211, 	S12B=212, 	S13B=213, 	S14B=214,
 // State for Backward Propagation
 parameter 	BP0=15, 	BP1=16, 	BP2=17, 	BP3=18, 	BP4=19,
 			BP5=20, 	BP6=21, 	BP7=22, 	BP8=23, 	BP9=24,
@@ -453,7 +453,7 @@ begin
 	           if (counter_cell != 8'd7) //repeat 8x for counting H2, X2, X1, H1
 	           begin
 	        		counter_cell <= counter_cell+1; 
-	            	state <= S8B;
+	            	state <= S8b;
 	           end
 	           else begin 
 	            	counter_cell <= 8'd0;
@@ -1134,7 +1134,7 @@ begin
 			end
 			UPD12:
 			begin
-				if(count5 == 53*45+10 && count_epoch== 12'd20)
+				if(count5 == 53*45+10 && count_epoch== 4'd10)
 				begin
 					state <= SIDLE;
 				end
