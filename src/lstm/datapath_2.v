@@ -948,10 +948,10 @@ assign addr_a_ui_2 = update ? upd_addr_a_ui_2 : bp_addr_a_ui_2;
 assign addr_a_uf_2 = update ? upd_addr_a_uf_2 : bp_addr_a_uf_2;
 assign addr_a_uo_2 = update ? upd_addr_a_uo_2 : bp_addr_a_uo_2;
 
-assign addr_w_1 = update ? upd_addr_a_wa_1 : rd_addr_b_wa_1;
-assign addr_u_1 = update ? upd_addr_a_ua_1 : rd_addr_b_ua_1;
-assign addr_w_2 = update ? upd_addr_a_wa_2 : rd_addr_b_wa_2;
-assign addr_u_2 = update ? upd_addr_a_ua_2 : rd_addr_b_ua_2;
+assign addr_w_1 = bp ? addr_a_wa_1 : rd_addr_b_wa_1;
+assign addr_u_1 = bp ? addr_a_ua_1 : rd_addr_b_ua_1;
+assign addr_w_2 = bp ? addr_a_wa_2 : rd_addr_b_wa_2;
+assign addr_u_2 = bp ? addr_a_ua_2 : rd_addr_b_ua_2;
 assign addr_a_h1 = update ? upd_addr_a_h_1 : wr_addr_a_h1;
 assign addr_a_h2 = update ? upd_addr_a_h_2 : wr_addr_a_h2;
 
@@ -1226,8 +1226,6 @@ delta #(
 assign bp_addr_a_da2 = rd_dgate ? rd_addr_a_da2 : wr_addr_a_da2;
 assign addr_a_da2 = update ? upd_addr_a_da2 : bp_addr_a_da2;
 assign addr_b_da2 = update ? upd_addr_b_da2 : bp_addr_b_da2;
-assign addr_w_1 = update ? upd_addr_a_wa_1 : rd_addr_b_wa_1;
-assign addr_u_1 = update ? upd_addr_a_ua_1 : rd_addr_b_ua_1;
 memory_cell #(
         // .ADDR(9),
         .WIDTH(WIDTH),

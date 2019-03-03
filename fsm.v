@@ -1876,7 +1876,7 @@ begin
 			rd_dgate     <= 1'b0;  en_delta_2   <= 1'b0;
 			update       <= 1'b0;  en_delta_1   <= 1'b0;
 			bp           <= 1'b1;  en_rw_dout2  <= 1'b0;
-			rst_cost     <= 1'b1;  en_rw_dout1  <= 1'b0;
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b0;
 			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b1;
 
 			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
@@ -3278,7 +3278,7 @@ begin
 			rd_dgate     <= 1'b1;  en_delta_2   <= 1'b0;
 			update       <= 1'b0;  en_delta_1   <= 1'b0;
 			bp           <= 1'b1;  en_rw_dout2  <= 1'b0;
-			rst_cost     <= 1'b1;  en_rw_dout1  <= 1'b0;
+			rst_cost     <= 1'b0;  en_rw_dout1  <= 1'b0;
 			acc_cost     <= 1'b0;  en_rw_dx2    <= 1'b0;
 
 			sel_in1_2    <= 2'h0;  sel_in1_1    <= 2'h0;
