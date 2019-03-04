@@ -39,10 +39,12 @@ wr_da1, wr_di1, wr_df1, wr_do1,
 
 rst_cost, acc_cost,
 
-rst_mac_1, rst_mac_2, rst_2, wr_w1, wr_u1, wr_b1, wr_w2, wr_u2, wr_b2,
+rst_mac_1, rst_mac_2, wr_w1, wr_u1, wr_b1, wr_w2, wr_u2, wr_b2,
 en_x1, en_x2, en_h1, en_h2, en_w1, en_w2, en_u1, en_u2, en_b1, en_b2,
 acc_dgate1, acc_dgate2, rst_acc_1, rst_acc_2, 
-rst_bp, rst_upd
+rst_bp, rst_upd,
+
+wr_o, wr_addr_o
 );
 
 // parameters
@@ -100,7 +102,7 @@ output reg wr_act_1;
 output reg wr_act_2;
 output reg wr_h2;
 output reg wr_c2;
-output reg en_1, en_2,rst_2;
+output reg en_1, en_2;
 
 ////
 // Backpropagation Section
@@ -156,6 +158,9 @@ output reg rst_mac_1;
 output reg rst_mac_2;
 output reg rst_acc_1;
 output reg rst_acc_2;
+
+output reg wr_o;
+output reg [ADDR_WIDTH-1:0] wr_addr_o;
 
 /////////////////////////////////////////////
 //          Register Declaration           //
@@ -1164,281 +1169,313 @@ begin
  		// Forward Propagation Section
 	    SIDLE:
 	    begin
-	    	stop <=1;
-	    	rst_fwd <=0;
-	    	rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
+	        wr_o      <= 0;
+	        wr_addr_o <= 0;
+	        stop      <=1;
+	        rst_fwd   <=0;
+	        rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
 			rst_mac_1 <= 1;
 			rst_mac_2 <= 1;
-			acc_x1 <=0;
-			acc_h1 <=0;
-			acc_x2 <=0;
-			acc_h2 <=0;
-			wr_h1 <=0;
-			wr_h2 <=0;
-			wr_c1 <=0;
-			wr_c2 <=0;
-			en_1 <=0;
+			acc_x1    <=0;
+			acc_h1    <=0;
+			acc_x2    <=0;
+			acc_h2    <=0;
+			wr_h1     <=0;
+			wr_h2     <=0;
+			wr_c1     <=0;
+			wr_c2     <=0;
+			en_1      <=0;
 	    end
 	    S0:
 		begin
-			stop <=0;
-			rst_fwd <=1;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_fwd   <=1;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
 			rst_mac_1 <= 1;
 			rst_mac_2 <= 1;
-			acc_x1 <=0;
-			acc_h1 <=0;
-			acc_x2 <=0;
-			acc_h2 <=0;
-			wr_h1 <=0;
-			wr_h2 <=0;
-			wr_c1 <=0;
-			wr_c2 <=0;
-			en_1 <=0;
+			acc_x1    <=0;
+			acc_h1    <=0;
+			acc_x2    <=0;
+			acc_h2    <=0;
+			wr_h1     <=0;
+			wr_h2     <=0;
+			wr_c1     <=0;
+			wr_c2     <=0;
+			en_1      <=0;
 		end
 		S1:
 		begin
-			stop <=0;
-			rst_fwd <=0;
-			rst_bp <= 1'b0;
-			rst_fwd <=0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_fwd   <=0;
+			rst_bp    <= 1'b0;
+			rst_fwd   <=0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=1;
-			acc_x1 <=0;
-			acc_h1 <=0;
-			acc_x2 <=0;
-			acc_h2 <=0;
-			wr_h1 <=0;
-			wr_h2 <=0;
-			wr_c1 <=0;
-			wr_c2 <=0;
-			en_1<=1; 
+			acc_x1    <=0;
+			acc_h1    <=0;
+			acc_x2    <=0;
+			acc_h2    <=0;
+			wr_h1     <=0;
+			wr_h2     <=0;
+			wr_c1     <=0;
+			wr_c2     <=0;
+			en_1      <=1; 
 		end
 		// start computing for fir_macst layer -- repeat 53x -------------//
 		S2:
 		begin
-			stop <=0;
-			rst_fwd <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_fwd   <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=1;
-			en_1<=1;
-			en_2 <=0;
-			update <=0;
-			acc_x1 <=1;
-			acc_h1 <=1;			
-			wr_h1 <=0;
-			wr_h2 <=0;
-			wr_c1 <=0;
-			wr_c2 <=0;
+			en_1      <=1;
+			en_2      <=0;
+			update    <=0;
+			acc_x1    <=1;
+			acc_h1    <=1;         
+			wr_h1     <=0;
+			wr_h2     <=0;
+			wr_c1     <=0;
+			wr_c2     <=0;
 		end
 		S3:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_1 <=1;
-			en_2 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_1      <=1;
+			en_2      <=0;
 						//enable write state and activation
-			wr_c1 <= 1; 
-			wr_h1 <= 1;
-			acc_x1 <= 0;
-			acc_h1 <= 0;		
+			wr_c1     <= 1; 
+			wr_h1     <= 1;
+			acc_x1    <= 0;
+			acc_h1    <= 0;        
 		end
 		S4:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
 			//enable write h
-			en_1 <=1;
-			en_2 <=0;
-			wr_c1 <=0;
-			wr_h1 <= 0;
-			wr_act_1 <=1;
-			rst_mac_1<=0;
+			en_1      <=1;
+			en_2      <=0;
+			wr_c1     <=0;
+			wr_h1     <= 0;
+			wr_act_1  <=1;
+			rst_mac_1 <=0;
 		end
 		S5:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_1 <=1;
-			en_2 <=0;
-			wr_h1 <=0;
-			wr_c1 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_1      <=1;
+			en_2      <=0;
+			wr_h1     <=0;
+			wr_c1     <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=1;
-			rst_mac_2<=1;
+			rst_mac_2 <=1;
 		end
 		S6:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
 			rst_mac_1 <= 0;
 			rst_mac_2 <=1;
-			en_1 <=1;
-			en_2 <=0;
+			en_1      <=1;
+			en_2      <=0;
 		end
 		// ----------------------------------------------------------//
 		S7:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
 			rst_mac_1 <= 0;
 			rst_mac_2 <=0;
-			en_2 <=1;	
+			en_2      <=1;   
 		end
 		// start computing for the 2nd and 1st layer - repeat 8x ----//
 		S8: // repeat 8x
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			acc_x2 <=1;
-			acc_h2 <=1;
-			acc_x1 <=1;
-       		acc_h1 <=1;
-       		rst_mac_2 <= 0;
-       		rst_mac_1 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			acc_x2    <=1;
+			acc_h2    <=1;
+			acc_x1    <=1;
+             acc_h1   <=1;
+             rst_mac_2<= 0;
+             rst_mac_1<=0;
 		end
 		S9: //repeat 45x
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			acc_x2 <=1;
-			acc_h2 <=0;
-			acc_x1 <=1;
-			acc_h1 <=1;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			acc_x2    <=1;
+			acc_h2    <=0;
+			acc_x1    <=1;
+			acc_h1    <=1;
 		end
 		S10: 
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			wr_h2 <=1;
-			wr_c2 <=1;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			wr_h2     <=1;
+			wr_c2     <=1;
 			//enable write state and activation
-			wr_c1 <=1; 
-			wr_h1 <=1;
-			acc_x2 <=0;
-			acc_h2 <=0;
-			acc_x1 <=0;
-			acc_h1 <=0;
-			wr_act_2 <=1;
-			wr_act_1 <=1;
+			wr_c1     <=1; 
+			wr_h1     <=1;
+			acc_x2    <=0;
+			acc_h2    <=0;
+			acc_x1    <=0;
+			acc_h1    <=0;
+			wr_act_2  <=1;
+			wr_act_1  <=1;
 		end
 		S11:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			wr_h2 <=0;
-			wr_c2 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			wr_h2     <=0;
+			wr_c2     <=0;
 			//enable write state and activation
-			wr_c1 <=0; 
-			wr_h1 <=0;
-			en_2 <= 1;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_c1     <=0; 
+			wr_h1     <=0;
+			en_2      <= 1;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 
 		end
 		S12:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			en_1 <=1;
-			wr_h1 <=0;
-			wr_c1 <=0;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			en_1      <=1;
+			wr_h1     <=0;
+			wr_c1     <=0;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=1;
-			rst_mac_2<=1;
-			wr_h2 <=0;
-			wr_c2 <=0;
+			rst_mac_2 <=1;
+			wr_h2     <=0;
+			wr_c2     <=0;
 			//enable write state and activation
-			wr_c1 <=0; 
-			wr_h1 <=0;
+			wr_c1     <=0; 
+			wr_h1     <=0;
 		end
 		S13:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			en_1 <=1;
-			wr_h2 <=0;
-			wr_c2 <=0;
-			wr_c1 <= 0; 
-			wr_act_2 <=0;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			en_1      <=1;
+			wr_h2     <=0;
+			wr_c2     <=0;
+			wr_c1     <= 0; 
+			wr_act_2  <=0;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=0;
 		end
 		// ---------------------TRANSITION STATE------------------------//
 		S14:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			acc_h1 <=0;
-			acc_h2 <=0;
-			acc_x1 <=0;
-			acc_x2 <=0;
-			en_2 <=0;
-			en_1 <=1;
-			wr_h2 <=0;
-			wr_c2 <=0;
-			wr_c1 <= 0; 
-			wr_act_2 <=0;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			acc_h1    <=0;
+			acc_h2    <=0;
+			acc_x1    <=0;
+			acc_x2    <=0;
+			en_2      <=0;
+			en_1      <=1;
+			wr_h2     <=0;
+			wr_c2     <=0;
+			wr_c1     <= 0; 
+			wr_act_2  <=0;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=1;
 		end
@@ -1446,152 +1483,162 @@ begin
 		// SECOND LAYER VERSION
 		S8B: // repeat 8x
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			acc_x2 <=1;
-			acc_h2 <=1;
-			acc_x1 <=0;
-       		acc_h1 <=0;
-       		rst_mac_2 <= 0;
-       		rst_mac_1 <=1;
+			wr_o      <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			acc_x2    <=1;
+			acc_h2    <=1;
+			acc_x1    <=0;
+             acc_h1   <=0;
+             rst_mac_2<= 0;
+	        rst_mac_1 <=1;
 		end
 		S9B: //repeat 45x
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			acc_x2 <=1;
-			acc_h2 <=0;
-			acc_x1 <=0;
-			acc_h1 <=0;
+			wr_o      <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			acc_x2    <=1;
+			acc_h2    <=0;
+			acc_x1    <=0;
+			acc_h1    <=0;
 		end
 		S10B: 
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			wr_h2 <=1;
-			wr_c2 <=1;
+			wr_o      <= 1;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			wr_h2     <=1;
+			wr_c2     <=1;
 			//enable write state and activation
-			wr_c1 <=0; 
-			wr_h1 <=0;
-			acc_x2 <=0;
-			acc_h2 <=0;
-			acc_x1 <=0;
-			acc_h1 <=0;
-			wr_act_2 <=1;
-			wr_act_1 <=0;
+			wr_c1     <=0; 
+			wr_h1     <=0;
+			acc_x2    <=0;
+			acc_h2    <=0;
+			acc_x1    <=0;
+			acc_h1    <=0;
+			wr_act_2  <=1;
+			wr_act_1  <=0;
 		end
 		S11B:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			wr_h2 <=0;
-			wr_c2 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= wr_addr_o + 1;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			wr_h2     <=0;
+			wr_c2     <=0;
 			//enable write state and activation
-			wr_c1 <=0; 
-			wr_h1 <=0;
-			en_2 <= 1;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_c1     <=0; 
+			wr_h1     <=0;
+			en_2      <= 1;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 
 		end
 		S12B:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			en_1 <=1;
-			wr_h1 <=0;
-			wr_c1 <=0;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			en_1      <=1;
+			wr_h1     <=0;
+			wr_c1     <=0;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=1;
-			rst_mac_2<=1;
-			wr_h2 <=0;
-			wr_c2 <=0;
+			rst_mac_2 <=1;
+			wr_h2     <=0;
+			wr_c2     <=0;
 			//enable write state and activation
-			wr_c1 <=0; 
-			wr_h1 <=0;
+			wr_c1     <=0; 
+			wr_h1     <=0;
 		end
 		S13B:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			en_2 <= 1;
-			en_1 <=1;
-			wr_h2 <=0;
-			wr_c2 <=0;
-			wr_c1 <= 0; 
-			wr_act_2 <=0;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			en_2      <= 1;
+			en_1      <=1;
+			wr_h2     <=0;
+			wr_c2     <=0;
+			wr_c1     <= 0; 
+			wr_act_2  <=0;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=0;
 		end
 		// ---------------------TRANSITION STATE------------------------//
 		S14B:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			acc_h1 <=0;
-			acc_h2 <=0;
-			acc_x1 <=0;
-			acc_x2 <=0;
-			en_2 <=0;
-			en_1 <=1;
-			wr_h2 <=0;
-			wr_c2 <=0;
-			wr_c1 <= 0; 
-			wr_act_2 <=0;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			acc_h1    <=0;
+			acc_h2    <=0;
+			acc_x1    <=0;
+			acc_x2    <=0;
+			en_2      <=0;
+			en_1      <=1;
+			wr_h2     <=0;
+			wr_c2     <=0;
+			wr_c1     <= 0; 
+			wr_act_2  <=0;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=1;
 		end
 
 		S14:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			acc_h1 <=0;
-			acc_h2 <=0;
-			acc_x1 <=0;
-			acc_x2 <=0;
-			en_2 <=0;
-			en_1 <=1;
-			wr_h2 <=0;
-			wr_c2 <=0;
-			wr_c1 <= 0; 
-			wr_act_2 <=0;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			acc_h1    <=0;
+			acc_h2    <=0;
+			acc_x1    <=0;
+			acc_x2    <=0;
+			en_2      <=0;
+			en_1      <=1;
+			wr_h2     <=0;
+			wr_c2     <=0;
+			wr_c1     <= 0; 
+			wr_act_2  <=0;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=0;
 			rst_mac_2 <=1;
 		end
@@ -1599,23 +1646,25 @@ begin
 
 		S15:
 		begin
-			stop <=0;
-			rst_bp <= 1'b0;
-			rst_upd <= 1'b0;
-			bp <=0;
-			update <=0;
-			acc_h1 <=0;
-			acc_h2 <=0;
-			acc_x1 <=0;
-			acc_x2 <=0;
-			en_2 <=0;
-			en_1 <=0;
-			wr_h2 <=0;
-			wr_c2 <=0;
-			wr_c1 <= 0; 
-			wr_act_2 <=0;
-			wr_act_2 <=0;
-			wr_act_1 <=0;
+			wr_o      <= 0;
+			wr_addr_o <= 0;
+			stop      <=0;
+			rst_bp    <= 1'b0;
+			rst_upd   <= 1'b0;
+			bp        <=0;
+			update    <=0;
+			acc_h1    <=0;
+			acc_h2    <=0;
+			acc_x1    <=0;
+			acc_x2    <=0;
+			en_2      <=0;
+			en_1      <=0;
+			wr_h2     <=0;
+			wr_c2     <=0;
+			wr_c1     <= 0; 
+			wr_act_2  <=0;
+			wr_act_2  <=0;
+			wr_act_1  <=0;
 			rst_mac_1 <=1;
 			rst_mac_2 <=1;
 		end

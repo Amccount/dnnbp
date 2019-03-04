@@ -1,4 +1,4 @@
-module top_level(clk, /*rst, */rst_fsm, i_start, o_stop, o_cost);
+module top_level(clk, /*rst, */rst_fsm, i_start, o_stop, o_cost, o_h2, o_wr_addr_o, o_wr_o);
 // parameters
 parameter WIDTH = 24;
 parameter FRAC = 16;
@@ -44,6 +44,9 @@ input i_start;
 // output ports
 output signed [WIDTH-1:0] o_cost;
 output o_stop;
+output o_wr_o;
+output [WIDTH-1:0] o_h2;
+output [ADDR_WIDTH-1:0] o_wr_addr_o;
 
 // wire [2:0] temp_ctrl_reg;
 // assign temp_ctrl_reg = {i_train, i_start, i_stop};
@@ -241,6 +244,11 @@ wire en_rw_dx2;
 
 wire rst_bp;
 wire rst_upd;
+
+wire [WIDTH-1:0] o_h2;
+
+wire o_wr_o;
+wire [ADDR_WIDTH-1:0] o_wr_addr_o;		
 
 datapath #(
 		.ADDR_WIDTH(ADDR_WIDTH),
@@ -485,6 +493,7 @@ datapath #(
 		.acc_cost           (acc_cost),
 		.rst_acc_1          (rst_acc_1),
 		.rst_acc_2          (rst_acc_2),
+		.h2 				(o_h2),
 		.o_cost             (o_cost)
 	);
 
@@ -609,7 +618,9 @@ datapath #(
 			.rst_acc_1    (rst_acc_1),
 			.rst_acc_2    (rst_acc_2),
 			.rst_bp		  (rst_bp),
-			.rst_upd	  (rst_upd)
+			.rst_upd	  (rst_upd),
+			.wr_o   	  (o_wr_o),
+			.wr_addr_o 	  (o_wr_addr_o)
 		);
 
 	// control_register inst_control_register (.clk(clk), .i(temp_ctrl_reg), .o(o_ctrl_reg));
@@ -1064,4 +1075,20 @@ addr_gen_upd_wub #(
 		.en     (en_b2),
 		.o_addr (wr_addr_a_b2)
 	);
+
+// // Output Memory to Zybo
+// memory_cell #(
+// 		.WIDTH(WIDTH),
+// 		.NUM(LAYR2_CELL),
+// 		.TIMESTEP(1),
+// 		.FILENAME("o.list")
+// 	) inst_memory_cell_o (
+// 		.clk    (clk),		
+// 		.wr_a   (o_wr_o),
+// 		.addr_a (o_wr_addr_o),
+// 		.addr_b (),
+// 		.i_a    (o_h2),
+// 		.o_a    (),
+// 		.o_b    ()
+// 	);
 endmodule

@@ -114,7 +114,7 @@ module datapath(
 	rst_acc_1, rst_acc_2,
 
 	// --
-	o_cost
+	h2, o_cost
 	);
 
 // parameters
@@ -261,6 +261,7 @@ input rst_acc_1, rst_acc_2;
 // input ports
 
 // output ports
+output signed [WIDTH-1:0] h2;
 output signed [WIDTH-1:0] o_cost;
 
 // registers
