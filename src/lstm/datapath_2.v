@@ -114,7 +114,7 @@ module datapath(
 	rst_acc_1, rst_acc_2,
 
 	// --
-	h2, o_cost
+	h2, o_cost, addr_x1, i_x1
 	);
 
 // parameters
@@ -257,12 +257,14 @@ input rst_cost, acc_cost;
 
 // -- update weight
 input rst_acc_1, rst_acc_2;
+input signed [WIDTH-1:0] i_x1;
 
 // input ports
 
 // output ports
 output signed [WIDTH-1:0] h2;
 output signed [WIDTH-1:0] o_cost;
+output [ADDR_WIDTH-1:0] addr_x1;
 
 // registers
 
@@ -279,7 +281,7 @@ wire signed [WIDTH-1:0] o_a_wa_1, o_a_wi_1, o_a_wf_1, o_a_wo_1;
 wire signed [WIDTH-1:0] o_a_ua_1, o_a_ui_1, o_a_uf_1, o_a_uo_1;
 wire signed [WIDTH-1:0] o_a_ba_1, o_a_bi_1, o_a_bf_1, o_a_bo_1;
 
-wire signed [WIDTH-1:0] o_b_x1, o_b_h1, o_b_c1;
+wire signed [WIDTH-1:0] i_x1, o_b_h1, o_b_c1;
 wire signed [WIDTH-1:0] o_b_wa_1, o_b_wi_1, o_b_wf_1, o_b_wo_1;
 wire signed [WIDTH-1:0] o_b_ua_1, o_b_ui_1, o_b_uf_1, o_b_uo_1;
 wire signed [WIDTH-1:0] o_b_ba_1, o_b_bi_1, o_b_bf_1, o_b_bo_1;
@@ -398,20 +400,20 @@ wire signed [WIDTH-1:0] sh3_da1, sh3_di1, sh3_df1, sh3_do1;
 // LAYER 1 //////////////////////////////////
 
 // Input Memory
-memory_cell #(
-			.WIDTH(WIDTH),
-			.NUM(LAYR1_INPUT),
-			.TIMESTEP(TIMESTEP),
-			.FILENAME(LAYR1_X)
-		) inst_memory_cell_x1(
-			.clk    (clk),			
-			.wr_a   (),
-			.addr_a (),
-			.addr_b (addr_x1),
-			.i_a    (),
-			.o_a    (),
-			.o_b    (o_b_x1)
-);
+// memory_cell #(
+// 			.WIDTH(WIDTH),
+// 			.NUM(LAYR1_INPUT),
+// 			.TIMESTEP(TIMESTEP),
+// 			.FILENAME(LAYR1_X)
+// 		) inst_memory_cell_x1(
+// 			.clk    (clk),			
+// 			.wr_a   (),
+// 			.addr_a (),
+// 			.addr_b (addr_x1),
+// 			.i_a    (),
+// 			.o_a    (),
+// 			.o_b    (i_x1)
+// );
 
 // LAYER 1 WEIGHT MEMORY
 memory_cell #(
@@ -626,24 +628,24 @@ memory_cell #(
 assign prev_h1 = o_a_h1;
 assign prev_c1 = o_a_c1;
 
-assign sh_x1 = o_b_x1[WIDTH-1] ? {3'b111,o_b_x1[WIDTH-1:3]} : {3'b000,o_b_x1[WIDTH-1:3]};
+assign sh_x1 = i_x1[WIDTH-1] ? {3'b111,i_x1[WIDTH-1:3]} : {3'b000,i_x1[WIDTH-1:3]};
 assign sh_h1 = o_a_h1[WIDTH-1] ? {3'b111,o_a_h1[WIDTH-1:3]} : {3'b000,o_a_h1[WIDTH-1:3]};
 
 // LAYER 1 Multiplexers
 assign addr_x1 = update ? upd_addr_b_x1 : rd_addr_b_x1;
-assign mux_bp_x1_1 = bp ? o_a_da1 : o_b_x1 ;
+assign mux_bp_x1_1 = bp ? o_a_da1 : i_x1 ;
 assign mux_upd_x1_1 = update ? sh_x1 : mux_bp_x1_1;
 assign mux_upd_w1_1 = update ? o_a_da1 : o_a_wa_1;
 
-assign mux_bp_x2_1 = bp ? o_a_di1 : o_b_x1 ;
+assign mux_bp_x2_1 = bp ? o_a_di1 : i_x1 ;
 assign mux_upd_x2_1 = update ? sh_x1 : mux_bp_x2_1;
 assign mux_upd_w2_1 = update ? o_a_di1 : o_a_wi_1;
 
-assign mux_bp_x3_1 = bp ? o_a_df1 : o_b_x1 ;
+assign mux_bp_x3_1 = bp ? o_a_df1 : i_x1 ;
 assign mux_upd_x3_1 = update ? sh_x1 : mux_bp_x3_1;
 assign mux_upd_w3_1 = update ? o_a_df1 : o_a_wf_1;
 
-assign mux_bp_x4_1 = bp ? o_a_do1 : o_b_x1 ;
+assign mux_bp_x4_1 = bp ? o_a_do1 : i_x1 ;
 assign mux_upd_x4_1 = update ? sh_x1 : mux_bp_x4_1;
 assign mux_upd_w4_1 = update ? o_a_do1 : o_a_wo_1;
 

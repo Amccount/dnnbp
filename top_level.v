@@ -1,4 +1,4 @@
-module top_level(clk, /*rst, */rst_fsm, i_start, o_stop, o_cost, o_h2, o_wr_addr_o, o_wr_o);
+module top_level(clk, /*rst, */rst_fsm, i_start, o_stop, o_cost, o_h2, o_wr_addr_o, o_wr_o, i_x, o_addr_x, state);
 // parameters
 parameter WIDTH = 24;
 parameter FRAC = 16;
@@ -38,6 +38,7 @@ input clk, /*rst,*/ rst_fsm;
 
 // input ports
 input i_start;
+input signed [WIDTH-1:0] i_x;
 
 // control ports
 
@@ -47,7 +48,8 @@ output o_stop;
 output o_wr_o;
 output [WIDTH-1:0] o_h2;
 output [ADDR_WIDTH-1:0] o_wr_addr_o;
-
+output [ADDR_WIDTH-1:0] o_addr_x;
+output [7:0] state;
 // wire [2:0] temp_ctrl_reg;
 // assign temp_ctrl_reg = {i_train, i_start, i_stop};
 
@@ -494,7 +496,9 @@ datapath #(
 		.rst_acc_1          (rst_acc_1),
 		.rst_acc_2          (rst_acc_2),
 		.h2 				(o_h2),
-		.o_cost             (o_cost)
+		.o_cost             (o_cost),
+		.addr_x1 			(o_addr_x), 
+		.i_x1 				(i_x)
 	);
 
 
@@ -620,7 +624,8 @@ datapath #(
 			.rst_bp		  (rst_bp),
 			.rst_upd	  (rst_upd),
 			.wr_o   	  (o_wr_o),
-			.wr_addr_o 	  (o_wr_addr_o)
+			.wr_addr_o 	  (o_wr_addr_o),
+			.state 		  (state)
 		);
 
 	// control_register inst_control_register (.clk(clk), .i(temp_ctrl_reg), .o(o_ctrl_reg));

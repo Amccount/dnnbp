@@ -45,6 +45,7 @@ acc_dgate1, acc_dgate2, rst_acc_1, rst_acc_2,
 rst_bp, rst_upd,
 
 wr_o, wr_addr_o
+, state
 );
 
 // parameters
@@ -166,7 +167,7 @@ output reg [ADDR_WIDTH-1:0] wr_addr_o;
 //          Register Declaration           //
 /////////////////////////////////////////////
 reg flag;
-reg [7:0] state;
+output reg [7:0] state;
 
 // Counter for Forward Section
 // reg [7:0] count, counter_cell, counter_layer, counter_timestep;
@@ -1139,15 +1140,16 @@ begin
 			end
 			UPD12:
 			begin
-				if(count5 == 53*45+10 && count_epoch== 12'd20)
+				// if(count5 == 53*45+10 && count_epoch== 12'd20)
+				if(count5 == 53*45+10)
 				begin
 					state <= SIDLE;
 				end
-				else if (count5 == 53*45+10) 
-				begin
-					state <= S0;
-					count_epoch <=count_epoch+1;
-				end
+				// else if (count5 == 53*45+10) 
+				// begin
+				// 	state <= S0;
+				// 	count_epoch <=count_epoch+1;
+				// end
 				else
 				begin
 					state <= UPD9;
